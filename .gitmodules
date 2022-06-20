@@ -1,3 +1,6 @@
 [submodule "Shambots5907_SMF"]
 	path = Shambots5907_SMF
 	url = https://github.com/CCShambots/Shambots5907_SMF.git
+[submodule "src/main/java/frc/robot/util/Shambots5907_SMF"]
+	path = src/main/java/frc/robot/util/Shambots5907_SMF
+	url = https://github.com/CCShambots/Shambots5907_SMF.git
