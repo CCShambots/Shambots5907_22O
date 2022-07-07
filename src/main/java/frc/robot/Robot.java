@@ -22,9 +22,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledInit() {
-    CommandScheduler.getInstance().cancelAll();
-    
     SubsystemManager.getInstance().disableAllSubsystems();
+
+    CommandScheduler.getInstance().cancelAll();
   }
 
   @Override
@@ -49,7 +49,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testInit() {
-    // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
   }
 
