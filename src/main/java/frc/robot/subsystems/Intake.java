@@ -42,11 +42,20 @@ public class Intake extends StatedSubsystem<Intake.IntakeState> {
         addCommutativeTransition(LeftSideRunning, RightSideRunning, 
             new InstantCommand(() -> {runRightMotor(); lowerRightSide(); stopLeftMotor(); raiseLeftSide();}), 
             new InstantCommand(() -> {runLeftMotor(); lowerLeftSide(); stopRightMotor(); raiseRightSide();}));
-    
+
+        addCommutativeTransition(Idle, Ejecting, 
+            new InstantCommand(() -> {lowerLeftSide(); lowerRightSide(); exhaustLeftMotor(); exhaustRightMotor();}),
+            new InstantCommand(() -> {raiseLeftSide(); raiseRightSide(); stopLeftMotor(); stopRightMotor();}));
+        
+        addTransition(LeftSideRunning, Ejecting, new InstantCommand(() -> {exhaustLeftMotor(); lowerRightSide(); exhaustRightMotor();}));
+        addTransition(RightSideRunning, Ejecting, new InstantCommand(() -> {exhaustRightMotor(); lowerLeftSide(); exhaustLeftMotor();}));
     }
 
     private void runLeftMotor() {leftMotor.set(INTAKE_POWER);}
     private void runRightMotor() {rightMotor.set(INTAKE_POWER);}
+
+    private void exhaustLeftMotor() {leftMotor.set(-INTAKE_POWER);}
+    private void exhaustRightMotor() {rightMotor.set(-INTAKE_POWER);}
 
     private void stopLeftMotor() {leftMotor.set(0);}
     private void stopRightMotor() {rightMotor.set(0);}
@@ -58,7 +67,7 @@ public class Intake extends StatedSubsystem<Intake.IntakeState> {
     private void raiseRightSide() {rightSolenoid.set(DoubleSolenoid.Value.kForward);}
 
     public enum IntakeState {
-        Undetermined, Idle, LeftSideRunning, RightSideRunning
+        Undetermined, Idle, LeftSideRunning, RightSideRunning, Ejecting
     }
 
     @Override
@@ -72,5 +81,10 @@ public class Intake extends StatedSubsystem<Intake.IntakeState> {
     }
 
     @Override
-    public void additionalSendableData(SendableBuilder builder) {}
+    public void additionalSendableData(SendableBuilder builder) {
+        builder.addDoubleProperty("left-power", leftMotor::get, null);
+        builder.addDoubleProperty("right-power", rightMotor::get, null);
+        builder.addStringProperty("left-solenoid", () -> leftSolenoid.get().name(), null);
+        builder.addStringProperty("right-solenoid", () -> rightSolenoid.get().name(), null);
+    }
 }
