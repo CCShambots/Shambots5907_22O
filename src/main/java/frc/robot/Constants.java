@@ -42,7 +42,6 @@ public final class Constants {
     public static final class Controllers {
 
     }
-
     public static void configureMotor(WPI_TalonFX motor, boolean braked, boolean reversed) {
         motor.configFactoryDefault();
         motor.configSupplyCurrentLimit(CURRENT_LIMIT);
