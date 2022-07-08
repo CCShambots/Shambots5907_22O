@@ -4,6 +4,10 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -14,7 +18,23 @@ package frc.robot;
  */
 public final class Constants {
 
+    public static final SupplyCurrentLimitConfiguration CURRENT_LIMIT = new SupplyCurrentLimitConfiguration(true, 20, 20, 0.1); //enable these limits, current limit, trigger threshold, trigger threshold time
+
+
     public static final class Controllers {
 
     }
+    
+    public static void configureMotor(WPI_TalonFX motor, boolean braked, boolean reversed) {
+        motor.configFactoryDefault();
+        motor.configSupplyCurrentLimit(CURRENT_LIMIT);
+        motor.setInverted(reversed);
+        motor.setNeutralMode(braked ? NeutralMode.Brake : NeutralMode.Coast);
+    }
+
+    /**
+     * Default configuration for a motor. Assumes that the motor should be braked, but not reversed
+     * @param motor Talon to configure
+     */
+    public static void configureMotor(WPI_TalonFX motor) {configureMotor(motor, true, false);}
 }
