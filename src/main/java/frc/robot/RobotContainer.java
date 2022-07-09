@@ -21,10 +21,9 @@ public class RobotContainer {
 
   private void configureButtonBindings() {}
 
-  
-  public Command determineRobotManagerState() {
-    return robotManager.goToState(robotManager.getEntryState());
+  public void determineRobotManagerState() {
+    robotManager.enable();
+    robotManager.requestTransition(robotManager.getEntryState());
   }
-
 
 }
