@@ -3,6 +3,8 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.util.Shambots5907_SMF.SubsystemManager;
+import frc.robot.util.dashboard.DashboardInterface;
+import static frc.robot.util.dashboard.DashboardInterface.Tab.*;
 
 public class Robot extends TimedRobot {
 
@@ -12,7 +14,7 @@ public class Robot extends TimedRobot {
   public void robotInit() {
 
     m_robotContainer = new RobotContainer();
-    m_robotContainer.determineRobotManagerState().schedule();
+    m_robotContainer.determineRobotManagerState();
   }
 
   @Override
@@ -26,6 +28,7 @@ public class Robot extends TimedRobot {
     SubsystemManager.getInstance().disableAllSubsystems();
 
     CommandScheduler.getInstance().cancelAll();
+    DashboardInterface.getInstance().setTab(Auto);
   }
 
   @Override
@@ -34,6 +37,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     SubsystemManager.getInstance().prepSubsystems().schedule();
+    DashboardInterface.getInstance().setTab(Auto);
   }
 
   @Override
@@ -42,6 +46,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     SubsystemManager.getInstance().prepSubsystems().schedule();
+    DashboardInterface.getInstance().setTab(Teleop);
   }
 
   /** This function is called periodically during operator control. */
@@ -51,17 +56,15 @@ public class Robot extends TimedRobot {
   @Override
   public void testInit() {
     CommandScheduler.getInstance().cancelAll();
+    DashboardInterface.getInstance().setTab(Test);
   }
 
-  /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {}
 
-  /** This function is called once when the robot is first started up. */
   @Override
   public void simulationInit() {}
 
-  /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {}
 }

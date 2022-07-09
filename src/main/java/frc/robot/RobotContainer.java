@@ -11,7 +11,6 @@ public class RobotContainer {
   private final Joystick driverController = new Joystick(0);
   private final Joystick operatorController = new Joystick(1);
 
-  
   private final RobotManager robotManager = new RobotManager();
   
   private final Intake intake = new Intake();
@@ -29,10 +28,9 @@ public class RobotContainer {
 
   }
 
-  
-  public Command determineRobotManagerState() {
-    return robotManager.goToState(robotManager.getEntryState());
+  public void determineRobotManagerState() {
+    robotManager.enable();
+    robotManager.requestTransition(robotManager.getEntryState());
   }
-
 
 }

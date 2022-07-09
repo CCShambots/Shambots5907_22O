@@ -17,7 +17,7 @@ public class RobotManager extends StatedSubsystem<RobotManager.State> {
 
     @Override
     public String getName() {
-        return null;
+        return "Robot Manager";
     }
 
 
