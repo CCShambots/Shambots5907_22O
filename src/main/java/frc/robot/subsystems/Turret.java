@@ -46,11 +46,10 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
     public Turret() {
         super(TurretState.class);
 
-        //TODO: Make config factory default true later
-        Constants.configureMotor(rotaryMotor, false);
-        Constants.configureMotor(hoodMotor, false);
-        Constants.configureMotor(flywheel1Motor, false);
-        Constants.configureMotor(flywheel2Motor, false);
+        Constants.configureMotor(rotaryMotor, true);
+        Constants.configureMotor(hoodMotor, true);
+        Constants.configureMotor(flywheel1Motor, true);
+        Constants.configureMotor(flywheel2Motor, true);
 
         flywheel2Motor.follow(flywheel1Motor);
         flywheel2Motor.setInverted(OpposeMaster);
@@ -99,8 +98,6 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
         double hoodPIDOutput = hoodPID.calculate(getHoodAngle());
 
         rotaryMotor.setVoltage(hoodFFOutput + hoodPIDOutput);
-
-
     }
 
     /**
