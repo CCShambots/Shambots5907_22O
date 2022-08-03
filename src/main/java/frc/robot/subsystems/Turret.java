@@ -16,6 +16,7 @@ import frc.robot.util.math.InterpLUT;
 import static com.ctre.phoenix.motorcontrol.InvertType.*;
 import static frc.robot.Constants.Turret.*;
 import static frc.robot.subsystems.Turret.TurretState.*;
+import static java.lang.Math.abs;
 
 public class Turret extends StatedSubsystem<Turret.TurretState> {
     private final WPI_TalonFX rotaryMotor = new WPI_TalonFX(ROTARY_MOTOR_ID);
@@ -33,7 +34,6 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
 
     private final SimpleMotorFeedforward flywheelFeedForward = new SimpleMotorFeedforward(FLYWHEEL_KS, FLYWHEEL_KV);
     private final PIDController flywheelPID = new PIDController(FLYWHEEL_KP, FLYWHEEL_KI, FLYWHEEL_KD);
-    private double flywheelTargetVelo = 0;
 
     private final SimpleMotorFeedforward rotaryFeedForward = new SimpleMotorFeedforward(ROTARY_KS, ROTARY_KV);
     private final ProfiledPIDController rotaryPID = new ProfiledPIDController(ROTARY_KP, ROTARY_KI, ROTARY_KD,
@@ -43,18 +43,21 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
     private final ProfiledPIDController hoodPID = new ProfiledPIDController(HOOD_KP, HOOD_KI, HOOD_KD,
             new TrapezoidProfile.Constraints(HOOD_MAX_VEL, HOOD_MAX_ACCEL));
 
+    private boolean hoodOverextended = false;
+    private boolean rotaryOverextended = false;
+
     public Turret() {
         super(TurretState.class);
 
         Constants.configureMotor(rotaryMotor, true);
         Constants.configureMotor(hoodMotor, true);
-        Constants.configureMotor(flywheel1Motor, true);
-        Constants.configureMotor(flywheel2Motor, true);
+        Constants.configureMotor(flywheel1Motor, false, false, true);
+        Constants.configureMotor(flywheel2Motor, false, false, true);
 
         flywheel2Motor.follow(flywheel1Motor);
         flywheel2Motor.setInverted(OpposeMaster);
 
-
+        //Setup lookup tables for velocity and angle control
         RPMLUT.add(0, 0);
         RPMLUT.createLUT();
 
@@ -70,34 +73,78 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
     }
 
     public void setRotaryTargetAngle(double degrees) {
-
-        rotaryPID.setGoal(degrees);
+        double clippedDegrees = ROTARY_RANGE.clipToRange(degrees);
+        if(clippedDegrees != degrees) rotaryOverextended = true;
+        else if (rotaryOverextended) rotaryOverextended = false;
+        rotaryPID.setGoal(clippedDegrees);
     }
 
     public void setHoodTargetAngle(double degrees) {
+        double clippedDegrees = HOOD_RANGE.clipToRange(degrees);
+        if(clippedDegrees != degrees) hoodOverextended = true;
+        else if (hoodOverextended) hoodOverextended = false;
         hoodPID.setGoal(degrees);
+    }
+
+    @Override
+    public void onEnable() {
+        resetAllPIDs();
+    }
+
+    public void resetAllPIDs() {
+        resetFlywheelPID();
+        resetHoodPID();
+        resetHoodPID();
+    }
+
+    public void resetFlywheelPID() {
+        flywheelPID.reset();
+    }
+
+    public void resetRotaryPID() {
+        rotaryPID.reset(getRotaryAngle(), getRotaryVelo());
+    }
+
+    public void resetHoodPID() {
+        hoodPID.reset(getHoodAngle(), getHoodVelo());
     }
 
     @Override
     public void update() {
 
         //Flywheel calculations
+        updateFlywheel();
+
+        //Rotary calculations
+        updateRotary();
+
+        //Hood calculations
+        updateHood();
+    }
+
+    private void updateFlywheel() {
         double flywheelFFOutput = flywheelFeedForward.calculate(flywheelPID.getSetpoint());
         double flywheelPIDOutput = flywheelPID.calculate(getFlywheelRPM());
 
         flywheel1Motor.setVoltage(flywheelFFOutput + flywheelPIDOutput);
+    }
 
-        //Rotary calculations
+    private void updateRotary() {
         double rotaryFFOutput = rotaryFeedForward.calculate(rotaryPID.getSetpoint().velocity);
-        double rotaryPIDOutput = rotaryPID.calculate(getRotaryPos());
+        double rotaryPIDOutput = rotaryPID.calculate(getRotaryAngle());
 
-        rotaryMotor.setVoltage(rotaryFFOutput + rotaryPIDOutput);
+        double rotarySum = rotaryFFOutput + rotaryPIDOutput;
+        if(limSwitch1.isTripped() && rotarySum > 0) rotarySum = 0;
+        else if(limSwitch2.isTripped() && rotarySum < 0) rotarySum = 0;
 
-        //Hood calculations
+        rotaryMotor.setVoltage(rotarySum);
+    }
+
+    private void updateHood() {
         double hoodFFOutput = hoodFeedForward.calculate(hoodPID.getSetpoint().velocity);
         double hoodPIDOutput = hoodPID.calculate(getHoodAngle());
 
-        rotaryMotor.setVoltage(hoodFFOutput + hoodPIDOutput);
+        hoodMotor.setVoltage(hoodFFOutput + hoodPIDOutput);
     }
 
     /**
@@ -114,7 +161,7 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
     /**
      * @return deg
      */
-    public double getRotaryPos() {
+    public double getRotaryAngle() {
         return
             rotaryMotor.getSelectedSensorPosition() //Ticks
             / 2048 * //Rotations
@@ -159,22 +206,58 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
                 ;
     }
 
+    //Diagnostic access methods
+    public double getFlywheelTarget() {return flywheelPID.getSetpoint();}
+    public double getFlywheelError() {return abs(getFlywheelTarget()-getFlywheelRPM());}
+    public double getHoodTarget() {return hoodPID.getSetpoint().position;}
+    public double getHoodError() {return abs(getHoodTarget() - getHoodAngle());}
+    public double getRotaryTarget() {return rotaryPID.getSetpoint().position;}
+    public double getRotaryError() {return abs(getRotaryTarget() - getRotaryAngle());}
+
+    //Limelight access methods
+    public void turnOnLimelight() {limelight.setOn();}
+    public void turnOffLimelight() {limelight.setOff();}
+    public boolean limelightHasTarget() {return limelight.hasTarget();}
+    public double getLimelightXOffset() {return limelight.targetOffset().getX();}
+    public double getLimelightYOffset() {return limelight.targetOffset().getY();}
+    public double getLimelightDistanceFromCenter() {return limelight.getDistanceFromCenter();}
+
     @Override
-    public String getName() {
-        return "turret";
-    }
+    public String getName() {return "turret";}
 
     @Override
     public void additionalSendableData(SendableBuilder builder) {
         builder.addDoubleProperty("flywheel velo", this::getFlywheelRPM, null);
-        builder.addDoubleProperty("rotary degrees", this::getRotaryPos, null);
+        builder.addDoubleProperty("flywheel target", this::getFlywheelTarget, null);
+        builder.addDoubleProperty("flywheel error", this::getFlywheelError, null);
+        builder.addDoubleProperty("rotary degrees", this::getRotaryAngle, null);
         builder.addDoubleProperty("rotary velo", this::getRotaryVelo, null);
+        builder.addDoubleProperty("rotary target", this::getRotaryTarget, null);
+        builder.addDoubleProperty("rotary error", this::getRotaryError, null);
         builder.addDoubleProperty("hood degrees", this::getHoodAngle, null);
         builder.addDoubleProperty("hood velo", this::getHoodVelo, null);
+        builder.addDoubleProperty("hood target", this::getHoodTarget, null);
+        builder.addDoubleProperty("hood error", this::getHoodError, null);
+
+        builder.addDoubleProperty("limelight distance from target", this::getLimelightDistanceFromCenter, null);
     }
 
     public enum TurretState {
         Undetermined, Idle
     }
+
+    //TODO: REMOVE DEBUG FUNCTIONS
+    public void setFlywheelPower(double power) {
+        flywheel1Motor.set(power);
+    }
+
+    public void setHoodPower(double power) {
+        hoodMotor.set(power);
+    }
+
+    public void setRotaryPower(double power) {
+        rotaryMotor.set(power);
+    }
+
 
 }

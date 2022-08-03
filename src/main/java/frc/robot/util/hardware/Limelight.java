@@ -3,6 +3,11 @@ package frc.robot.util.hardware;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import frc.robot.Constants;
+
+import static frc.robot.Constants.Turret.*;
+import static java.lang.Math.tan;
+import static java.lang.Math.toRadians;
 
 public class Limelight {
     private static Limelight instance;
@@ -30,7 +35,6 @@ public class Limelight {
     }
 
     /**
-     * Note: The returned values are raw from the limelight. They are negated (if needed) in the turret subsystem
      * @return how far the detected target is from the center of the limelight frame in degrees
      */
     public Translation2d targetOffset() {
@@ -38,6 +42,22 @@ public class Limelight {
                 -getLimeLightTable().getEntry("tx").getDouble(0),
                 getLimeLightTable().getEntry("ty").getDouble(0)
         );
+    }
+
+
+    /**
+     * @return distance from center of the field (-1 if no target is found)
+     */
+    public double getDistanceFromCenter() {
+       if(!hasTarget()) return -1;
+
+       double angleRadians = toRadians(targetOffset().getY()) + LIMELIGHT_ANGLE;
+
+       double distanceToTape = (GOAL_HEIGHT-LIMELIGHT_HEIGHT) / tan(angleRadians);
+
+       double distanceToCenter = distanceToTape + GOAL_TO_CENTER_DISTANCE;
+
+       return distanceToCenter;
     }
 
     /**

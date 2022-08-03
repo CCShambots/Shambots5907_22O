@@ -7,6 +7,7 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+import frc.robot.util.math.Range;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -47,6 +48,8 @@ public final class Constants {
         public static final double ROTARY_CLOCKWISE_LIMIT = -135;
         public static final double ROTARY_COUNTER_CLOCKWISE_LIMIT = 135;
 
+        public static final Range ROTARY_RANGE = new Range(ROTARY_CLOCKWISE_LIMIT, ROTARY_COUNTER_CLOCKWISE_LIMIT);
+
         public static final double HOOD_KS = 0;
         public static final double HOOD_KV = 0;
         public static final double HOOD_KP = 0;
@@ -55,6 +58,16 @@ public final class Constants {
         public static final double HOOD_MAX_VEL = 0; //Deg/sec
         public static final double HOOD_MAX_ACCEL = 0; //Deg/(sec^2)
 
+        public static final double HOOD_MIN_ANGLE = 0;
+        public static final double HOOD_MAX_ANGLE = 32;
+
+        public static final Range HOOD_RANGE = new Range(HOOD_MIN_ANGLE, HOOD_MAX_ANGLE);
+
+        //TODO: Fill in
+        public static final double LIMELIGHT_HEIGHT = 2; //Meters
+        public static final double LIMELIGHT_ANGLE = Math.toRadians(30); //Radians
+        public static final double GOAL_HEIGHT = 5; //Meters (middle of the tape on the upper goal)
+        public static final double GOAL_TO_CENTER_DISTANCE = 2; //Meters
     }
 
     public static final class Controllers {
