@@ -11,16 +11,20 @@ import frc.robot.util.Shambots5907_SMF.SubsystemManager;
 
 public class RobotContainer {
 
-  private final Turret turret = new Turret();
+  private final Turret turret; //Instantiated in the constructor because I need Robot.java
   
   private final Joystick driverController = new Joystick(0);
   private final Joystick operatorController = new Joystick(1);
 
   private final RobotManager robotManager = new RobotManager();
 
-  public RobotContainer() {
+  public RobotContainer(Robot robot) {
+
+     turret = new Turret(robot);
 
     robotManager.enable();
+
+    turret.turnOffLimelight();
 
     SubsystemManager.getInstance().registerSubsystem(turret);
 

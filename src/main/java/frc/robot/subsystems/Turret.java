@@ -8,10 +8,15 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants;
+import frc.robot.Robot;
+import frc.robot.commands.turret.ActiveTracking;
+import frc.robot.commands.turret.DetermineTurretState;
 import frc.robot.util.Shambots5907_SMF.StatedSubsystem;
 import frc.robot.util.hardware.Limelight;
 import frc.robot.util.hardware.MagneticLimitSwitch;
 import frc.robot.util.math.InterpLUT;
+import frc.robot.util.math.RollingBuffer;
+import pabeles.concurrency.ConcurrencyOps;
 
 import static com.ctre.phoenix.motorcontrol.InvertType.*;
 import static frc.robot.Constants.Turret.*;
@@ -38,21 +43,28 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
     private final SimpleMotorFeedforward rotaryFeedForward = new SimpleMotorFeedforward(ROTARY_KS, ROTARY_KV);
     private final ProfiledPIDController rotaryPID = new ProfiledPIDController(ROTARY_KP, ROTARY_KI, ROTARY_KD,
             new TrapezoidProfile.Constraints(ROTARY_MAX_VEL, ROTARY_MAX_ACCEL));
+    private boolean rotaryControlLoopEnabled = true;
+    private RollingBuffer rotaryTrackingBuffer = ;
 
     private final SimpleMotorFeedforward hoodFeedForward = new SimpleMotorFeedforward(HOOD_KS, HOOD_KV);
     private final ProfiledPIDController hoodPID = new ProfiledPIDController(HOOD_KP, HOOD_KI, HOOD_KD,
             new TrapezoidProfile.Constraints(HOOD_MAX_VEL, HOOD_MAX_ACCEL));
+    private boolean hoodControlLoopEnabled = true;
 
     private boolean hoodOverextended = false;
     private boolean rotaryOverextended = false;
 
-    public Turret() {
+    private boolean trustResetting = false; //Whether or not the bot should just assume everything is reset properly
+
+    public Turret(Robot robot) {
         super(TurretState.class);
 
         Constants.configureMotor(rotaryMotor, true);
         Constants.configureMotor(hoodMotor, true);
         Constants.configureMotor(flywheel1Motor, false, false, true);
         Constants.configureMotor(flywheel2Motor, false, false, true);
+
+        rotaryMotor.setStatusFramePeriod()
 
         flywheel2Motor.follow(flywheel1Motor);
         flywheel2Motor.setInverted(OpposeMaster);
@@ -64,8 +76,33 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
         HoodAngleLUT.add(0, 0);
         HoodAngleLUT.createLUT();
 
-        //TODO: Make actual state finding
-        addDetermination(Undetermined, Idle, new InstantCommand());
+        rotaryTrackingBuffer = new RollingBuffer(this::getRotaryAngle, 5, 500, robot);
+
+        addDetermination(Undetermined, Idle, new InstantCommand(() -> {
+            resetHoodPos(0);
+            resetRotaryPos(0);
+            resetHoodPID();
+            resetRotaryPID();
+            resetFlywheelPID();
+            turnOffLimelight();
+            setFlywheelTargetRPM(0);
+        }));
+
+        setContinuousCommand(Idle, new InstantCommand(() -> {
+            if(!trustResetting) {
+                requestTransition(Resetting);
+            }
+        }));
+
+        addCommutativeTransition(Idle, ActiveTracking, new InstantCommand((this::turnOnLimelight)), new InstantCommand((this::turnOffLimelight)));
+
+        setContinuousCommand(ActiveTracking, new ActiveTracking(this));
+
+        addTransition(Idle, Resetting, new InstantCommand());
+        setContinuousCommand(Resetting, new DetermineTurretState(this));
+        addTransition(Resetting, Idle, new InstantCommand());
+
+        addTransition(Idle, ClimbLock, new InstantCommand(() -> setRotaryTargetAngle(0)));
     }
 
     public void setFlywheelTargetRPM(double rpm) {
@@ -130,21 +167,25 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
     }
 
     private void updateRotary() {
-        double rotaryFFOutput = rotaryFeedForward.calculate(rotaryPID.getSetpoint().velocity);
-        double rotaryPIDOutput = rotaryPID.calculate(getRotaryAngle());
+        if(rotaryControlLoopEnabled) {
+            double rotaryFFOutput = rotaryFeedForward.calculate(rotaryPID.getSetpoint().velocity);
+            double rotaryPIDOutput = rotaryPID.calculate(getRotaryAngle());
 
-        double rotarySum = rotaryFFOutput + rotaryPIDOutput;
-        if(limSwitch1.isTripped() && rotarySum > 0) rotarySum = 0;
-        else if(limSwitch2.isTripped() && rotarySum < 0) rotarySum = 0;
+            double rotarySum = rotaryFFOutput + rotaryPIDOutput;
+            if(limSwitch1.isTripped() && rotarySum > 0) rotarySum = 0;
+            else if(limSwitch2.isTripped() && rotarySum < 0) rotarySum = 0;
 
-        rotaryMotor.setVoltage(rotarySum);
+            rotaryMotor.setVoltage(rotarySum);
+        }
     }
 
     private void updateHood() {
-        double hoodFFOutput = hoodFeedForward.calculate(hoodPID.getSetpoint().velocity);
-        double hoodPIDOutput = hoodPID.calculate(getHoodAngle());
+        if(hoodControlLoopEnabled) {
+            double hoodFFOutput = hoodFeedForward.calculate(hoodPID.getSetpoint().velocity);
+            double hoodPIDOutput = hoodPID.calculate(getHoodAngle());
 
-        hoodMotor.setVoltage(hoodFFOutput + hoodPIDOutput);
+            hoodMotor.setVoltage(hoodFFOutput + hoodPIDOutput);
+        }
     }
 
     /**
@@ -206,6 +247,24 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
                 ;
     }
 
+    public boolean isSensor1Pressed() {return limSwitch1.isTripped();}
+    public boolean isSensor2Pressed() {return limSwitch2.isTripped();}
+
+    //Reset methods
+    public void resetHoodPos(double degrees) {
+        hoodMotor.setSelectedSensorPosition(degrees * (485.0 / 18.0) * 2048);
+    }
+
+    public void resetRotaryPos(double degrees) {
+        rotaryMotor.setSelectedSensorPosition(degrees * (140.0 / 40.0) / 1.0 * 2048);
+    }
+
+    //Disabling control loops
+    public void disableHoodControlLoops() {hoodControlLoopEnabled = false;}
+    public void enableHoodControlLoops() {hoodControlLoopEnabled = true;}
+    public void disableRotaryControlLoops() {hoodControlLoopEnabled = false;}
+    public void enableRotaryControlLoops() {hoodControlLoopEnabled = true;}
+
     //Diagnostic access methods
     public double getFlywheelTarget() {return flywheelPID.getSetpoint();}
     public double getFlywheelError() {return abs(getFlywheelTarget()-getFlywheelRPM());}
@@ -217,7 +276,7 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
     //Limelight access methods
     public void turnOnLimelight() {limelight.setOn();}
     public void turnOffLimelight() {limelight.setOff();}
-    public boolean limelightHasTarget() {return limelight.hasTarget();}
+    public boolean doesLimelightHaveTarget() {return limelight.hasTarget();}
     public double getLimelightXOffset() {return limelight.targetOffset().getX();}
     public double getLimelightYOffset() {return limelight.targetOffset().getY();}
     public double getLimelightDistanceFromCenter() {return limelight.getDistanceFromCenter();}
@@ -238,12 +297,14 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
         builder.addDoubleProperty("hood velo", this::getHoodVelo, null);
         builder.addDoubleProperty("hood target", this::getHoodTarget, null);
         builder.addDoubleProperty("hood error", this::getHoodError, null);
+        builder.addBooleanProperty("sensor 1 pressed", this::isSensor1Pressed, null);
+        builder.addBooleanProperty("sensor 2 pressed", this::isSensor2Pressed, null);
 
         builder.addDoubleProperty("limelight distance from target", this::getLimelightDistanceFromCenter, null);
     }
 
     public enum TurretState {
-        Undetermined, Idle
+        Undetermined, Idle, Resetting, Ejecting, ActiveTracking, ClimbLock
     }
 
     //TODO: REMOVE DEBUG FUNCTIONS
