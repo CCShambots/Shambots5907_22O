@@ -18,9 +18,9 @@ public class RobotContainer {
 
   private final RobotManager robotManager = new RobotManager();
 
-  public RobotContainer(Robot robot) {
+  public RobotContainer() {
 
-     turret = new Turret(robot);
+     turret = new Turret();
 
     robotManager.enable();
 

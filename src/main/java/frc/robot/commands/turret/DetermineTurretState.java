@@ -40,7 +40,6 @@ public class DetermineTurretState extends CommandBase {
             resettingRotary = false;
             t.setRotaryPower(0);
         }
-
     }
 
     @Override

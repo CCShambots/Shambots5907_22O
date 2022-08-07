@@ -15,11 +15,12 @@ import frc.robot.util.Shambots5907_SMF.StatedSubsystem;
 import frc.robot.util.hardware.Limelight;
 import frc.robot.util.hardware.MagneticLimitSwitch;
 import frc.robot.util.math.InterpLUT;
-import frc.robot.util.math.RollingBuffer;
-import pabeles.concurrency.ConcurrencyOps;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.ctre.phoenix.motorcontrol.InvertType.*;
 import static frc.robot.Constants.Turret.*;
+import static frc.robot.subsystems.Turret.RotarySpeed.*;
 import static frc.robot.subsystems.Turret.TurretState.*;
 import static java.lang.Math.abs;
 
@@ -41,10 +42,10 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
     private final PIDController flywheelPID = new PIDController(FLYWHEEL_KP, FLYWHEEL_KI, FLYWHEEL_KD);
 
     private final SimpleMotorFeedforward rotaryFeedForward = new SimpleMotorFeedforward(ROTARY_KS, ROTARY_KV);
-    private final ProfiledPIDController rotaryPID = new ProfiledPIDController(ROTARY_KP, ROTARY_KI, ROTARY_KD,
-            new TrapezoidProfile.Constraints(ROTARY_MAX_VEL, ROTARY_MAX_ACCEL));
+    private final ProfiledPIDController rotaryPID = new ProfiledPIDController(ROTARY_KP, ROTARY_KI, ROTARY_KD, NORMAL_ROTARY_CONSTRAINTS);
     private boolean rotaryControlLoopEnabled = true;
-    private RollingBuffer rotaryTrackingBuffer = ;
+    private double prevRotaryAngle;
+    private RotarySpeed rotarySpeed = Normal;
 
     private final SimpleMotorFeedforward hoodFeedForward = new SimpleMotorFeedforward(HOOD_KS, HOOD_KV);
     private final ProfiledPIDController hoodPID = new ProfiledPIDController(HOOD_KP, HOOD_KI, HOOD_KD,
@@ -56,7 +57,7 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
 
     private boolean trustResetting = false; //Whether or not the bot should just assume everything is reset properly
 
-    public Turret(Robot robot) {
+    public Turret() {
         super(TurretState.class);
 
         Constants.configureMotor(rotaryMotor, true);
@@ -64,10 +65,13 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
         Constants.configureMotor(flywheel1Motor, false, false, true);
         Constants.configureMotor(flywheel2Motor, false, false, true);
 
-        rotaryMotor.setStatusFramePeriod()
-
         flywheel2Motor.follow(flywheel1Motor);
         flywheel2Motor.setInverted(OpposeMaster);
+
+        //Set the tolerance for the PID loop to say it is not busy
+        rotaryPID.setTolerance(ROTARY_TOLERANCE);
+        flywheelPID.setTolerance(FLYWHEEL_TOLERANCE);
+        hoodPID.setTolerance(HOOD_TOLERANCE);
 
         //Setup lookup tables for velocity and angle control
         RPMLUT.add(0, 0);
@@ -76,11 +80,10 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
         HoodAngleLUT.add(0, 0);
         HoodAngleLUT.createLUT();
 
-        rotaryTrackingBuffer = new RollingBuffer(this::getRotaryAngle, 5, 500, robot);
-
         addDetermination(Undetermined, Idle, new InstantCommand(() -> {
             resetHoodPos(0);
             resetRotaryPos(0);
+            setRotarySpeed(Normal);
             resetHoodPID();
             resetRotaryPID();
             resetFlywheelPID();
@@ -96,7 +99,14 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
 
         addCommutativeTransition(Idle, ActiveTracking, new InstantCommand((this::turnOnLimelight)), new InstantCommand((this::turnOffLimelight)));
 
-        setContinuousCommand(ActiveTracking, new ActiveTracking(this));
+
+        //TODO: GET ODO POSE
+
+        AtomicBoolean lockedIn = new AtomicBoolean(false);
+
+        setContinuousCommand(ActiveTracking, new ActiveTracking(this, RPMLUT, HoodAngleLUT, (value) -> lockedIn.set(value)));
+
+        addFlagState(ActiveTracking, LockedIn, () -> lockedIn.get());
 
         addTransition(Idle, Resetting, new InstantCommand());
         setContinuousCommand(Resetting, new DetermineTurretState(this));
@@ -126,6 +136,19 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
     @Override
     public void onEnable() {
         resetAllPIDs();
+    }
+
+    @Override
+    public void onDisable() {
+        runInstantaneousTransition(
+                Idle,
+                () -> {
+                    setHoodTargetAngle(getHoodAngle());
+                    setFlywheelTargetRPM(0);
+                    setHoodTargetAngle(getHoodAngle());
+                    turnOffLimelight();
+                }
+        );
     }
 
     public void resetAllPIDs() {
@@ -177,6 +200,8 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
 
             rotaryMotor.setVoltage(rotarySum);
         }
+
+        prevRotaryAngle = getRotaryAngle();
     }
 
     private void updateHood() {
@@ -249,6 +274,25 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
 
     public boolean isSensor1Pressed() {return limSwitch1.isTripped();}
     public boolean isSensor2Pressed() {return limSwitch2.isTripped();}
+    public double getPrevRotaryAngle() {return prevRotaryAngle;}
+
+    public boolean isRotaryBusy() {return rotaryPID.atGoal();}
+    public boolean isFlywheelBusy() {return flywheelPID.atSetpoint();}
+    public boolean isHoodBusy() {return hoodPID.atGoal();}
+
+    public boolean isRotaryOverextended() {return rotaryOverextended;}
+    public boolean isHoodOverextended() {return hoodOverextended;}
+
+    public void setRotarySpeed(RotarySpeed speed) {
+        rotarySpeed = speed;
+        if(speed==Normal) {
+            rotaryPID.setConstraints(NORMAL_ROTARY_CONSTRAINTS);
+        } else if(speed==Search) {
+            rotaryPID.setConstraints(SEARCH_ROTARY_CONSTRAINTS);
+        }
+    }
+
+    public RotarySpeed getRotarySpeed() {return rotarySpeed;}
 
     //Reset methods
     public void resetHoodPos(double degrees) {
@@ -304,7 +348,11 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
     }
 
     public enum TurretState {
-        Undetermined, Idle, Resetting, Ejecting, ActiveTracking, ClimbLock
+        Undetermined, Idle, Resetting, Ejecting, ActiveTracking, LockedIn, ClimbLock
+    }
+
+    public enum RotarySpeed {
+        Normal, Search
     }
 
     //TODO: REMOVE DEBUG FUNCTIONS

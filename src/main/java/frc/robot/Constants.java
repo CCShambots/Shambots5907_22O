@@ -7,6 +7,8 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.robot.util.math.Range;
 
 /**
@@ -20,6 +22,9 @@ import frc.robot.util.math.Range;
 public final class Constants {
 
     public static final SupplyCurrentLimitConfiguration CURRENT_LIMIT = new SupplyCurrentLimitConfiguration(true, 20, 20, 0.1); //enable these limits, current limit, trigger threshold, trigger threshold time
+
+    public static final Translation2d GOAL_POS = new Translation2d(8.23, 4.11); //in meters
+
 
     public static final class Turret {
         //TODO: Update CAN ID's and digital pins
@@ -37,18 +42,31 @@ public final class Constants {
         public static final double FLYWHEEL_KI = 0;
         public static final double FLYWHEEL_KD = 0;
 
+        public static final double FLYWHEEL_TOLERANCE = 50;
+
         public static final double ROTARY_KS = 0;
         public static final double ROTARY_KV = 0;
         public static final double ROTARY_KP = 0;
         public static final double ROTARY_KI = 0;
         public static final double ROTARY_KD = 0;
+
         public static final double ROTARY_MAX_VEL = 0; //Deg/sec
         public static final double ROTARY_MAX_ACCEL = 0; //Deg/(sec^2)
+
+        public static final TrapezoidProfile.Constraints NORMAL_ROTARY_CONSTRAINTS = new TrapezoidProfile.Constraints(ROTARY_MAX_VEL, ROTARY_MAX_ACCEL);
+
+        public static final double ROTARY_SEARCH_VEL = 0; //Deg/sec
+        public static final double ROTARY_SEARCH_ACCEL = 0; //Deg/(sec^2)
+
+        public static final TrapezoidProfile.Constraints SEARCH_ROTARY_CONSTRAINTS = new TrapezoidProfile.Constraints(ROTARY_SEARCH_VEL, ROTARY_SEARCH_ACCEL);
 
         public static final double ROTARY_CLOCKWISE_LIMIT = -135;
         public static final double ROTARY_COUNTER_CLOCKWISE_LIMIT = 135;
 
         public static final Range ROTARY_RANGE = new Range(ROTARY_CLOCKWISE_LIMIT, ROTARY_COUNTER_CLOCKWISE_LIMIT);
+
+        public static final double ROTARY_TOLERANCE = 2; //Degrees
+        public static final double LIMELIGHT_DEADBAND = 2; //Degrees
 
         public static final double HOOD_KS = 0;
         public static final double HOOD_KV = 0;
@@ -62,6 +80,8 @@ public final class Constants {
         public static final double HOOD_MAX_ANGLE = 32;
 
         public static final Range HOOD_RANGE = new Range(HOOD_MIN_ANGLE, HOOD_MAX_ANGLE);
+
+        public static final double HOOD_TOLERANCE = 0.5;
 
         //TODO: Fill in
         public static final double LIMELIGHT_HEIGHT = 2; //Meters
