@@ -1,5 +1,6 @@
 package frc.robot.util.hardware;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -35,13 +36,17 @@ public class Limelight {
     }
 
     /**
-     * @return how far the detected target is from the center of the limelight frame in degrees
+     * @return X offset (or yaw)
      */
-    public Translation2d targetOffset() {
-        return new Translation2d(
-                -getLimeLightTable().getEntry("tx").getDouble(0),
-                getLimeLightTable().getEntry("ty").getDouble(0)
-        );
+    public Rotation2d getXOffset() {
+        return Rotation2d.fromDegrees(-getLimeLightTable().getEntry("tx").getDouble(0));
+    }
+
+    /**
+     * @return Y offset (or pitch)
+     */
+    public Rotation2d getYOffset() {
+        return Rotation2d.fromDegrees(getLimeLightTable().getEntry("ty").getDouble(0));
     }
 
 
@@ -51,7 +56,7 @@ public class Limelight {
     public double getDistanceFromCenter() {
        if(!hasTarget()) return -1;
 
-       double angleRadians = toRadians(targetOffset().getY()) + LIMELIGHT_ANGLE;
+       double angleRadians = getYOffset().getRadians() + LIMELIGHT_ANGLE;
 
        double distanceToTape = (GOAL_HEIGHT-LIMELIGHT_HEIGHT) / tan(angleRadians);
 

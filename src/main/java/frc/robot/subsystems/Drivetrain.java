@@ -1,38 +1,43 @@
 package frc.robot.subsystems;
 
-import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.ctre.phoenix.sensors.PigeonIMU;
 import com.ctre.phoenix.sensors.WPI_Pigeon2;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 
+import edu.wpi.first.math.MatBuilder;
+import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.util.Shambots5907_SMF.StatedSubsystem;
 import frc.robot.util.SwerveModule;
+import frc.robot.util.hardware.Limelight;
+import frc.robot.util.math.ComputerVisionUtil;
+import frc.robot.util.math.Geometry;
 
 import static frc.robot.Constants.SwerveDrivetrain.*;
+import static frc.robot.Constants.Turret.*;
 import static frc.robot.subsystems.Drivetrain.*;
 import static frc.robot.subsystems.Drivetrain.SwerveState.*;
 
@@ -40,7 +45,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
     private Map<String, SwerveModule> modules;
     private WPI_Pigeon2 gyro = new WPI_Pigeon2(1);
-    private double rotationOffset;
+    private double rotationOffsetDegrees;
     private Rotation2d holdAngle;
 
     private PIDController thetaHoldControllerTele = new PIDController(P_HOLDANGLETELE, I_HOLDANGLETELE, D_HOLDANGLETELE);
@@ -48,7 +53,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
     private ProfiledPIDController thetaHoldControllerAuto = new ProfiledPIDController(P_HOLDANGLEAUTO, I_HOLDANGLEAUTO, D_HOLDANGLEAUTO, new TrapezoidProfile.Constraints(MAX_ROTATION, MAX_ROT_ACCEL));
     private PIDController xHoldController = new PIDController(P_HOLDTRANSLATION, I_HOLDTRANSLATION, D_HOLDTRANSLATION);
     private PIDController yHoldController = new PIDController(P_HOLDTRANSLATION, I_HOLDTRANSLATION, D_HOLDTRANSLATION);
-    private SwerveDriveOdometry odometry;
+    private SwerveDrivePoseEstimator odometry;
 
     private boolean fieldRelative = true;
 
@@ -65,14 +70,20 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
         gyro.configFactoryDefault();
 
-        rotationOffset = getGyroHeading();
-        holdAngle = new Rotation2d(rotationOffset);
+        rotationOffsetDegrees = getGyroHeading();
+        holdAngle = new Rotation2d(rotationOffsetDegrees);
         
-        odometry = new SwerveDriveOdometry(kDriveKinematics, getCurrentAngle());
+        odometry = new SwerveDrivePoseEstimator(getCurrentAngle(), new Pose2d(), kDriveKinematics,
+                new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.02, 0.02, 0.01),
+                new MatBuilder<>(Nat.N1(), Nat.N1()).fill(0),
+                new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0, 0, 0)
+                );
 
         thetaHoldControllerTele.enableContinuousInput(-Math.PI, Math.PI);
         field = new Field2d();
 
+        getOdoPose = () -> getPose();
+        getDrivetrainAngle = () -> getCurrentAngle();
 
         //State machine stuff
         addDetermination(Undetermined, Idle, new InstantCommand(() -> {
@@ -97,7 +108,18 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
     public void update() {
         updateOdometry();
 
-        field.setRobotPose(odometry.getPoseMeters());
+        field.setRobotPose(getPose());
+
+        if(Limelight.getInstance().hasTarget()) {
+            Pose2d visionPoseEstimation = ComputerVisionUtil.estimateFieldToRobot(
+                    LIMELIGHT_HEIGHT, GOAL_HEIGHT, LIMELIGHT_ANGLE, Limelight.getInstance().getYOffset().getRadians(), Limelight.getInstance().getXOffset(),
+                    getCurrentAngle(), Geometry.getCurrentTargetPose(getDrivetrainAngle.get(), getRotaryAngle.get(), getLimelightXOffsetAngle.get()),
+                    new Transform2d(new Translation2d(), new Rotation2d())
+            );
+
+            //TODO: Timer.getFPGATimestamp() might cause some issues?
+            odometry.addVisionMeasurement(visionPoseEstimation, Timer.getFPGATimestamp());
+        }
     }
 
     @Override
@@ -146,7 +168,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
      * @return Robot angle
      */
     public Rotation2d getCurrentAngle(){
-        double angle = getGyroHeading() - rotationOffset;
+        double angle = getGyroHeading() - rotationOffsetDegrees;
         while (angle < -180){ angle += 360; }
         while (angle > 180){ angle -= 360; }
         return Rotation2d.fromDegrees(angle);
@@ -190,7 +212,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
     }
 
     public Pose2d getPose() {
-        return odometry.getPoseMeters();
+        return odometry.getEstimatedPosition();
     }
 
     public double getGyroHeading() {
@@ -204,8 +226,8 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
     /* RESET COMMANDS FOR DIFFERENT ASPECTS */
 
     public void resetGyro(Rotation2d angle) {
-         gyro.setYaw(angle.getDegrees());
-        rotationOffset = 0;
+        gyro.setYaw(angle.getDegrees());
+        rotationOffsetDegrees = 0;
         holdAngle = getCurrentAngle();
     }
 

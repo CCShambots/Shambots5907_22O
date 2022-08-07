@@ -7,6 +7,7 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.robot.util.math.Range;
@@ -15,6 +16,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 /**
@@ -94,6 +96,9 @@ public final class Constants {
         public static final double LIMELIGHT_ANGLE = Math.toRadians(30); //Radians
         public static final double GOAL_HEIGHT = 5; //Meters (middle of the tape on the upper goal)
         public static final double GOAL_TO_CENTER_DISTANCE = 2; //Meters
+
+        public static Supplier<Rotation2d> getLimelightXOffsetAngle;
+        public static Supplier<Rotation2d> getRotaryAngle;
     }
 
     public static final class SwerveModule{
@@ -165,6 +170,9 @@ public final class Constants {
                 new SwerveModuleState(0, Rotation2d.fromDegrees(45)),
                 new SwerveModuleState(0, Rotation2d.fromDegrees(-45))
         };
+
+        public static Supplier<Pose2d> getOdoPose;
+        public static Supplier<Rotation2d> getDrivetrainAngle;
     }
 
     public static final class ControllerConversions{

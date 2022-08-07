@@ -4,11 +4,11 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants;
-import frc.robot.Robot;
 import frc.robot.commands.turret.ActiveTracking;
 import frc.robot.commands.turret.DetermineTurretState;
 import frc.robot.util.Shambots5907_SMF.StatedSubsystem;
@@ -79,6 +79,9 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
 
         HoodAngleLUT.add(0, 0);
         HoodAngleLUT.createLUT();
+
+        getRotaryAngle = () -> Rotation2d.fromDegrees(getRotaryAngle());
+        getLimelightXOffsetAngle = () -> Rotation2d.fromDegrees(getLimelightXOffsetDegrees());
 
         addDetermination(Undetermined, Idle, new InstantCommand(() -> {
             resetHoodPos(0);
@@ -321,8 +324,8 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
     public void turnOnLimelight() {limelight.setOn();}
     public void turnOffLimelight() {limelight.setOff();}
     public boolean doesLimelightHaveTarget() {return limelight.hasTarget();}
-    public double getLimelightXOffset() {return limelight.targetOffset().getX();}
-    public double getLimelightYOffset() {return limelight.targetOffset().getY();}
+    public double getLimelightXOffsetDegrees() {return limelight.getXOffset().getDegrees();}
+    public double getLimelightYOffsetDegrees() {return limelight.getYOffset().getDegrees();}
     public double getLimelightDistanceFromCenter() {return limelight.getDistanceFromCenter();}
 
     @Override

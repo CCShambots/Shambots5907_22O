@@ -10,8 +10,6 @@ import frc.robot.subsystems.Turret;
 import frc.robot.util.math.Geometry;
 import frc.robot.util.math.InterpLUT;
 
-import java.util.function.DoubleConsumer;
-import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import static frc.robot.Constants.GOAL_POS;
@@ -39,6 +37,8 @@ public class ActiveTracking extends CommandBase {
         this.flywheelLUT = flywheelLUT;
         this.hoodLUT = hoodLUT;
         this.indicateLockedInConsumer = indicateLockedIn;
+
+        this.odoPoseSupplier = Constants.SwerveDrivetrain.getOdoPose;
 
         this.timer = new Timer();
     }
@@ -71,7 +71,7 @@ public class ActiveTracking extends CommandBase {
 
     //Update the value we can trust from the limelight
     private void updateLimelight() {
-        limelightOffset = turret.getLimelightXOffset(); //Get the limelight offset from the network table
+        limelightOffset = turret.getLimelightXOffsetDegrees(); //Get the limelight offset from the network table
 
         //Only change the limelight target if the limelight has a target
         if(turret.doesLimelightHaveTarget()) targetAngle = limelightOffset + turret.getPrevRotaryAngle();
