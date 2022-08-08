@@ -22,6 +22,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -29,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.commands.drivetrain.DriveCommand;
 import frc.robot.util.Shambots5907_SMF.StatedSubsystem;
 import frc.robot.util.SwerveModule;
 
@@ -54,7 +56,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
     private Field2d field;
 
-    public Drivetrain() {
+    public Drivetrain(Joystick driverController) {
         super(SwerveState.class);
 
         modules = new HashMap<>();
@@ -86,6 +88,9 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         addInstanceBasedState(Trajectory);
 
         addCommutativeTransition(Idle, Teleop, new InstantCommand(), new InstantCommand(() -> setAllModules(STOPPED_STATE)));
+
+        //TODO: Fix axes
+        setContinuousCommand(Teleop, new DriveCommand(this, () -> driverController.getRawAxis(1), () -> driverController.getRawAxis(4), () -> driverController.getRawAxis(5)));
 
         addCommutativeTransition(Idle, XShape, new InstantCommand(() -> setModuleStates(X_SHAPE_ARRAY)), new InstantCommand(() -> setAllModules(STOPPED_STATE)));
         addCommutativeTransition(Teleop, XShape, new InstantCommand(() -> setModuleStates(X_SHAPE_ARRAY)), new InstantCommand(() -> setAllModules(STOPPED_STATE)));
