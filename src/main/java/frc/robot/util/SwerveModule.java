@@ -11,6 +11,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.util.sendable.Sendable;
@@ -52,7 +53,9 @@ public class SwerveModule implements Sendable{
 
     private SwerveModuleState targetState;
 
-    public SwerveModule(String name, int turnID, int driveID, int encoderID, boolean reverseDriveMotor) {
+    private Translation2d offsetFromCenter;
+
+    public SwerveModule(String name, int turnID, int driveID, int encoderID, boolean reverseDriveMotor, Translation2d offsetFromCenter) {
         this.moduleName = name;
         turnMotor = new WPI_TalonFX(turnID);
         turnMotor.configFactoryDefault();
@@ -76,7 +79,10 @@ public class SwerveModule implements Sendable{
         turnPIDController.enableContinuousInput(-Math.PI, Math.PI);
 
         targetState = new SwerveModuleState(0, getTurnAngle());
+
+        this.offsetFromCenter = offsetFromCenter;
     }
+
 
     public void setDesiredState(SwerveModuleState state) {
         SwerveModuleState optimizedState = SwerveModuleState.optimize(state, getTurnAngle());
@@ -94,7 +100,7 @@ public class SwerveModule implements Sendable{
                 * (1 / 2048.0)  // convert sensor ticks to revolutions
                 * (1 / Constants.SwerveModule.DRIVE_RATIO)  // convert motor revolutions to wheel revolutions
                 * (2 * Math.PI * Constants.SwerveModule.WHEEL_RADIUS);   // convert wheel revolutions to linear distance
-    } 
+    }
 
     public SwerveModuleState getCurrentState() {
         return new SwerveModuleState(getDriveMotorRate(), getTurnAngle());
@@ -150,7 +156,10 @@ public class SwerveModule implements Sendable{
         builder.addDoubleProperty("Encoder offset", () -> encoderOffset, null);
         builder.addDoubleProperty("Target turn velo", () -> turnPIDController.getSetpoint().velocity, null);
         builder.addDoubleProperty("Measuerd turn velo", () -> turnEncoder.getVelocity(), null);
-        
+
     }
-    
+
+
+    public Translation2d getOffsetFromCenter() {return offsetFromCenter;}
+
 }

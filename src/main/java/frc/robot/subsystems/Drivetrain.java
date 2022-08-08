@@ -66,16 +66,16 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         super(SwerveState.class);
 
         modules = new HashMap<>();
-        modules.put("Module 1", new SwerveModule("Module-1", 11, 1, 1, false));
-        modules.put("Module 2", new SwerveModule("Module-2", 12, 2, 2, false));
-        modules.put("Module 3", new SwerveModule("Module-3", 13, 3, 3, true));
-        modules.put("Module 4", new SwerveModule("Module-4", 14, 4, 4, true));
+        modules.put("Module 1", new SwerveModule("Module-1", 11, 1, 1, false, moduleOffsets[0]));
+        modules.put("Module 2", new SwerveModule("Module-2", 12, 2, 2, false, moduleOffsets[1]));
+        modules.put("Module 3", new SwerveModule("Module-3", 13, 3, 3, true, moduleOffsets[2]));
+        modules.put("Module 4", new SwerveModule("Module-4", 14, 4, 4, true, moduleOffsets[3]));
 
         gyro.configFactoryDefault();
 
         rotationOffsetDegrees = getGyroHeading();
         holdAngle = new Rotation2d(rotationOffsetDegrees);
-        
+
         odometry = new SwerveDrivePoseEstimator(getCurrentAngle(), new Pose2d(), kDriveKinematics,
                 new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.02, 0.02, 0.01),
                 new MatBuilder<>(Nat.N1(), Nat.N1()).fill(0),
@@ -114,7 +114,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
     public void update() {
         updateOdometry();
 
-        field.setRobotPose(getPose());
+        updateField2dObject();
 
         if(Limelight.getInstance().hasTarget()) {
             Pose2d visionPoseEstimation = ComputerVisionUtil.estimateFieldToRobot(
@@ -123,9 +123,40 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
                     new Transform2d(new Translation2d(), new Rotation2d())
             );
 
+            field.getObject("limelight").setPose(visionPoseEstimation);
+
             //TODO: Timer.getFPGATimestamp() might cause some issues?
             odometry.addVisionMeasurement(visionPoseEstimation, Timer.getFPGATimestamp());
         }
+    }
+
+    public void updateOdometry() {
+        odometry.update(getCurrentAngle(),
+                modules.get("Module 1").getCurrentState(),
+                modules.get("Module 2").getCurrentState(),
+                modules.get("Module 3").getCurrentState(),
+                modules.get("Module 4").getCurrentState()
+        );
+    }
+
+    private void updateField2dObject() {
+        Pose2d robotPose = getPose();
+        field.setRobotPose(robotPose);
+
+        //Send each of the module poses to the dashboard as well
+        for(Entry<String, SwerveModule> e : modules.entrySet()) {
+            field.getObject(e.getKey()).setPose(calculateModulePose(e.getValue(), robotPose));
+        }
+
+    }
+
+    private Pose2d calculateModulePose(SwerveModule module, Pose2d robotPose) {
+        SwerveModuleState state = module.getCurrentState();
+        Translation2d offset = module.getOffsetFromCenter();
+
+        Pose2d pose = new Pose2d(robotPose.getTranslation().plus(offset), robotPose.getRotation().plus(state.angle));
+
+        return pose;
     }
 
     @Override
@@ -206,15 +237,6 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
     public Command getTrajectoryCommand(PathPlannerTrajectory trajectory) {
         return getTrajectoryCommand(trajectory, false);
-    }
-
-    public void updateOdometry() {
-        odometry.update(getCurrentAngle(), 
-            modules.get("Module 1").getCurrentState(), 
-            modules.get("Module 2").getCurrentState(), 
-            modules.get("Module 3").getCurrentState(), 
-            modules.get("Module 4").getCurrentState()
-        );
     }
 
     public Pose2d getPose() {
