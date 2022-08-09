@@ -1,0 +1,23 @@
+{
+  "tabPane": [
+    {
+      "title": "Drivetrain Details",
+      "autoPopulate": false,
+      "autoPopulatePrefix": "",
+      "widgetPane": {
+        "gridSize": 128.0,
+        "showGrid": true,
+        "hgap": 16.0,
+        "vgap": 16.0,
+        "titleType": 0,
+        "tiles": {}
+      }
+    }
+  ],
+  "windowGeometry": {
+    "x": 2.0,
+    "y": 10.0,
+    "width": 1917.0,
+    "height": 823.0
+  }
+}
