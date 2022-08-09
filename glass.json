@@ -15,6 +15,8 @@
       "/LiveWindow/Ungrouped/DigitalInput[3]": "Digital Input",
       "/LiveWindow/Ungrouped/DigitalInput[5]": "Digital Input",
       "/LiveWindow/Ungrouped/DigitalInput[6]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[8]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[9]": "Digital Input",
       "/LiveWindow/Ungrouped/DigitalOutput[4]": "Digital Output",
       "/LiveWindow/Ungrouped/PIDController[10]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[11]": "PIDController",
@@ -88,6 +90,7 @@
       "/LiveWindow/Ungrouped/PIDController[7]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[8]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[9]": "PIDController",
+      "/LiveWindow/Ungrouped/Pigeon 2 [1]": "Gyro",
       "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
       "/LiveWindow/Ungrouped/Talon FX [0]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon FX [11]": "Motor Controller",
@@ -97,6 +100,8 @@
       "/LiveWindow/Ungrouped/Talon FX [1]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon FX [21]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon FX [22]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [23]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [24]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon FX [2]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon FX [31]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon FX [32]": "Motor Controller",
@@ -125,6 +130,7 @@
       "/SmartDashboard/Top Flywheel PID": "PIDController",
       "/SmartDashboard/drivetrain": "Subsystem",
       "/SmartDashboard/drivetrain/field": "Field2d",
+      "/SmartDashboard/drivetrain/thetaControllerTele": "PIDController",
       "/SmartDashboard/drivetrain/xController": "PIDController",
       "/SmartDashboard/drivetrain/yController": "PIDController",
       "/SmartDashboard/field": "Field2d",
@@ -132,8 +138,39 @@
     },
     "windows": {
       "/SmartDashboard/drivetrain/field": {
+        "Module 1": {
+          "arrows": false,
+          "color": [
+            1.0,
+            0.0,
+            0.0,
+            255.0
+          ],
+          "image": "C:\\Users\\barta\\Documents\\GitHub\\Shambots5907_22O\\Glass Configuration\\circle.png",
+          "length": 0.25,
+          "selectable": false,
+          "style": "Box/Image",
+          "width": 0.25
+        },
+        "Module 2": {
+          "image": "C:\\Users\\barta\\Documents\\GitHub\\Shambots5907_22O\\Glass Configuration\\circle.png",
+          "length": 0.25,
+          "width": 0.25
+        },
+        "Module 3": {
+          "image": "C:\\Users\\barta\\Documents\\GitHub\\Shambots5907_22O\\Glass Configuration\\circle.png",
+          "length": 0.25,
+          "width": 0.25
+        },
+        "Module 4": {
+          "image": "C:\\Users\\barta\\Documents\\GitHub\\Shambots5907_22O\\Glass Configuration\\circle.png",
+          "length": 0.25,
+          "width": 0.25
+        },
         "Robot": {
+          "arrowSize": 32,
           "length": 0.7900000214576721,
+          "weight": 2.0,
           "width": 0.7099999785423279
         },
         "image": "C:\\Users\\Public\\wpilib\\2022\\field22.png",
@@ -158,7 +195,7 @@
   },
   "NetworkTables Settings": {
     "mode": "Client",
-    "serverTeam": "1506"
+    "serverTeam": "5907"
   },
   "NetworkTables View": {
     "visible": false
