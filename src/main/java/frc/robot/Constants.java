@@ -4,9 +4,13 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+import edu.wpi.first.networktables.NetworkTableInstance;
+
+import static frc.robot.Constants.AllianceColor.*;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -18,11 +22,11 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
  */
 public final class Constants {
 
+    public static AllianceColor alliance = Red;
+
     public static int COMPRESSOR_ID = 0;
 
     public static final SupplyCurrentLimitConfiguration CURRENT_LIMIT = new SupplyCurrentLimitConfiguration(true, 20, 20, 0.1); //enable these limits, current limit, trigger threshold, trigger threshold time
-
-    public static final int COMPRESSOR_ID = 0;
 
     public static final class Climber {
         //TODO: Get actual motor id's
@@ -62,6 +66,22 @@ public final class Constants {
 
         //TODO: Increase speed
         public static final double INTAKE_POWER = 0.25;
+    public static final class Conveyor {
+        public static final int LEFT_COMPACTOR_ID = 21;
+        public static final int RIGHT_COMPACTOR_ID = 22;
+        public static final int LEFT_CONVEYOR_ID = 23;
+        public static final int RIGHT_CONVEYOR_ID = 24;
+        public static final int LEFT_COLOR_ONE = 0;
+        public static final int LEFT_COLOR_TWO = 1;
+        public static final int RIGHT_COLOR_ONE = 2;
+        public static final int RIGHT_COLOR_TWO = 3;
+        public static final int LEFT_PROX = 4;
+        public static final int RIGHT_PROX = 5;
+        public static final int CENTER_PROX = 6;
+
+        //TODO: Raise both of these speeds
+        public static final double CONVEYOR_SPEED = 0.25;
+        public static final double COMPACTOR_SPEED = 0.25;
     }
 
 
@@ -80,4 +100,14 @@ public final class Constants {
      * @param motor Talon to configure
      */
     public static void configureMotor(WPI_TalonFX motor) {configureMotor(motor, true, false);}
+
+    public enum AllianceColor {
+        Red, Blue
+    }
+
+    public static void pullAllianceFromFMS() {
+        boolean isRedAlliance = NetworkTableInstance.getDefault().getTable("FMSInfo").getEntry("IsRedAlliance").getBoolean(true);
+        alliance = isRedAlliance ? Red : Blue;
+    }
+
 }

@@ -15,6 +15,8 @@ public class Robot extends TimedRobot {
 
     m_robotContainer = new RobotContainer();
     m_robotContainer.determineRobotManagerState();
+
+    Constants.pullAllianceFromFMS();
   }
 
   @Override
@@ -38,6 +40,8 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     SubsystemManager.getInstance().prepSubsystems().schedule();
     DashboardInterface.getInstance().setTab(Auto);
+
+    Constants.pullAllianceFromFMS();
   }
 
   @Override
@@ -47,6 +51,8 @@ public class Robot extends TimedRobot {
   public void teleopInit() {
     SubsystemManager.getInstance().prepSubsystems().schedule();
     DashboardInterface.getInstance().setTab(Teleop);
+
+    Constants.pullAllianceFromFMS();
   }
 
   /** This function is called periodically during operator control. */

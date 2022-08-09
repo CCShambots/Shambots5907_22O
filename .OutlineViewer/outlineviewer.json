@@ -1,0 +1,11 @@
+{
+  "NetworkTables Settings": {
+    "mode": "Client"
+  },
+  "SmartDashboard": {
+    "conveyor": {
+      "open": true
+    },
+    "open": true
+  }
+}
