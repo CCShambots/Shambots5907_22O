@@ -75,11 +75,11 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
 
         //Setup lookup tables for velocity and angle control
         RPMLUT.add(0, 0);
-        RPMLUT.add(0, 0);
+        RPMLUT.add(1, 1);
         RPMLUT.createLUT();
 
         HoodAngleLUT.add(0, 0);
-        HoodAngleLUT.add(0, 0);
+        HoodAngleLUT.add(1, 1);
         HoodAngleLUT.createLUT();
 
         getRotaryAngle = () -> Rotation2d.fromDegrees(getRotaryAngle());
