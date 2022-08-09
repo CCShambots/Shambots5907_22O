@@ -17,6 +17,7 @@ public class Robot extends TimedRobot {
     m_robotContainer.determineRobotManagerState();
 
     Constants.pullAllianceFromFMS();
+    m_robotContainer.enableLights();
   }
 
   @Override

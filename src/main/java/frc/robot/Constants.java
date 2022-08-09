@@ -5,6 +5,12 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
+
+import com.ctre.phoenix.led.Animation;
+import com.ctre.phoenix.led.FireAnimation;
+import com.ctre.phoenix.led.LarsonAnimation;
+import com.ctre.phoenix.led.StrobeAnimation;
+import com.ctre.phoenix.led.LarsonAnimation.BounceMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
@@ -21,6 +27,25 @@ import static frc.robot.Constants.AllianceColor.*;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+    //TODO: Pick actual CANdle ID
+
+    public static class Lights {
+        public static final int CANdleID = 0;
+        public static final int numLEDs = 300;
+        public static final double blinkingSpeed = 0.5;
+        public static final double bounceSpeed = 0.5;
+        public static final double fasterBlinkingSpeed = 0.75;
+        public static final Animation lightsOff = new FireAnimation();
+        public static final Animation idleAnimation = new  LarsonAnimation(0, 0, 255, 0, bounceSpeed, numLEDs, BounceMode.Front, 7);
+        public static final Animation testingAnimation = new StrobeAnimation(255, 255, 0, 0, blinkingSpeed, numLEDs);
+        public static final Animation oneBallAnimation = new StrobeAnimation(0, 0, 255, 0, blinkingSpeed, numLEDs);
+        public static final Animation twoBallAnimation = new StrobeAnimation(0, 0, 255, 0, 0, numLEDs); // Value of zero here might not work
+        public static final Animation lockedInOneBall = new StrobeAnimation(0, 255, 0, 0, blinkingSpeed, numLEDs);
+        public static final Animation lockedInTwoBall = new StrobeAnimation(0, 255, 0, 0, 0, numLEDs);
+        public static final Animation bottomEjectAnimation = new StrobeAnimation(255, 0, 0, 0, fasterBlinkingSpeed, numLEDs);
+        public static final Animation climbingAnimation = new StrobeAnimation(255, 0, 255, 0, blinkingSpeed, numLEDs);
+    }
+
 
     public static AllianceColor alliance = Red;
 

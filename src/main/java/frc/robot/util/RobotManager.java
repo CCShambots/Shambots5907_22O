@@ -5,11 +5,22 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.util.Shambots5907_SMF.StatedSubsystem;
 
 public class RobotManager extends StatedSubsystem<RobotManager.State> {
+import frc.robot.subsystems.Lights;
+import frc.robot.util.Shambots5907_SMF.StatedSubsystem;
 
-    public RobotManager() {
+import static frc.robot.util.RobotManager.State.*;
+
+public class RobotManager extends StatedSubsystem<RobotManager.State> {
+    private Lights lights;
+
+    public RobotManager(Lights lights) {
         super(State.class);
 
         addDetermination(State.Undetermined, State.Idle, new InstantCommand());
+        this.lights = lights;
+
+        //TODO: Actually implement this determination
+        addDetermination(Undetermined, Idle, new InstantCommand());
     }
 
     @Override
