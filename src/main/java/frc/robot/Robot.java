@@ -25,9 +25,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledInit() {
-    CommandScheduler.getInstance().cancelAll();
-    
     SubsystemManager.getInstance().disableAllSubsystems();
+
+    CommandScheduler.getInstance().cancelAll();
     DashboardInterface.getInstance().setTab(Auto);
   }
 
