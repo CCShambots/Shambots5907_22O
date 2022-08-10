@@ -10,12 +10,14 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import frc.robot.util.math.BoundingRegion;
 import frc.robot.util.math.Range;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
@@ -179,6 +181,17 @@ public final class Constants {
         public static final double LIMELIGHT_ANGLE = Math.toRadians(30); //Radians
         public static final double GOAL_HEIGHT = 5; //Meters (middle of the tape on the upper goal)
         public static final double GOAL_TO_CENTER_DISTANCE = 2; //Meters
+
+        public static final Translation2d OUR_HANGAR_POINT = new Translation2d(1.75, 6.5);
+
+        public static final Translation2d OPP_HANGAR_POINT = new Translation2d(14.71, 1.75);
+        public static final BoundingRegion INVALID_EJECTION_REGION = new BoundingRegion(
+                new Translation2d(8.75, 2.5),
+                new Translation2d(13, 0),
+                new Translation2d(16.5,  0),
+                new Translation2d(16.5, 5.5),
+                new Translation2d(7.75, 5.5)
+        );
 
         public static Supplier<Rotation2d> getLimelightXOffsetAngle;
         public static Supplier<Rotation2d> getRotaryAngle;

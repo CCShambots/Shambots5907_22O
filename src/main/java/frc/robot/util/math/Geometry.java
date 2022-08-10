@@ -7,6 +7,7 @@ import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 
 import static frc.robot.Constants.*;
+import static java.lang.Math.*;
 
 public class Geometry {
 
@@ -34,4 +35,27 @@ public class Geometry {
         return new Translation2d(angle.getCos()*distance, angle.getSin()*distance);
     }
 
+    /**
+     * Return an orientation for the turret to face towards a target point
+     * @param currentPose the current pose of the robot
+     * @param targetPoint the point the turret should be targeting
+     * @return the angle the turret should be facing to point towards the chosen point
+     */
+    public static Rotation2d getTurretTarget(Pose2d currentPose, Translation2d targetPoint) {
+        //Calculate turret angle
+
+        double xOffset = targetPoint.getX() - currentPose.getX();
+        double yOffset = targetPoint.getY() - currentPose.getY();
+
+        //Angle to the goal point (regardless of robot orientation)
+        Rotation2d angleToGoal = new Rotation2d(atan2(yOffset, xOffset));
+
+        Rotation2d relAngle = angleToGoal.minus(currentPose.getRotation());
+
+        return relAngle;
+    }
+
+    public static Translation2d getEjectionTargetPoint(Pose2d currentPose) {
+        return Turret.INVALID_EJECTION_REGION.pointInBoundingRange(currentPose.getTranslation()) ? Turret.OPP_HANGAR_POINT : Turret.OUR_HANGAR_POINT;
+    }
 }
