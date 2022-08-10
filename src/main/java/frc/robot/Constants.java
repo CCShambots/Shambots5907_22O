@@ -12,7 +12,6 @@ import com.ctre.phoenix.led.LarsonAnimation;
 import com.ctre.phoenix.led.StrobeAnimation;
 import com.ctre.phoenix.led.LarsonAnimation.BounceMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
@@ -22,14 +21,12 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.robot.util.math.Range;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
-import static frc.robot.Constants.SwerveDrivetrain.moduleOffsets;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -104,6 +101,11 @@ public final class Constants {
 
         //TODO: Increase speed
         public static final double INTAKE_POWER = 0.25;
+
+        public static final double MANUAL_EJECT_TIME = 3; //Seconds
+
+    }
+
     public static final class Conveyor {
         public static final int LEFT_COMPACTOR_ID = 21;
         public static final int RIGHT_COMPACTOR_ID = 22;
@@ -273,12 +275,6 @@ public final class Constants {
         public static Supplier<Rotation2d> getRotaryAngle;
     }
 
-    public static final class Controllers {
-
-    }
-    public static void configureMotor(WPI_TalonFX motor, boolean braked, boolean reversed) {
-        motor.configFactoryDefault();
-    
     public static void configureMotor(WPI_TalonFX motor, boolean braked, boolean reversed, boolean configFactoryDefault) {
         if(configFactoryDefault) motor.configFactoryDefault();
         motor.configSupplyCurrentLimit(CURRENT_LIMIT);
@@ -290,16 +286,6 @@ public final class Constants {
      * Default configuration for a motor. Assumes that the motor should be braked, but not reversed
      * @param motor Talon to configure
      */
-    public static void configureMotor(WPI_TalonFX motor) {configureMotor(motor, true, false);}
-
-    public enum AllianceColor {
-        Red, Blue
-    }
-
-    public static void pullAllianceFromFMS() {
-        boolean isRedAlliance = NetworkTableInstance.getDefault().getTable("FMSInfo").getEntry("IsRedAlliance").getBoolean(true);
-        alliance = isRedAlliance ? Red : Blue;
-    }
     public static void configureMotor(WPI_TalonFX motor) {configureMotor(motor, true, false, true);}
 
     /**
@@ -308,4 +294,14 @@ public final class Constants {
      */
     public static void configureMotor(WPI_TalonFX motor, boolean configFactoryDefault) {configureMotor(motor, true, false, configFactoryDefault);}
 
-}
+    public static void pullAllianceFromFMS() {
+        boolean isRedAlliance = NetworkTableInstance.getDefault().getTable("FMSInfo").getEntry("IsRedAlliance").getBoolean(true);
+        alliance = isRedAlliance ? Red: Blue;
+    }
+
+        public enum AllianceColor {
+            Red, Blue
+        }
+
+
+    }

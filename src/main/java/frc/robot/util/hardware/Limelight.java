@@ -1,25 +1,15 @@
 package frc.robot.util.hardware;
 
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
-
-public class Limelight{
-
-    /**Limelight subsystem that returns all the information we use for targetting */
-    public Limelight() {}
-    
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import frc.robot.Constants;
 
 import static frc.robot.Constants.Turret.*;
-import static java.lang.Math.tan;
-import static java.lang.Math.toRadians;
+import static java.lang.Math.*;
 
-public class Limelight {
+public class Limelight{
+
     private static Limelight instance;
 
     /**Limelight subsystem that returns all the information we use for targetting */
@@ -50,9 +40,12 @@ public class Limelight {
      */
     public Translation2d targetOffset() {
         return new Translation2d(
-            -getLimeLightTable().getEntry("tx").getDouble(0),
-            getLimeLightTable().getEntry("ty").getDouble(0)
+                -getLimeLightTable().getEntry("tx").getDouble(0),
+                getLimeLightTable().getEntry("ty").getDouble(0)
         );
+    }
+
+    /**
      * @return X offset (or yaw)
      */
     public Rotation2d getXOffset() {
