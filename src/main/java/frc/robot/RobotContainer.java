@@ -8,7 +8,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.subsystems.Lights.LEDState;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
+import frc.robot.subsystems.Turret;
+import frc.robot.subsystems.Drivetrain;
 import frc.robot.util.RobotManager;
+import frc.robot.util.Shambots5907_SMF.SubsystemManager;
 
 import static frc.robot.subsystems.Conveyor.ConveyorState.*;
 
@@ -23,7 +30,7 @@ public class RobotContainer {
   private final Climber climber = new Climber();
   private final Lights lights = new Lights();
 
-  private final RobotManager robotManager = new RobotManager();
+  private final RobotManager robotManager = new RobotManager(drivetrain, intake, conveyor, turret, climber, lights);
 
 
   public RobotContainer() {

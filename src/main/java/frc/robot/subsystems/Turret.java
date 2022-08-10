@@ -10,6 +10,7 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants;
 import frc.robot.commands.turret.ActiveTracking;
+import frc.robot.commands.turret.AutoEjecting;
 import frc.robot.commands.turret.DetermineTurretState;
 import frc.robot.util.Shambots5907_SMF.StatedSubsystem;
 import frc.robot.util.hardware.Limelight;
@@ -36,7 +37,8 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
     private final Limelight limelight = Limelight.getInstance();
 
     private final InterpLUT RPMLUT = new InterpLUT();
-    private final InterpLUT HoodAngleLUT = new InterpLUT();
+    private final InterpLUT hoodAngleLUT = new InterpLUT();
+    private final InterpLUT ejectionRPMLUT = new InterpLUT();
 
     private final SimpleMotorFeedforward flywheelFeedForward = new SimpleMotorFeedforward(FLYWHEEL_KS, FLYWHEEL_KV);
     private final PIDController flywheelPID = new PIDController(FLYWHEEL_KP, FLYWHEEL_KI, FLYWHEEL_KD);
@@ -78,9 +80,13 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
         RPMLUT.add(1, 1);
         RPMLUT.createLUT();
 
-        HoodAngleLUT.add(0, 0);
-        HoodAngleLUT.add(1, 1);
-        HoodAngleLUT.createLUT();
+        hoodAngleLUT.add(0, 0);
+        hoodAngleLUT.add(1, 1);
+        hoodAngleLUT.createLUT();
+
+        ejectionRPMLUT.add(0, 0);
+        ejectionRPMLUT.add(1, 1);
+        ejectionRPMLUT.createLUT();;
 
         getRotaryAngle = () -> Rotation2d.fromDegrees(getRotaryAngle());
         getLimelightXOffsetAngle = () -> Rotation2d.fromDegrees(getLimelightXOffsetDegrees());
@@ -104,12 +110,8 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
 
         addCommutativeTransition(Idle, ActiveTracking, new InstantCommand((this::turnOnLimelight)), new InstantCommand((this::turnOffLimelight)));
 
-
-        //TODO: GET ODO POSE
-
         AtomicBoolean lockedIn = new AtomicBoolean(false);
-
-        setContinuousCommand(ActiveTracking, new ActiveTracking(this, RPMLUT, HoodAngleLUT, (value) -> lockedIn.set(value)));
+        setContinuousCommand(ActiveTracking, new ActiveTracking(this, RPMLUT, hoodAngleLUT, (value) -> lockedIn.set(value)));
 
         addFlagState(ActiveTracking, LockedIn, () -> lockedIn.get());
 
@@ -118,6 +120,23 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
         addTransition(Resetting, Idle, new InstantCommand());
 
         addTransition(Idle, ClimbLock, new InstantCommand(() -> setRotaryTargetAngle(0)));
+
+        //Ejecting logic
+        addTransition(Idle, Ejecting, new InstantCommand(() -> setHoodTargetAngle(HOOD_MAX_ANGLE)));
+        setContinuousCommand(Ejecting, new AutoEjecting(this, ejectionRPMLUT, Constants.SwerveDrivetrain.getOdoPose));
+        addTransition(Ejecting, Idle, new InstantCommand(() -> {
+            setFlywheelTargetRPM(0);
+            setHoodTargetAngle(HOOD_MIN_ANGLE);
+        }));
+
+        addTransition(ActiveTracking, Ejecting, new InstantCommand(() -> {
+            turnOffLimelight();
+            setHoodTargetAngle(HOOD_MAX_ANGLE);
+        }));
+        addTransition(Ejecting, ActiveTracking, new InstantCommand(() -> {
+            turnOnLimelight();
+            setHoodTargetAngle(HOOD_MIN_ANGLE);
+        }));
     }
 
     public void setFlywheelTargetRPM(double rpm) {
