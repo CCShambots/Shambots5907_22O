@@ -16,9 +16,6 @@ import static frc.robot.Constants.Lights.*;
 
 public class Lights extends StatedSubsystem<LEDState> {
     private final CANdle candle = new CANdle(CANdleID, "rio");
-    
-    //TODO: Finish
-    private final int ledCount = 300;
 
     private Animation currentAnimation = lightsOff;
 
