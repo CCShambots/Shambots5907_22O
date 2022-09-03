@@ -46,6 +46,8 @@ public class Lights extends StatedSubsystem<LEDState> {
         addTransition(LockedIn, BottomEject, setAnimation(bottomEjectAnimation));
         addTransition(OneBall, BottomEject, setAnimation(oneBallAnimation));
         addTransition(TwoBall, BottomEject, setAnimation(twoBallAnimation));
+
+        addTransition(Idle, Climbing, setAnimation(climbingAnimation));
     }
 
     private Command setAnimation(Animation animation) {
@@ -62,7 +64,7 @@ public class Lights extends StatedSubsystem<LEDState> {
     public void additionalSendableData(SendableBuilder builder) {}
 
     public enum LEDState {
-        Undetermined, Idle, Default, OneBall, TwoBall, LockedIn, BottomEject, Testing;
+        Undetermined, Idle, Default, OneBall, TwoBall, LockedIn, BottomEject, Climbing, Testing;
 
         private static LEDState[] vals = values();
         public LEDState next() { return vals[(this.ordinal() +1) % vals.length];}

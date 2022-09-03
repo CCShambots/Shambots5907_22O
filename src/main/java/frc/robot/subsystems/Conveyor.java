@@ -53,6 +53,8 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
         Constants.configureMotor(leftConveyor);
         Constants.configureMotor(rightConveyor);
 
+        numBallsSupplier = ballTracker::getNumberOfBalls;
+
         addDetermination(Undetermined, Idle, new InstantCommand(this::stopAll));
         addTransition(Idle, StartIntakeLeft, new InstantCommand());
 
@@ -279,6 +281,7 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
 
     @Override
     public void update() {
+        if(getCurrentState() == Idle) setShouldEndIntakeSequence(false);
     }
 
     //TODO: Make private once finished debugging
@@ -308,6 +311,8 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
 
     public MotorState getLeftConveyorState() {return getMotorState(leftConveyor);}
     public MotorState getRightConveyorState() {return getMotorState(rightConveyor);}
+
+    public int getNumBalls() {return ballTracker.getNumberOfBalls();}
 
 
     /**

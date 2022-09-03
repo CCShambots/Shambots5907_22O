@@ -10,6 +10,7 @@ import frc.robot.subsystems.Turret;
 import frc.robot.util.math.Geometry;
 import frc.robot.util.math.InterpLUT;
 
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 import static frc.robot.Constants.GOAL_POS;
@@ -23,6 +24,7 @@ public class ActiveTracking extends CommandBase {
     private InterpLUT flywheelLUT, hoodLUT;
     private BooleanConsumer indicateLockedInConsumer;
     private Supplier<Pose2d> odoPoseSupplier;
+    private IntSupplier ballCountSupplier;
 
     //Control variables
     private double limelightOffset = 0; //The value of the target off on the limelight (x-axis)
@@ -39,6 +41,7 @@ public class ActiveTracking extends CommandBase {
         this.indicateLockedInConsumer = indicateLockedIn;
 
         this.odoPoseSupplier = Constants.SwerveDrivetrain.getOdoPose;
+        this.ballCountSupplier = Constants.Conveyor.numBallsSupplier;
 
         this.timer = new Timer();
     }
@@ -67,6 +70,19 @@ public class ActiveTracking extends CommandBase {
         if(mode == Searching) searchingLoop();
 
         updateLockedIn();
+        flywheelAndHoodControl();
+    }
+
+    private void flywheelAndHoodControl() {
+        //Flywheel and hood control
+        double distance = odoPoseSupplier.get().getTranslation().getDistance(GOAL_POS);
+
+        if(ballCountSupplier.getAsInt() > 0) {
+            turret.setHoodTargetAngle(hoodLUT.get(distance));
+            turret.setFlywheelTargetRPM(flywheelLUT.get(distance));
+        } else {
+            turret.setFlywheelTargetRPM(0);
+        }
     }
 
     //Update the value we can trust from the limelight
@@ -82,12 +98,6 @@ public class ActiveTracking extends CommandBase {
         if(turret.doesLimelightHaveTarget()) {
             //Set the spinner to the target angle only if the limelight should not be deadbanded
             if(Math.abs(targetAngle - turret.getRotaryAngle()) > LIMELIGHT_DEADBAND) turret.setRotaryTargetAngle(targetAngle);
-
-            //Flywheel and hood control
-            double distance = turret.getLimelightDistanceFromCenter();
-
-            turret.setHoodTargetAngle(hoodLUT.get(distance));
-            turret.setFlywheelTargetRPM(flywheelLUT.get(distance));
 
             overRotatedCheck();
         } else {

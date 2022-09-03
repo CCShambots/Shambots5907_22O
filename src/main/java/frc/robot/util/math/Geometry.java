@@ -56,6 +56,6 @@ public class Geometry {
     }
 
     public static Translation2d getEjectionTargetPoint(Pose2d currentPose) {
-        return Turret..pointInBoundingRange(currentPose.getTranslation()) ? Turret.OPP_HANGAR_POINT : Turret.OUR_HANGAR_POINT;
+        return Turret.INVALID_EJECTION_REGION.pointInBoundingRange(currentPose.getTranslation()) ? Turret.OPP_HANGAR_POINT : Turret.OUR_HANGAR_POINT;
     }
 }

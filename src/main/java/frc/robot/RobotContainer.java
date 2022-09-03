@@ -1,23 +1,13 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.subsystems.*;
 import frc.robot.util.Shambots5907_SMF.SubsystemManager;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.subsystems.Lights.LEDState;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.subsystems.Turret;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.util.RobotManager;
-import frc.robot.util.Shambots5907_SMF.SubsystemManager;
 
-import static frc.robot.subsystems.Conveyor.ConveyorState.*;
 
 public class RobotContainer {
   private final Joystick driverController = new Joystick(0);
@@ -34,17 +24,32 @@ public class RobotContainer {
 
 
   public RobotContainer() {
-    robotManager.enable();
 
-    SubsystemManager.getInstance().registerSubsystems(drivetrain, intake, conveyor, turret, climber);
-    SubsystemManager.getInstance().sendSubsystemToNT(lights);
-
-    turret.turnOffLimelight();
-
-    SubsystemManager.getInstance().registerSubsystem(turret);
+    setupSubsystems();
 
     configureButtonBindings();
 
+  }
+
+  private void setupSubsystems() {
+    SubsystemManager.getInstance().registerSubsystems(drivetrain, intake, conveyor, turret, climber);
+
+    //The lights subsystem is always enabled, because the lights are always giving information
+    SubsystemManager.getInstance().sendSubsystemToNT(lights);
+
+    //The robot manager isn't a normal subsystem, but should still be sent over NT
+    SubsystemManager.getInstance().sendSubsystemToNT(robotManager);
+
+    //Both of these are constantly enabled
+    robotManager.enable();
+    lights.enable();
+
+    //Make them transition to the idle state immediately
+    robotManager.requestTransition(robotManager.getEntryState()); //This will only finish determining its state once all the other subsystems finish
+    lights.requestTransition(lights.getEntryState());
+
+    //This is just for everyone's comfort once the robot code turns on.
+    turret.turnOffLimelight();
   }
 
 
