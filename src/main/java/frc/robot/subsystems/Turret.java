@@ -297,8 +297,8 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
                 ;
     }
 
-    public boolean isSensor1Pressed() {return limSwitch1.isTripped();}
-    public boolean isSensor2Pressed() {return limSwitch2.isTripped();}
+    public boolean isOuterLimPressed() {return outerLimSwitch.isTripped();}
+    public boolean isCenterLimPressed() {return centerLimitSwitch.isTripped();}
     public double getPrevRotaryAngle() {return prevRotaryAngle;}
 
     public boolean isRotaryBusy() {return rotaryPID.atGoal();}
@@ -366,8 +366,8 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
         builder.addDoubleProperty("hood velo", this::getHoodVelo, null);
         builder.addDoubleProperty("hood target", this::getHoodTarget, null);
         builder.addDoubleProperty("hood error", this::getHoodError, null);
-        builder.addBooleanProperty("sensor 1 pressed", this::isSensor1Pressed, null);
-        builder.addBooleanProperty("sensor 2 pressed", this::isSensor2Pressed, null);
+        builder.addBooleanProperty("sensor 1 pressed", this::isOuterLimPressed, null);
+        builder.addBooleanProperty("sensor 2 pressed", this::isCenterLimPressed, null);
 
         builder.addDoubleProperty("limelight distance from target", this::getLimelightDistanceFromCenter, null);
     }

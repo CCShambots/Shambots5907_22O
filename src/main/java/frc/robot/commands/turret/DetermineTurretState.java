@@ -4,6 +4,11 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Turret;
 
 public class DetermineTurretState extends CommandBase {
+    private double hoodPower = 0.125;
+    private double rotaryPower = 0.125;
+    private double outerRotaryResetAngle = 270;
+    private double centerRotaryResetAngle = 270;
+
     private Turret t;
 
     private boolean resettingHood;
@@ -24,8 +29,8 @@ public class DetermineTurretState extends CommandBase {
         t.disableHoodControlLoops();
         t.disableRotaryControlLoops();
 
-        t.setRotaryPower(0.25);
-        t.setHoodPower(-0.25);
+        t.setRotaryPower(rotaryPower);
+        t.setHoodPower(-hoodPower);
     }
 
     @Override
@@ -36,8 +41,13 @@ public class DetermineTurretState extends CommandBase {
             t.resetHoodPos(0);
         }
 
-        if(t.isSensor1Pressed()) {
+        if(t.isOuterLimPressed()) {
             resettingRotary = false;
+            t.resetRotaryPos(outerRotaryResetAngle);
+            t.setRotaryPower(0);
+        } else if(t.isCenterLimPressed()) {
+            resettingRotary = false;
+            t.resetRotaryPos(centerRotaryResetAngle);
             t.setRotaryPower(0);
         }
     }
