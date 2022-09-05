@@ -41,7 +41,7 @@ import static frc.robot.subsystems.Drivetrain.SwerveState.*;
 public class Drivetrain extends StatedSubsystem<SwerveState> {
 
     private Map<String, SwerveModule> modules;
-    private WPI_Pigeon2 gyro = new WPI_Pigeon2(1);
+    private WPI_Pigeon2 gyro = new WPI_Pigeon2(PigeonID);
     private double rotationOffset;
     private Rotation2d holdAngle;
 
