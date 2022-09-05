@@ -24,8 +24,8 @@ public final class Constants {
 
     public static final class Climber {
         //TODO: Get actual motor id's
-        public static final int MOTOR_1_ID = 5;
-        public static final int MOTOR_2_ID = 6;
+        public static final int MOTOR_1_ID = 81;
+        public static final int MOTOR_2_ID = 82;
 
         public static final int SOLENOID_1_PORT = 1;
         public static final int SOLENOID_2_PORT = 2;
