@@ -1,17 +1,19 @@
 package frc.robot;
 
+import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPlannerTrajectory;
+import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.Joystick;
 import frc.robot.subsystems.*;
+import frc.robot.util.AutonomousLoader;
 import frc.robot.util.Shambots5907_SMF.SubsystemManager;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.Turret;
 import frc.robot.subsystems.Drivetrain;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.subsystems.Lights;
-import frc.robot.subsystems.Lights.LEDState;
 import frc.robot.util.RobotManager;
+
+import java.util.*;
 
 
 public class RobotContainer {
@@ -27,8 +29,17 @@ public class RobotContainer {
 
   private final RobotManager robotManager = new RobotManager(drivetrain, intake, conveyor, turret, climber, lights);
 
+  private final AutonomousLoader autoLoader;
+  private final Map<String, PathPlannerTrajectory> paths = new HashMap<>();
 
   public RobotContainer() {
+
+    paths.putAll(loadPaths(List.of(
+            "test"
+    )));
+
+    autoLoader = new AutonomousLoader(robotManager, paths);
+    SmartDashboard.putData("Choose Auto Route", autoLoader.getSendableChooser());
 
     setupSubsystems();
 
@@ -60,6 +71,27 @@ public class RobotContainer {
 
   private void configureButtonBindings() {
 
+  }
+
+  /**
+   * Loads the different trajectories from built Pathplanner JSON files
+   *
+   * @param names A list of the different trajectories to load
+   * @return A map of the loaded trajectories
+   */
+  public Map<String, PathPlannerTrajectory> loadPaths(List<String> names, boolean reversed) {
+    Map<String, PathPlannerTrajectory> trajectories = new HashMap<>();
+
+    for (String n : names) {
+      trajectories.put(n, PathPlanner.loadPath(n, Constants.SwerveDrivetrain.MAX_LINEAR_SPEED,
+              Constants.SwerveDrivetrain.MAX_LINEAR_ACCELERATION, reversed));
+    }
+
+    return trajectories;
+  }
+
+  public Map<String, PathPlannerTrajectory> loadPaths(List<String> names) {
+    return loadPaths(names, false);
   }
 
   
