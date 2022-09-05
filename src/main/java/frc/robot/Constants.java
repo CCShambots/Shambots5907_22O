@@ -112,6 +112,22 @@ public final class Constants {
 
         public static Supplier<Pose2d> getOdoPose;
         public static Supplier<Rotation2d> getDrivetrainAngle;
+        
+        public static final int MODULE_1_DRIVE_ID = 01;
+        public static final int MODULE_1_TURN_ID = 11;
+        public static final int MODULE_1_ENCODER_ID = 21;
+
+        public static final int MODULE_2_DRIVE_ID = 02;
+        public static final int MODULE_2_TURN_ID = 12;
+        public static final int MODULE_2_ENCODER_ID = 22;
+
+        public static final int MODULE_3_DRIVE_ID = 03;
+        public static final int MODULE_3_TURN_ID = 13;
+        public static final int MODULE_3_ENCODER_ID = 23;
+
+        public static final int MODULE_4_DRIVE_ID = 04;
+        public static final int MODULE_4_TURN_ID = 14;
+        public static final int MODULE_4_ENCODER_ID = 24;
     }
 
     public static final class ControllerConversions{
