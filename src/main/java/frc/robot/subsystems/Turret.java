@@ -31,8 +31,8 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
     private final WPI_TalonFX flywheel1Motor = new WPI_TalonFX(FLYWHEEL_MOTOR1_ID);
     private final WPI_TalonFX flywheel2Motor = new WPI_TalonFX(FLYWHEEL_MOTOR2_ID);
 
-    private final MagneticLimitSwitch limSwitch1 = new MagneticLimitSwitch(LIM_SWITCH_1_ID);
-    private final MagneticLimitSwitch limSwitch2 = new MagneticLimitSwitch(LIM_SWITCH_2_ID);
+    private final MagneticLimitSwitch outerLimSwitch = new MagneticLimitSwitch(OUTER_LIM_SWITCH_ID);
+    private final MagneticLimitSwitch centerLimitSwitch = new MagneticLimitSwitch(CENTER_LIM_SWITCH_ID);
 
     private final Limelight limelight = Limelight.getInstance();
 
@@ -219,9 +219,9 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
             double rotaryFFOutput = rotaryFeedForward.calculate(rotaryPID.getSetpoint().velocity);
             double rotaryPIDOutput = rotaryPID.calculate(getRotaryAngle());
 
-            double rotarySum = rotaryFFOutput + rotaryPIDOutput;
-            if(limSwitch1.isTripped() && rotarySum > 0) rotarySum = 0;
-            else if(limSwitch2.isTripped() && rotarySum < 0) rotarySum = 0;
+        double rotarySum = rotaryFFOutput + rotaryPIDOutput;
+        if(outerLimSwitch.isTripped() && rotarySum > 0) rotarySum = 0;
+        else if(centerLimitSwitch.isTripped() && rotarySum < 0) rotarySum = 0;
 
             rotaryMotor.setVoltage(rotarySum);
         }

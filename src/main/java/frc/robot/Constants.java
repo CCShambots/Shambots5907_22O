@@ -121,13 +121,13 @@ public final class Constants {
 
     public static final class Turret {
         //TODO: Update CAN ID's and digital pins
-        public static final int ROTARY_MOTOR_ID = 21;
-        public static final int HOOD_MOTOR_ID = 22;
-        public static final int FLYWHEEL_MOTOR1_ID = 23;
-        public static final int FLYWHEEL_MOTOR2_ID = 24;
+        public static final int ROTARY_MOTOR_ID = 71;
+        public static final int HOOD_MOTOR_ID = 72;
+        public static final int FLYWHEEL_MOTOR1_ID = 73;
+        public static final int FLYWHEEL_MOTOR2_ID = 74;
 
-        public static final int LIM_SWITCH_1_ID = 8;
-        public static final int LIM_SWITCH_2_ID = 9;
+        public static final int OUTER_LIM_SWITCH_ID = 8;
+        public static final int CENTER_LIM_SWITCH_ID = 9;
 
         public static final double FLYWHEEL_KS = 0;
         public static final double FLYWHEEL_KV = 0;
