@@ -10,7 +10,7 @@ public class RobotContainer {
   private final Joystick driverController = new Joystick(0);
   private final Joystick operatorController = new Joystick(1);
 
-  private final Drivetrain drivetrain = new Drivetrain();
+  private final Drivetrain drivetrain = new Drivetrain(driverController);
 
   private final RobotManager robotManager = new RobotManager();
 
