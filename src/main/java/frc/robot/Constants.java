@@ -10,6 +10,7 @@ import com.ctre.phoenix.led.FireAnimation;
 import com.ctre.phoenix.led.LarsonAnimation;
 import com.ctre.phoenix.led.StrobeAnimation;
 import com.ctre.phoenix.led.LarsonAnimation.BounceMode;
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 
@@ -53,6 +54,7 @@ public final class Constants {
     public static RobotEnabled botEnabledStatus = RobotEnabled.Disabled;
 
     public static int PCM_ID = 01;
+    public static int COMPRESSOR_ID = 0;
 
     public static final SupplyCurrentLimitConfiguration CURRENT_LIMIT = new SupplyCurrentLimitConfiguration(true, 20, 20, 0.1); //enable these limits, current limit, trigger threshold, trigger threshold time
     public static final Translation2d GOAL_POS = new Translation2d(8.23, 4.11); //in meters
@@ -81,6 +83,28 @@ public final class Constants {
 
         public static final int SOLENOID_1_PORT = 1;
         public static final int SOLENOID_2_PORT = 2;
+
+    public static final class Drivetrain {
+
+    }
+
+    public static final class Conveyor {
+        public static final int LEFT_COMPACTOR_ID = 51;
+        public static final int RIGHT_COMPACTOR_ID = 52;
+        public static final int LEFT_CONVEYOR_ID = 61;
+        public static final int RIGHT_CONVEYOR_ID = 62;
+        public static final int LEFT_COLOR_ONE = 0;
+        public static final int LEFT_COLOR_TWO = 1;
+        public static final int RIGHT_COLOR_ONE = 2;
+        public static final int RIGHT_COLOR_TWO = 3;
+        public static final int LEFT_PROX = 4;
+        public static final int RIGHT_PROX = 5;
+        public static final int CENTER_PROX = 6;
+
+        //TODO: Raise both of these speeds
+        public static final double CONVEYOR_SPEED = 0.25;
+        public static final double COMPACTOR_SPEED = 0.25;
+    }
 
 
         //TODO: Maybe no load PID's (hopefully not though)

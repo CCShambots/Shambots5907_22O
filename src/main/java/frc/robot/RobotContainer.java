@@ -20,6 +20,9 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.subsystems.Lights;
 import frc.robot.subsystems.Lights.LEDState;
 import frc.robot.util.RobotManager;
+import frc.robot.util.Shambots5907_SMF.SubsystemManager;
+
+import static frc.robot.subsystems.Conveyor.ConveyorState.*;
 
 import java.util.*;
 
@@ -50,6 +53,8 @@ public class RobotContainer {
     SmartDashboard.putData("Choose Auto Route", autoLoader.getSendableChooser());
 
     setupSubsystems();
+
+    SubsystemManager.getInstance().registerSubsystem(conveyor);
 
     configureButtonBindings();
 

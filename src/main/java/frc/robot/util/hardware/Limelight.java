@@ -35,33 +35,14 @@ public class Limelight{
     }
 
     /**
-     * @return X offset (or yaw)
+     * Note: The returned values are raw from the limelight. They are negated (if needed) in the turret subsystem
+     * @return how far the detected target is from the center of the limelight frame in degrees
      */
-    public Rotation2d getXOffset() {
-        return Rotation2d.fromDegrees(-getLimeLightTable().getEntry("tx").getDouble(0));
-    }
-
-    /**
-     * @return Y offset (or pitch)
-     */
-    public Rotation2d getYOffset() {
-        return Rotation2d.fromDegrees(getLimeLightTable().getEntry("ty").getDouble(0));
-    }
-
-
-    /**
-     * @return distance from center of the field (-1 if no target is found)
-     */
-    public double getDistanceFromCenter() {
-       if(!hasTarget()) return -1;
-
-       double angleRadians = getYOffset().getRadians() + LIMELIGHT_ANGLE;
-
-       double distanceToTape = (GOAL_HEIGHT-LIMELIGHT_HEIGHT) / tan(angleRadians);
-
-       double distanceToCenter = distanceToTape + GOAL_TO_CENTER_DISTANCE;
-
-       return distanceToCenter;
+    public Translation2d targetOffset() {
+        return new Translation2d(
+            -getLimeLightTable().getEntry("tx").getDouble(0),
+            getLimeLightTable().getEntry("ty").getDouble(0)
+        );
     }
 
     /**
