@@ -100,20 +100,20 @@ public final class Constants {
         public static final int PigeonID = 01;
 
         public static final int MODULE_1_DRIVE_ID = 11;
-        public static final int MODULE_1_TURN_ID = 21;
-        public static final int MODULE_1_ENCODER_ID = 31;
+        public static final int MODULE_1_TURN_ID = 12;
+        public static final int MODULE_1_ENCODER_ID = 11;
 
-        public static final int MODULE_2_DRIVE_ID = 12;
-        public static final int MODULE_2_TURN_ID = 22;
-        public static final int MODULE_2_ENCODER_ID = 32;
+        public static final int MODULE_2_DRIVE_ID = 13;
+        public static final int MODULE_2_TURN_ID = 14;
+        public static final int MODULE_2_ENCODER_ID = 12;
 
-        public static final int MODULE_3_DRIVE_ID = 13;
-        public static final int MODULE_3_TURN_ID = 23;
-        public static final int MODULE_3_ENCODER_ID = 33;
+        public static final int MODULE_3_DRIVE_ID = 15;
+        public static final int MODULE_3_TURN_ID = 16;
+        public static final int MODULE_3_ENCODER_ID = 15;
 
-        public static final int MODULE_4_DRIVE_ID = 14;
-        public static final int MODULE_4_TURN_ID = 24;
-        public static final int MODULE_4_ENCODER_ID = 34;
+        public static final int MODULE_4_DRIVE_ID = 17;
+        public static final int MODULE_4_TURN_ID = 18;
+        public static final int MODULE_4_ENCODER_ID = 17;
     }
 
     public static final class ControllerConversions{
