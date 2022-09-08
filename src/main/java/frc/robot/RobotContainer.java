@@ -9,7 +9,7 @@ import frc.robot.util.Shambots5907_SMF.SubsystemManager;
 public class RobotContainer {
   
   private final Joystick driverController = new Joystick(0);
-  private final Joystick operatorController = new Joystick(1);
+  // private final Joystick operatorController = new Joystick(1);
 
   private final Drivetrain drivetrain = new Drivetrain(driverController);
 
@@ -29,6 +29,10 @@ public class RobotContainer {
 
     new JoystickButton(driverController, 1).whenPressed(drivetrain.goToStateCommand(Drivetrain.SwerveState.XShape));
     new JoystickButton(driverController, 2).whenPressed(drivetrain.goToStateCommand(Drivetrain.SwerveState.Teleop));
+  }
+
+  public void runControlLoops() {
+    drivetrain.runModuleControlLoops();
   }
 
   public void determineRobotManagerState() {

@@ -52,7 +52,7 @@ public class SwerveModule implements Sendable{
 
     private SwerveModuleState targetState;
 
-    public SwerveModule(String name, int turnID, int driveID, int encoderID, boolean reverseDriveMotor) {
+    public SwerveModule(String name, int turnID, int driveID, int encoderID, double encoderOffset, boolean reverseDriveMotor) {
         this.moduleName = name;
         turnMotor = new WPI_TalonFX(turnID);
         turnMotor.configFactoryDefault();
@@ -71,7 +71,7 @@ public class SwerveModule implements Sendable{
         turnEncoder.configAbsoluteSensorRange(AbsoluteSensorRange.Signed_PlusMinus180);
         turnEncoder.configSensorDirection(false);
 
-        this.encoderOffset = Preferences.getDouble(name + "-encoder-offset", 0);
+        this.encoderOffset = encoderOffset;
 
         turnPIDController.enableContinuousInput(-Math.PI, Math.PI);
 

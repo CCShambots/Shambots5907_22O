@@ -102,18 +102,23 @@ public final class Constants {
         public static final int MODULE_1_DRIVE_ID = 11;
         public static final int MODULE_1_TURN_ID = 12;
         public static final int MODULE_1_ENCODER_ID = 11;
+        public static final double MODULE_1_OFFSET = 77.5;
 
         public static final int MODULE_2_DRIVE_ID = 13;
         public static final int MODULE_2_TURN_ID = 14;
-        public static final int MODULE_2_ENCODER_ID = 12;
+        public static final int MODULE_2_ENCODER_ID = 13;
+        public static final double MODULE_2_OFFSET = 29.0;
 
         public static final int MODULE_3_DRIVE_ID = 15;
         public static final int MODULE_3_TURN_ID = 16;
         public static final int MODULE_3_ENCODER_ID = 15;
+        public static final double MODULE_3_OFFSET = -111.9;
 
         public static final int MODULE_4_DRIVE_ID = 17;
         public static final int MODULE_4_TURN_ID = 18;
         public static final int MODULE_4_ENCODER_ID = 17;
+        public static final double MODULE_4_OFFSET = -153.1
+        ;
     }
 
     public static final class ControllerConversions{
