@@ -14,8 +14,8 @@ import static frc.robot.Constants.*;
 
 public class Intake extends StatedSubsystem<Intake.IntakeState> {
 
-    private final DoubleSolenoid leftSolenoid = new DoubleSolenoid(COMPRESSOR_ID, PneumaticsModuleType.CTREPCM, LEFT_SOLENOID_FORWARD, LEFT_SOLENOID_REVERSE);
-    private final DoubleSolenoid rightSolenoid = new DoubleSolenoid(COMPRESSOR_ID, PneumaticsModuleType.CTREPCM, RIGHT_SOLENOID_FORWARD, RIGHT_SOLENOID_REVERSE);
+    private final DoubleSolenoid leftSolenoid = new DoubleSolenoid(PCM_ID, PneumaticsModuleType.CTREPCM, LEFT_SOLENOID_FORWARD, LEFT_SOLENOID_REVERSE);
+    private final DoubleSolenoid rightSolenoid = new DoubleSolenoid(PCM_ID, PneumaticsModuleType.CTREPCM, RIGHT_SOLENOID_FORWARD, RIGHT_SOLENOID_REVERSE);
 
     private final WPI_TalonFX leftMotor = new WPI_TalonFX(LEFT_MOTOR_ID);
     private final WPI_TalonFX rightMotor = new WPI_TalonFX(RIGHT_MOTOR_ID);

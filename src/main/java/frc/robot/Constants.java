@@ -52,7 +52,7 @@ public final class Constants {
     public static AllianceColor alliance = Red;
     public static RobotEnabled botEnabledStatus = RobotEnabled.Disabled;
 
-    public static int COMPRESSOR_ID = 0;
+    public static int PCM_ID = 01;
 
     public static final SupplyCurrentLimitConfiguration CURRENT_LIMIT = new SupplyCurrentLimitConfiguration(true, 20, 20, 0.1); //enable these limits, current limit, trigger threshold, trigger threshold time
     public static final Translation2d GOAL_POS = new Translation2d(8.23, 4.11); //in meters
@@ -279,8 +279,8 @@ public final class Constants {
     }
 
     public static final class Intake {
-        public static final int LEFT_MOTOR_ID = 11;
-        public static final int RIGHT_MOTOR_ID = 12;
+        public static final int LEFT_MOTOR_ID = 21;
+        public static final int RIGHT_MOTOR_ID = 22;
         public static final int LEFT_SOLENOID_FORWARD = 0;
         public static final int LEFT_SOLENOID_REVERSE = 1;
         public static final int RIGHT_SOLENOID_FORWARD = 2;
