@@ -345,9 +345,8 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
     public void turnOnLimelight() {limelight.setOn();}
     public void turnOffLimelight() {limelight.setOff();}
     public boolean doesLimelightHaveTarget() {return limelight.hasTarget();}
-    public double getLimelightXOffsetDegrees() {return limelight.getXOffset().getDegrees();}
-    public double getLimelightYOffsetDegrees() {return limelight.getYOffset().getDegrees();}
-    public double getLimelightDistanceFromCenter() {return limelight.getDistanceFromCenter();}
+    public double getLimelightXOffsetDegrees() {return limelight.targetOffset().getX();}
+    public double getLimelightYOffsetDegrees() {return limelight.targetOffset().getY();}
 
     @Override
     public String getName() {return "turret";}
@@ -367,8 +366,6 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
         builder.addDoubleProperty("hood error", this::getHoodError, null);
         builder.addBooleanProperty("sensor 1 pressed", this::isSensor1Pressed, null);
         builder.addBooleanProperty("sensor 2 pressed", this::isSensor2Pressed, null);
-
-        builder.addDoubleProperty("limelight distance from target", this::getLimelightDistanceFromCenter, null);
     }
 
     public enum TurretState {

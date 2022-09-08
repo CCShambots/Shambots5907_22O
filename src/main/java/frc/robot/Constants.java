@@ -213,6 +213,9 @@ public final class Constants {
         public static final int MODULE_4_DRIVE_ID = 17;
         public static final int MODULE_4_TURN_ID = 18;
         public static final int MODULE_4_ENCODER_ID = 17;
+
+        public static Supplier<Pose2d> getOdoPose;
+        public static Supplier<Rotation2d> getDrivetrainAngle;
     }
 
     public static final class ControllerConversions{

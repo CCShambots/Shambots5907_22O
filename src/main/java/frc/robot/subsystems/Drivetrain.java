@@ -48,7 +48,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
     private Map<String, SwerveModule> modules;
     private WPI_Pigeon2 gyro = new WPI_Pigeon2(PigeonID);
-    private double rotationOffset;
+    private double rotationOffsetDegrees;
     private Rotation2d holdAngle;
 
     private PIDController thetaHoldControllerTele = new PIDController(P_HOLDANGLETELE, I_HOLDANGLETELE, D_HOLDANGLETELE);
@@ -66,10 +66,10 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         super(SwerveState.class);
 
         modules = new HashMap<>();
-        modules.put("Module 1", new SwerveModule("Module-1", MODULE_1_TURN_ID, MODULE_1_DRIVE_ID, MODULE_1_ENCODER_ID, false));
-        modules.put("Module 2", new SwerveModule("Module-2", MODULE_2_TURN_ID, MODULE_2_DRIVE_ID, MODULE_2_ENCODER_ID, false));
-        modules.put("Module 3", new SwerveModule("Module-3", MODULE_3_TURN_ID, MODULE_3_DRIVE_ID, MODULE_3_ENCODER_ID, true));
-        modules.put("Module 4", new SwerveModule("Module-4", MODULE_4_TURN_ID, MODULE_4_DRIVE_ID, MODULE_4_ENCODER_ID, true));
+        modules.put("Module 1", new SwerveModule("Module-1", MODULE_1_TURN_ID, MODULE_1_DRIVE_ID, MODULE_1_ENCODER_ID, false, moduleOffsets[0]));
+        modules.put("Module 2", new SwerveModule("Module-2", MODULE_2_TURN_ID, MODULE_2_DRIVE_ID, MODULE_2_ENCODER_ID, false, moduleOffsets[1]));
+        modules.put("Module 3", new SwerveModule("Module-3", MODULE_3_TURN_ID, MODULE_3_DRIVE_ID, MODULE_3_ENCODER_ID, true, moduleOffsets[2]));
+        modules.put("Module 4", new SwerveModule("Module-4", MODULE_4_TURN_ID, MODULE_4_DRIVE_ID, MODULE_4_ENCODER_ID, true, moduleOffsets[3]));
 
         gyro.configFactoryDefault();
 
@@ -117,7 +117,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
         if(Limelight.getInstance().hasTarget()) {
             Pose2d visionPoseEstimation = ComputerVisionUtil.estimateFieldToRobot(
-                    LIMELIGHT_HEIGHT, GOAL_HEIGHT, LIMELIGHT_ANGLE, Limelight.getInstance().getYOffset().getRadians(), Limelight.getInstance().getXOffset(),
+                    LIMELIGHT_HEIGHT, GOAL_HEIGHT, LIMELIGHT_ANGLE, Limelight.getInstance().targetOffset().getY(), Rotation2d.fromDegrees(Limelight.getInstance().targetOffset().getY()),
                     getCurrentAngle(), Geometry.getCurrentTargetPose(getDrivetrainAngle.get(), getRotaryAngle.get(), getLimelightXOffsetAngle.get()),
                     new Transform2d(new Translation2d(), new Rotation2d())
             );
