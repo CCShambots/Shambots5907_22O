@@ -47,8 +47,8 @@ import static frc.robot.subsystems.Drivetrain.SwerveState.*;
 public class Drivetrain extends StatedSubsystem<SwerveState> {
 
     private Map<String, SwerveModule> modules;
-    private WPI_Pigeon2 gyro = new WPI_Pigeon2(1);
-    private double rotationOffsetDegrees;
+    private WPI_Pigeon2 gyro = new WPI_Pigeon2(PigeonID);
+    private double rotationOffset;
     private Rotation2d holdAngle;
 
     private PIDController thetaHoldControllerTele = new PIDController(P_HOLDANGLETELE, I_HOLDANGLETELE, D_HOLDANGLETELE);
@@ -66,10 +66,10 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         super(SwerveState.class);
 
         modules = new HashMap<>();
-        modules.put("Module 1", new SwerveModule("Module-1", 11, 1, 1, false, moduleOffsets[0]));
-        modules.put("Module 2", new SwerveModule("Module-2", 12, 2, 2, false, moduleOffsets[1]));
-        modules.put("Module 3", new SwerveModule("Module-3", 13, 3, 3, true, moduleOffsets[2]));
-        modules.put("Module 4", new SwerveModule("Module-4", 14, 4, 4, true, moduleOffsets[3]));
+        modules.put("Module 1", new SwerveModule("Module-1", MODULE_1_TURN_ID, MODULE_1_DRIVE_ID, MODULE_1_ENCODER_ID, false));
+        modules.put("Module 2", new SwerveModule("Module-2", MODULE_2_TURN_ID, MODULE_2_DRIVE_ID, MODULE_2_ENCODER_ID, false));
+        modules.put("Module 3", new SwerveModule("Module-3", MODULE_3_TURN_ID, MODULE_3_DRIVE_ID, MODULE_3_ENCODER_ID, true));
+        modules.put("Module 4", new SwerveModule("Module-4", MODULE_4_TURN_ID, MODULE_4_DRIVE_ID, MODULE_4_ENCODER_ID, true));
 
         gyro.configFactoryDefault();
 

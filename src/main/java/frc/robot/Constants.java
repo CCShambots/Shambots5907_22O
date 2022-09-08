@@ -172,8 +172,23 @@ public final class Constants {
                 new SwerveModuleState(0, Rotation2d.fromDegrees(-45))
         };
 
-        public static Supplier<Pose2d> getOdoPose;
-        public static Supplier<Rotation2d> getDrivetrainAngle;
+        public static final int PigeonID = 01;
+
+        public static final int MODULE_1_DRIVE_ID = 11;
+        public static final int MODULE_1_TURN_ID = 12;
+        public static final int MODULE_1_ENCODER_ID = 11;
+
+        public static final int MODULE_2_DRIVE_ID = 13;
+        public static final int MODULE_2_TURN_ID = 14;
+        public static final int MODULE_2_ENCODER_ID = 12;
+
+        public static final int MODULE_3_DRIVE_ID = 15;
+        public static final int MODULE_3_TURN_ID = 16;
+        public static final int MODULE_3_ENCODER_ID = 15;
+
+        public static final int MODULE_4_DRIVE_ID = 17;
+        public static final int MODULE_4_TURN_ID = 18;
+        public static final int MODULE_4_ENCODER_ID = 17;
     }
 
     public static final class ControllerConversions{
