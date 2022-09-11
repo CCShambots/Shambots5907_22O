@@ -15,6 +15,8 @@ public class Robot extends TimedRobot {
 
     m_robotContainer = new RobotContainer();
     m_robotContainer.determineRobotManagerState();
+
+    addPeriodic(m_robotContainer::runControlLoops, 0.05, 0.001);
   }
 
 

@@ -1,5 +1,7 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -14,7 +16,7 @@ public class RobotContainer {
   private final Turret turret = new Turret(); //Instantiated in the constructor because I need Robot.java
   
   private final Joystick driverController = new Joystick(0);
-  private final Joystick operatorController = new Joystick(1);
+  // private final Joystick operatorController = new Joystick(1);
 
   private final Drivetrain drivetrain = new Drivetrain(driverController);
 
@@ -56,6 +58,10 @@ public class RobotContainer {
     new JoystickButton(driverController, 4).whenPressed(new InstantCommand(() -> turret.setHoodTargetAngle(30)));
 
 
+  }
+
+  public void runControlLoops() {
+    drivetrain.runModuleControlLoops();
   }
 
   public void determineRobotManagerState() {

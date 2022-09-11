@@ -23,8 +23,6 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
-import static frc.robot.Constants.SwerveDrivetrain.moduleOffsets;
-
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -46,22 +44,22 @@ public final class Constants {
         public static final double TURN_SENSOR_RATIO = 1;
 
         // Drive motor PID controller coefficients
-        public static final double P_DRIVE = 3;
+        public static final double P_DRIVE = 1;
         public static final double I_DRIVE = 0;
         public static final double D_DRIVE = 0;
-        public static final double KS_DRIVE = .75;
-        public static final double KV_DRIVE = 2.3;
+        public static final double KS_DRIVE = .25;
+        public static final double KV_DRIVE = 2.85;
 
         // Use this ratio to convert from Falcon angular velocity to wheel angular velocity
         public static final double DRIVE_RATIO = 8.14;
 
         // Turn motor PID controller coefficients
         // using a trapezoidal profile
-        public static final double P_TURN = 0; //4.25
+        public static final double P_TURN = 0; //2
         public static final double I_TURN = 0;
-        public static final double D_TURN = 0; //0.06
-        public static final double KS_TURN = 0; //.7
-        public static final double KV_TURN = 0; //.2
+        public static final double D_TURN = 0; //0.1
+        public static final double KS_TURN = 0.75; //0.05
+        public static final double KV_TURN = 0.5; //0.15
         public static final double MAX_TURN_SPEED = 50; // Rad/S //50
         public static final double MAX_TURN_ACCEL = 400; // Rad/S^2
     }
@@ -69,9 +67,9 @@ public final class Constants {
     public static final class SwerveDrivetrain{
 
         // Distance between centers of right and left wheels on robot in meters
-        public static final double TRACK_WIDTH = 0.529;
+        public static final double TRACK_WIDTH = 0.62865;
         // Distance between front and back wheels on robot in meters
-        public static final double WHEEL_BASE = 0.614;
+        public static final double WHEEL_BASE = 0.52705;
 
         // Maximum linear chassis speed in meters per second (MK4 standard modules capable of 4.1)
         public static final double MAX_LINEAR_SPEED = 2;
@@ -81,25 +79,29 @@ public final class Constants {
         public static final double MAX_ROTATION = (MAX_LINEAR_SPEED / rotationRadius) * (2 * Math.PI);
         public static final double MAX_ROT_ACCEL = MAX_ROTATION * 3;
 
+        public static final SwerveDriveKinematics kDriveKinematics =
+                new SwerveDriveKinematics(
+                        new Translation2d(WHEEL_BASE / 2, TRACK_WIDTH / 2),
+                        new Translation2d(WHEEL_BASE / 2, -TRACK_WIDTH / 2),
+                        new Translation2d(-WHEEL_BASE / 2, -TRACK_WIDTH / 2),
+                        new Translation2d(-WHEEL_BASE / 2, TRACK_WIDTH / 2));
+
         public static final Translation2d[] moduleOffsets = {
-                new Translation2d(WHEEL_BASE / 2, -TRACK_WIDTH / 2),
-                new Translation2d(-WHEEL_BASE / 2, -TRACK_WIDTH / 2),
-                new Translation2d(-WHEEL_BASE / 2, TRACK_WIDTH / 2),
-                new Translation2d(WHEEL_BASE / 2, TRACK_WIDTH / 2)
+            new Translation2d(WHEEL_BASE / 2, TRACK_WIDTH / 2),
+            new Translation2d(WHEEL_BASE / 2, -TRACK_WIDTH / 2),
+            new Translation2d(-WHEEL_BASE / 2, -TRACK_WIDTH / 2),
+            new Translation2d(-WHEEL_BASE / 2, TRACK_WIDTH / 2)
         };
 
-        public static final SwerveDriveKinematics kDriveKinematics =
-                new SwerveDriveKinematics(moduleOffsets);
-
-        public static final double P_HOLDANGLETELE = 0; //.5
-        public static final double I_HOLDANGLETELE = 0.; //.25
+        public static final double P_HOLDANGLETELE = 5; //.5
+        public static final double I_HOLDANGLETELE = 0.25; 
         public static final double D_HOLDANGLETELE = 0;
 
-        public static final double P_HOLDANGLEAUTO = 0; //4
-        public static final double I_HOLDANGLEAUTO = 0; //.25
+        public static final double P_HOLDANGLEAUTO = 5; //4
+        public static final double I_HOLDANGLEAUTO = .25; //.25
         public static final double D_HOLDANGLEAUTO = 0;
 
-        public static final double P_HOLDTRANSLATION = 0; //1
+        public static final double P_HOLDTRANSLATION = 1; //1
         public static final double I_HOLDTRANSLATION = 0;
         public static final double D_HOLDTRANSLATION = 0;
 
@@ -117,18 +119,22 @@ public final class Constants {
         public static final int MODULE_1_DRIVE_ID = 11;
         public static final int MODULE_1_TURN_ID = 12;
         public static final int MODULE_1_ENCODER_ID = 11;
+        public static final double MODULE_1_OFFSET = 77.5 + 1.1;
 
         public static final int MODULE_2_DRIVE_ID = 13;
         public static final int MODULE_2_TURN_ID = 14;
-        public static final int MODULE_2_ENCODER_ID = 12;
+        public static final int MODULE_2_ENCODER_ID = 13;
+        public static final double MODULE_2_OFFSET = 29.0 + 2.1;
 
         public static final int MODULE_3_DRIVE_ID = 15;
         public static final int MODULE_3_TURN_ID = 16;
         public static final int MODULE_3_ENCODER_ID = 15;
+        public static final double MODULE_3_OFFSET = -111.9 - 8.2;
 
         public static final int MODULE_4_DRIVE_ID = 17;
         public static final int MODULE_4_TURN_ID = 18;
         public static final int MODULE_4_ENCODER_ID = 17;
+        public static final double MODULE_4_OFFSET = -153.1 - 0.8;
 
         public static Supplier<Pose2d> getOdoPose;
         public static Supplier<Rotation2d> getDrivetrainAngle;

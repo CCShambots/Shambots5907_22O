@@ -1,5 +1,6 @@
 package frc.robot.util;
 
+import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
@@ -55,16 +56,20 @@ public class SwerveModule implements Sendable{
 
     private Translation2d offsetFromCenter;
 
-    public SwerveModule(String name, int turnID, int driveID, int encoderID, boolean reverseDriveMotor, Translation2d offsetFromCenter) {
+    private boolean reverseTurnEncoder;
+
+    public SwerveModule(String name, int turnID, int driveID, int encoderID, double encoderOffset, boolean reverseDriveMotor, boolean reverseTurnEncoder, Translation2d offsetFromCenter) {
         this.moduleName = name;
         turnMotor = new WPI_TalonFX(turnID);
         turnMotor.configFactoryDefault();
 
+        this.reverseTurnEncoder = reverseTurnEncoder;
+        
         driveMotor = new WPI_TalonFX(driveID);
         driveMotor.configFactoryDefault();
         if(reverseDriveMotor) driveMotor.setInverted(true);
-        // driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 5);
-
+        driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 5);
+        
         this.turnEncoder = new CANCoder(encoderID);
         turnEncoder.configFactoryDefault();
         turnEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 5);
@@ -74,7 +79,7 @@ public class SwerveModule implements Sendable{
         turnEncoder.configAbsoluteSensorRange(AbsoluteSensorRange.Signed_PlusMinus180);
         turnEncoder.configSensorDirection(false);
 
-        this.encoderOffset = Preferences.getDouble(name + "-encoder-offset", 0);
+        this.encoderOffset = encoderOffset;
 
         turnPIDController.enableContinuousInput(-Math.PI, Math.PI);
 
@@ -90,7 +95,7 @@ public class SwerveModule implements Sendable{
     }
 
     public Rotation2d getTurnAngle(){
-        return new Rotation2d(turnEncoder.getAbsolutePosition() * Constants.SwerveModule.TURN_SENSOR_RATIO)
+        return new Rotation2d(reverseTurnEncoder ? -1 : 1 * turnEncoder.getAbsolutePosition() * Constants.SwerveModule.TURN_SENSOR_RATIO)
                               .minus(Rotation2d.fromDegrees(encoderOffset));
     }
 
@@ -155,8 +160,8 @@ public class SwerveModule implements Sendable{
         builder.addDoubleProperty("Target Velocity", () -> targetState.speedMetersPerSecond, null);
         builder.addDoubleProperty("Encoder offset", () -> encoderOffset, null);
         builder.addDoubleProperty("Target turn velo", () -> turnPIDController.getSetpoint().velocity, null);
-        builder.addDoubleProperty("Measuerd turn velo", () -> turnEncoder.getVelocity(), null);
-
+        builder.addDoubleProperty("Measuerd turn velo", () -> reverseTurnEncoder ? -1 : 1 * turnEncoder.getVelocity(), null);
+        
     }
 
 

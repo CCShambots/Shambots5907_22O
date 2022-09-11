@@ -66,10 +66,10 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         super(SwerveState.class);
 
         modules = new HashMap<>();
-        modules.put("Module 1", new SwerveModule("Module-1", MODULE_1_TURN_ID, MODULE_1_DRIVE_ID, MODULE_1_ENCODER_ID, false, moduleOffsets[0]));
-        modules.put("Module 2", new SwerveModule("Module-2", MODULE_2_TURN_ID, MODULE_2_DRIVE_ID, MODULE_2_ENCODER_ID, false, moduleOffsets[1]));
-        modules.put("Module 3", new SwerveModule("Module-3", MODULE_3_TURN_ID, MODULE_3_DRIVE_ID, MODULE_3_ENCODER_ID, true, moduleOffsets[2]));
-        modules.put("Module 4", new SwerveModule("Module-4", MODULE_4_TURN_ID, MODULE_4_DRIVE_ID, MODULE_4_ENCODER_ID, true, moduleOffsets[3]));
+        modules.put("Module 1", new SwerveModule("Module-1", MODULE_1_TURN_ID, MODULE_1_DRIVE_ID, MODULE_1_ENCODER_ID, MODULE_1_OFFSET, false, false, moduleOffsets[0]));
+        modules.put("Module 2", new SwerveModule("Module-2", MODULE_2_TURN_ID, MODULE_2_DRIVE_ID, MODULE_2_ENCODER_ID, MODULE_2_OFFSET, false, true, moduleOffsets[1]));
+        modules.put("Module 3", new SwerveModule("Module-3", MODULE_3_TURN_ID, MODULE_3_DRIVE_ID, MODULE_3_ENCODER_ID, MODULE_3_OFFSET, true, false, moduleOffsets[2]));
+        modules.put("Module 4", new SwerveModule("Module-4", MODULE_4_TURN_ID, MODULE_4_DRIVE_ID, MODULE_4_ENCODER_ID, MODULE_4_OFFSET, true, false, moduleOffsets[3]));
 
         gyro.configFactoryDefault();
 
@@ -102,7 +102,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         addCommutativeTransition(Idle, Teleop, new InstantCommand(), new InstantCommand(() -> setAllModules(STOPPED_STATE)));
 
         //TODO: Fix axes
-        setContinuousCommand(Teleop, new DriveCommand(this, () -> driverController.getRawAxis(1), () -> driverController.getRawAxis(4), () -> driverController.getRawAxis(5)));
+        setContinuousCommand(Teleop, new DriveCommand(this, () -> driverController.getRawAxis(0), () -> driverController.getRawAxis(1), () -> driverController.getRawAxis(4)));
 
         addCommutativeTransition(Idle, XShape, new InstantCommand(() -> setModuleStates(X_SHAPE_ARRAY)), new InstantCommand(() -> setAllModules(STOPPED_STATE)));
         addCommutativeTransition(Teleop, XShape, new InstantCommand(() -> setModuleStates(X_SHAPE_ARRAY)), new InstantCommand(() -> setAllModules(STOPPED_STATE)));

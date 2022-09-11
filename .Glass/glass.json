@@ -1,6 +1,12 @@
 {
   "NetworkTables": {
     "SmartDashboard": {
+      "drivetrain": {
+        "Module 1": {
+          "open": true
+        },
+        "open": true
+      },
       "open": true,
       "turret": {
         "open": true

@@ -17,9 +17,9 @@ public class DriveCommand extends CommandBase{
     private DoubleSupplier ySupplier;
     private DoubleSupplier turnSupplier;
 
-    private SlewRateLimiter xLimiter = new SlewRateLimiter(4);
-    private SlewRateLimiter yLimiter = new SlewRateLimiter(4);
-    private SlewRateLimiter thetaLimiter = new SlewRateLimiter(4);
+    private SlewRateLimiter xLimiter = new SlewRateLimiter(MAX_LINEAR_ACCELERATION);
+    private SlewRateLimiter yLimiter = new SlewRateLimiter(MAX_LINEAR_ACCELERATION);
+    private SlewRateLimiter thetaLimiter = new SlewRateLimiter(MAX_ROT_ACCEL);
 
 
     public DriveCommand(Drivetrain drivetrain, DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier turnSupplier) {
@@ -37,9 +37,9 @@ public class DriveCommand extends CommandBase{
 
     @Override
     public void execute() {
-      double correctedX =  convertRawInput(xLimiter.calculate(xSupplier.getAsDouble()), MAX_LINEAR_SPEED);
-      double correctedY =  convertRawInput(yLimiter.calculate(ySupplier.getAsDouble()), MAX_LINEAR_SPEED);
-      double correctedRot =  convertRawInput(thetaLimiter.calculate(turnSupplier.getAsDouble()), MAX_ROTATION);
+      double correctedX =  xLimiter.calculate(convertRawInput(xSupplier.getAsDouble(), MAX_LINEAR_SPEED));
+      double correctedY =  yLimiter.calculate(convertRawInput(ySupplier.getAsDouble(), MAX_LINEAR_SPEED));
+      double correctedRot =  thetaLimiter.calculate(convertRawInput(turnSupplier.getAsDouble(), MAX_ROTATION));
 
       ChassisSpeeds speeds;
 
