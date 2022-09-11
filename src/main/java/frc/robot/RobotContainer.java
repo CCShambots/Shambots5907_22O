@@ -39,23 +39,7 @@ public class RobotContainer {
 
   private void configureButtonBindings() {
 
-    //Hood angle
-    new POVButton(driverController, 0).whenPressed(new InstantCommand(() -> turret.setHoodPower(0.1))).whenReleased(new InstantCommand(() -> turret.setHoodPower(0)));
-    new POVButton(driverController, 180).whenPressed(new InstantCommand(() -> turret.setHoodPower(-0.1))).whenReleased(new InstantCommand(() -> turret.setHoodPower(0)));
-
-    //Rotary angle
-    new POVButton(driverController, 90).whenPressed(new InstantCommand(() -> turret.setRotaryPower(0.1))).whenReleased(new InstantCommand(() -> turret.setRotaryPower(0)));
-    new POVButton(driverController, 270).whenPressed(new InstantCommand(() -> turret.setRotaryPower(-0.1))).whenReleased(new InstantCommand(() -> turret.setRotaryPower(0)));
-
-    //Flywheel
-    new JoystickButton(driverController, 5).whenPressed(new InstantCommand(() -> turret.setFlywheelPower(1))).whenReleased(new InstantCommand(() -> turret.setFlywheelPower(0)));
-
-    //PID Controllers
-    new JoystickButton(driverController, 6).whenPressed(new InstantCommand(() -> turret.setFlywheelTargetRPM(1500))).whenReleased(new InstantCommand(() -> turret.setFlywheelTargetRPM(0)));
-    new JoystickButton(driverController, 1).whenPressed(new InstantCommand(() -> turret.setHoodTargetAngle(5)));
-    new JoystickButton(driverController, 2).whenPressed(new InstantCommand(() -> turret.setRotaryTargetAngle(-90)));
-    new JoystickButton(driverController, 3).whenPressed(new InstantCommand(() -> turret.setRotaryTargetAngle(90)));
-    new JoystickButton(driverController, 4).whenPressed(new InstantCommand(() -> turret.setHoodTargetAngle(30)));
+    new JoystickButton(driverController, 1).whenPressed(new InstantCommand(() -> turret.turnOnLimelight()));
 
 
   }
