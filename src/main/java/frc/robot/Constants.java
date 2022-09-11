@@ -11,6 +11,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.robot.util.math.BoundingRegion;
+
+import frc.robot.util.hardware.Gains;
 import frc.robot.util.math.Range;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -55,11 +57,11 @@ public final class Constants {
 
         // Turn motor PID controller coefficients
         // using a trapezoidal profile
-        public static final double P_TURN = 4.25;
+        public static final double P_TURN = 0; //4.25
         public static final double I_TURN = 0;
-        public static final double D_TURN = 0.06;
-        public static final double KS_TURN = .7;
-        public static final double KV_TURN = 0.20;
+        public static final double D_TURN = 0; //0.06
+        public static final double KS_TURN = 0; //.7
+        public static final double KV_TURN = 0; //.2
         public static final double MAX_TURN_SPEED = 50; // Rad/S //50
         public static final double MAX_TURN_ACCEL = 400; // Rad/S^2
     }
@@ -89,15 +91,15 @@ public final class Constants {
         public static final SwerveDriveKinematics kDriveKinematics =
                 new SwerveDriveKinematics(moduleOffsets);
 
-        public static final double P_HOLDANGLETELE = .5;
+        public static final double P_HOLDANGLETELE = 0; //.5
         public static final double I_HOLDANGLETELE = 0.; //.25
         public static final double D_HOLDANGLETELE = 0;
 
-        public static final double P_HOLDANGLEAUTO = 4;
-        public static final double I_HOLDANGLEAUTO = .25;
+        public static final double P_HOLDANGLEAUTO = 0; //4
+        public static final double I_HOLDANGLEAUTO = 0; //.25
         public static final double D_HOLDANGLEAUTO = 0;
 
-        public static final double P_HOLDTRANSLATION = 1;
+        public static final double P_HOLDTRANSLATION = 0; //1
         public static final double I_HOLDTRANSLATION = 0;
         public static final double D_HOLDTRANSLATION = 0;
 
@@ -127,6 +129,9 @@ public final class Constants {
         public static final int MODULE_4_DRIVE_ID = 17;
         public static final int MODULE_4_TURN_ID = 18;
         public static final int MODULE_4_ENCODER_ID = 17;
+
+        public static Supplier<Pose2d> getOdoPose;
+        public static Supplier<Rotation2d> getDrivetrainAngle;
     }
 
     public static final class ControllerConversions{
@@ -135,7 +140,6 @@ public final class Constants {
     }
 
     public static final class Turret {
-        //TODO: Update CAN ID's and digital pins
         public static final int ROTARY_MOTOR_ID = 41;
         public static final int HOOD_MOTOR_ID = 42;
         public static final int FLYWHEEL_MOTOR1_ID = 43;
@@ -144,22 +148,40 @@ public final class Constants {
         public static final int OUTER_LIM_SWITCH_ID = 8;
         public static final int CENTER_LIM_SWITCH_ID = 9;
 
-        public static final double FLYWHEEL_KS = 0;
-        public static final double FLYWHEEL_KV = 0;
-        public static final double FLYWHEEL_KP = 0;
+        public static final double FLYWHEEL_KS = 1.05;
+        public static final double FLYWHEEL_KV = 0.00228;
+        public static final double FLYWHEEL_KP = 0.0035;
         public static final double FLYWHEEL_KI = 0;
         public static final double FLYWHEEL_KD = 0;
+        public static final double FLYWHEEL_TOLERANCE = 25;
 
-        public static final double FLYWHEEL_TOLERANCE = 50;
+	    public static final int kSlotIdx = 0;
 
-        public static final double ROTARY_KS = 0;
-        public static final double ROTARY_KV = 0;
-        public static final double ROTARY_KP = 0;
-        public static final double ROTARY_KI = 0;
-        public static final double ROTARY_KD = 0;
+        /**
+         * Talon FX supports multiple (cascaded) PID loops. For
+         * now we just want the primary one.
+         */
+        public static final int kPIDLoopIdx = 0;
 
-        public static final double ROTARY_MAX_VEL = 0; //Deg/sec
-        public static final double ROTARY_MAX_ACCEL = 0; //Deg/(sec^2)
+        /**
+         * set to zero to skip waiting for confirmation, set to nonzero to wait and
+         * report to DS if action fails.
+         */
+        public static final int kTimeoutMs = 30;
+
+        /**
+         * Gains used in Motion Magic, to be adjusted accordingly
+         * Gains(kp, ki, kd, kf, izone, peak output);
+         */
+        public static final Gains rotaryGains = new Gains(0.15, 0.0, 0.0, 0.1, 0, 1.0);
+
+        public static final double ROTARY_KS = 1.45;
+        public static final double ROTARY_KV = 0.003;
+        public static final double ROTARY_KP = 0.08;
+        public static final double ROTARY_KI = 0.015;
+        public static final double ROTARY_KD = 0.0;
+        public static final double ROTARY_MAX_VEL = 90; //Deg/sec
+        public static final double ROTARY_MAX_ACCEL = 180; //Deg/(sec^2)
 
         public static final TrapezoidProfile.Constraints NORMAL_ROTARY_CONSTRAINTS = new TrapezoidProfile.Constraints(ROTARY_MAX_VEL, ROTARY_MAX_ACCEL);
 
@@ -169,23 +191,23 @@ public final class Constants {
         public static final TrapezoidProfile.Constraints SEARCH_ROTARY_CONSTRAINTS = new TrapezoidProfile.Constraints(ROTARY_SEARCH_VEL, ROTARY_SEARCH_ACCEL);
 
         public static final double ROTARY_CLOCKWISE_LIMIT = -135;
-        public static final double ROTARY_COUNTER_CLOCKWISE_LIMIT = 135;
+        public static final double ROTARY_COUNTER_CLOCKWISE_LIMIT = 90;
 
         public static final Range ROTARY_RANGE = new Range(ROTARY_CLOCKWISE_LIMIT, ROTARY_COUNTER_CLOCKWISE_LIMIT);
 
         public static final double ROTARY_TOLERANCE = 2; //Degrees
         public static final double LIMELIGHT_DEADBAND = 2; //Degrees
 
-        public static final double HOOD_KS = 0;
-        public static final double HOOD_KV = 0;
-        public static final double HOOD_KP = 0;
+        public static final double HOOD_KS = 0.75;
+        public static final double HOOD_KV = 0.0625;
+        public static final double HOOD_KP = 0.1;
         public static final double HOOD_KI = 0;
         public static final double HOOD_KD = 0;
-        public static final double HOOD_MAX_VEL = 0; //Deg/sec
-        public static final double HOOD_MAX_ACCEL = 0; //Deg/(sec^2)
+        public static final double HOOD_MAX_VEL = 64; //Deg/sec
+        public static final double HOOD_MAX_ACCEL = 64; //Deg/(sec^2)
 
         public static final double HOOD_MIN_ANGLE = 0;
-        public static final double HOOD_MAX_ANGLE = 32;
+        public static final double HOOD_MAX_ANGLE = 30;
 
         public static final Range HOOD_RANGE = new Range(HOOD_MIN_ANGLE, HOOD_MAX_ANGLE);
 

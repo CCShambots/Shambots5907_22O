@@ -9,13 +9,11 @@ public class RobotManager extends StatedSubsystem<RobotManager.State> {
 
     public RobotManager() {
         super(State.class);
-
         addDetermination(State.Undetermined, State.Idle, new InstantCommand());
     }
 
     @Override
     public void update() {
-
     }
 
     @Override
