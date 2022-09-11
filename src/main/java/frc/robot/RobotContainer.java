@@ -6,6 +6,10 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.Joystick;
 import frc.robot.subsystems.*;
 import frc.robot.util.AutonomousLoader;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.util.RobotManager;
@@ -29,7 +33,7 @@ import java.util.*;
 
 public class RobotContainer {
   private final Joystick driverController = new Joystick(0);
-  private final Joystick operatorController = new Joystick(1);
+  // private final Joystick operatorController = new Joystick(1);
 
   private final Drivetrain drivetrain = new Drivetrain(driverController);
   private final Intake intake = new Intake();
@@ -86,6 +90,13 @@ public class RobotContainer {
 
   private void configureButtonBindings() {
 
+    new JoystickButton(driverController, 1).whenPressed(new InstantCommand(() -> turret.turnOnLimelight()));
+
+
+  }
+
+  public void runControlLoops() {
+    drivetrain.runModuleControlLoops();
   }
 
   /**
