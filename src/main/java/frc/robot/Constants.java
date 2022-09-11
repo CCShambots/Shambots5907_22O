@@ -12,18 +12,10 @@ import com.ctre.phoenix.led.StrobeAnimation;
 import com.ctre.phoenix.led.LarsonAnimation.BounceMode;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 
-import com.ctre.phoenix.led.Animation;
-import com.ctre.phoenix.led.FireAnimation;
-import com.ctre.phoenix.led.LarsonAnimation;
-import com.ctre.phoenix.led.StrobeAnimation;
-import com.ctre.phoenix.led.LarsonAnimation.BounceMode;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
-import static frc.robot.Constants.AllianceColor.*;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -32,10 +24,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
-import java.util.function.*;
-
 import frc.robot.util.math.BoundingRegion;
 
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
@@ -49,7 +40,7 @@ import java.util.function.UnaryOperator;
  */
 public final class Constants {
 
-    public static AllianceColor alliance = Red;
+    public static AllianceColor alliance = AllianceColor.Red;
     public static RobotEnabled botEnabledStatus = RobotEnabled.Disabled;
 
     public static int PCM_ID = 01;
@@ -75,6 +66,27 @@ public final class Constants {
         public static final Animation climbingAnimation = new StrobeAnimation(255, 0, 255, 0, blinkingSpeed, numLEDs);
     }
 
+    public static final class Conveyor {
+        public static final int LEFT_COMPACTOR_ID = 31;
+        public static final int RIGHT_COMPACTOR_ID = 32;
+        public static final int LEFT_CONVEYOR_ID = 33;
+        public static final int RIGHT_CONVEYOR_ID = 34;
+        public static final int LEFT_COLOR_ONE = 4;
+        public static final int LEFT_COLOR_TWO = 5;
+        public static final int RIGHT_COLOR_ONE = 6;
+        public static final int RIGHT_COLOR_TWO = 7;
+        public static final int LEFT_PROX = 2;
+        public static final int RIGHT_PROX = 0;
+        public static final int CENTER_PROX = 1;
+
+        //TODO: Raise both of these speeds
+        public static final double CONVEYOR_SPEED = 0.5;
+        public static final double COMPACTOR_SPEED = 0.5;
+
+        public static IntSupplier numBallsSupplier;
+    }
+
+
     public static final class Climber {
         //TODO: Get actual motor id's
         public static final int MOTOR_1_ID = 81;
@@ -82,29 +94,6 @@ public final class Constants {
 
         public static final int SOLENOID_1_PORT = 1;
         public static final int SOLENOID_2_PORT = 2;
-
-    public static final class Drivetrain {
-
-    }
-
-    public static final class Conveyor {
-        public static final int LEFT_COMPACTOR_ID = 51;
-        public static final int RIGHT_COMPACTOR_ID = 52;
-        public static final int LEFT_CONVEYOR_ID = 61;
-        public static final int RIGHT_CONVEYOR_ID = 62;
-        public static final int LEFT_COLOR_ONE = 0;
-        public static final int LEFT_COLOR_TWO = 1;
-        public static final int RIGHT_COLOR_ONE = 2;
-        public static final int RIGHT_COLOR_TWO = 3;
-        public static final int LEFT_PROX = 4;
-        public static final int RIGHT_PROX = 5;
-        public static final int CENTER_PROX = 6;
-
-        //TODO: Raise both of these speeds
-        public static final double CONVEYOR_SPEED = 0.25;
-        public static final double COMPACTOR_SPEED = 0.25;
-    }
-
 
         //TODO: Maybe no load PID's (hopefully not though)
         public static final double KS = 0;
@@ -300,10 +289,6 @@ public final class Constants {
         public static Supplier<Rotation2d> getRotaryAngle;
     }
 
-    public static final class Drivetrain {
-
-    }
-
     public static final class Intake {
         public static final int LEFT_MOTOR_ID = 21;
         public static final int RIGHT_MOTOR_ID = 22;
@@ -314,30 +299,9 @@ public final class Constants {
 
         public static final double INTAKE_POWER = .65;
         public static final double PUMP_TIME_SECONDS = 0.25;
-    }
 
         public static final double MANUAL_EJECT_TIME = 3; //Seconds
 
-    }
-
-    public static final class Conveyor {
-        public static final int LEFT_COMPACTOR_ID = 21;
-        public static final int RIGHT_COMPACTOR_ID = 22;
-        public static final int LEFT_CONVEYOR_ID = 23;
-        public static final int RIGHT_CONVEYOR_ID = 24;
-        public static final int LEFT_COLOR_ONE = 0;
-        public static final int LEFT_COLOR_TWO = 1;
-        public static final int RIGHT_COLOR_ONE = 2;
-        public static final int RIGHT_COLOR_TWO = 3;
-        public static final int LEFT_PROX = 4;
-        public static final int RIGHT_PROX = 5;
-        public static final int CENTER_PROX = 6;
-
-        //TODO: Raise both of these speeds
-        public static final double CONVEYOR_SPEED = 0.25;
-        public static final double COMPACTOR_SPEED = 0.25;
-
-        public static IntSupplier numBallsSupplier;
     }
 
     public static void configureMotor(WPI_TalonFX motor, boolean braked, boolean reversed, boolean configFactoryDefault) {
@@ -361,18 +325,18 @@ public final class Constants {
 
     public static void pullAllianceFromFMS() {
         boolean isRedAlliance = NetworkTableInstance.getDefault().getTable("FMSInfo").getEntry("IsRedAlliance").getBoolean(true);
-        alliance = isRedAlliance ? Red: Blue;
+        alliance = isRedAlliance ? AllianceColor.Red : AllianceColor.Blue;
     }
 
-        public enum AllianceColor {
-            Red, Blue
-        }
+    public enum AllianceColor {
+        Red, Blue
+    }
 
-        public enum RobotEnabled {
-            Disabled,
-            Teleop,
-            Auto,
-            Test
-        }
+    public enum RobotEnabled {
+        Disabled,
+        Teleop,
+        Auto,
+        Test
+    }
 
 }

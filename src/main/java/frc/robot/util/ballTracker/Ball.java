@@ -2,10 +2,8 @@ package frc.robot.util.ballTracker;
 
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Ball implements Sendable{
-    //TODO: Rename "Conveyor" Branch to "Conveyor-base"
 
     private BallColorType color;
     private BallPosition position;
@@ -15,11 +13,9 @@ public class Ball implements Sendable{
         this.position = position;
     }
 
-    //TODO: Change access to "void" instead of "public"
-
-    public void advancePosition() {position = position.next();}
-    public void regressPosition() {position = position.previous();}
-    public void setPosition(BallPosition pos) {position = pos;}
+    void advancePosition() {position = position.next();}
+    void regressPosition() {position = position.previous();}
+    void setPosition(BallPosition pos) {position = pos;}
     public BallPosition getPosition() {return position;}
     public BallColorType getColor() {return color;}
     void setColor(BallColorType color) {this.color = color;}

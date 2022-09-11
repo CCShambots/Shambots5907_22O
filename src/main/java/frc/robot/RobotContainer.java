@@ -56,6 +56,8 @@ public class RobotContainer {
 
     SubsystemManager.getInstance().registerSubsystem(conveyor);
 
+    SubsystemManager.getInstance().registerSubsystem(conveyor);
+
     configureButtonBindings();
 
   }

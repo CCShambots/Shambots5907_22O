@@ -19,12 +19,7 @@ import static frc.robot.util.ballTracker.Ball.BallPosition.*;
 import static frc.robot.util.hardware.ColorSensor.ColorSensorOutput.*;
 
 public class BallTracker {
-    private ColorSensor leftColor;
-    private ColorSensor rightColor;
-    private ProximitySensor rightProx;
-    private ProximitySensor leftProx;
-    private ProximitySensor centerProx;
-    private Conveyor conveyor;
+    private boolean colorDetectionEnabled = false;
 
     //The balls that can exist that are currently in the robot
     private Ball emptyBall = new Ball(BallColorType.NotInBot, NotInBot);
@@ -35,12 +30,6 @@ public class BallTracker {
     );
 
     public BallTracker(ColorSensor leftColor, ColorSensor rightColor, ProximitySensor leftProx, ProximitySensor rightProx, ProximitySensor centerProx, Conveyor conveyor) {
-        this.leftColor = leftColor;
-        this.rightColor = rightColor;
-        this.rightProx = rightProx;
-        this.leftProx = leftProx;
-        this.centerProx = centerProx;
-        this.conveyor = conveyor;
 
         leftProx.registerTrigger(true, () -> {
                 if(conveyor.getLeftConveyorState() == Intaking) {
@@ -109,22 +98,24 @@ public class BallTracker {
     }
 
     public BallColorType evaluateBallColorType(ColorSensorOutput colorSensorOutput) {
-        AllianceColor color = Constants.alliance;
-        if(colorSensorOutput == Red && Constants.alliance == Constants.AllianceColor.Red) {
-            return BallColorType.Ours;
-        } else if(colorSensorOutput == Red && Constants.alliance == Constants.AllianceColor.Blue) {
-            return BallColorType.Opposing;
-        } else if(colorSensorOutput == Blue && Constants.alliance == Constants.AllianceColor.Blue) {
-            return BallColorType.Ours;
-        } else if(colorSensorOutput == Blue && Constants.alliance == Constants.AllianceColor.Red) {
-            return BallColorType.Opposing;
-        } else {
-            //Something has gone terribly wrong, so we'll just assume the ball is ours
-            return BallColorType.Ours;
-        }
+        //Only evaluate color if that feature is enabled
+        if(colorDetectionEnabled) {
+            AllianceColor allianceColor = Constants.alliance;
+            if(colorSensorOutput == Red && allianceColor == Constants.AllianceColor.Red) {
+                return BallColorType.Ours;
+            } else if(colorSensorOutput == Red && allianceColor == Constants.AllianceColor.Blue) {
+                return BallColorType.Opposing;
+            } else if(colorSensorOutput == Blue && allianceColor == Constants.AllianceColor.Blue) {
+                return BallColorType.Ours;
+            } else if(colorSensorOutput == Blue && allianceColor == Constants.AllianceColor.Red) {
+                return BallColorType.Opposing;
+            } else {
+                //Something has gone terribly wrong, so we'll just assume the ball is ours
+                return BallColorType.Ours;
+            }
+        } else return BallColorType.Ours;
+        
     }
-
-    //TODO: Implement tracker error if needed (hopefully not needed)
 
     private void safeSetBallPos(BallPosition targetPos, BallPosition searchPos) {
         Ball ball = findBall(searchPos);
@@ -218,6 +209,18 @@ public class BallTracker {
 
     public Ball getBall3() {
         return balls.get(2);
+    }
+
+    public void disableColorDetection() {
+        colorDetectionEnabled = false;
+    }
+
+    public void enableColorDetection() {
+        colorDetectionEnabled = true;
+    }
+
+    public boolean isColorDetectionEnabled() {
+        return colorDetectionEnabled;
     }
 
 

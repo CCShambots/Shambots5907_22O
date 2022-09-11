@@ -44,16 +44,18 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
 
     private boolean shouldEndIntakeSequence = false;
 
-    //TODO: Pass intake into this to be able to stop the intake through the conveyor
     public Conveyor() {
         super(ConveyorState.class);
 
-        Constants.configureMotor(leftCompactor);
-        Constants.configureMotor(rightCompactor);
-        Constants.configureMotor(leftConveyor);
-        Constants.configureMotor(rightConveyor);
+        //TODO: Remove
+        disableColorDetection();
 
-        numBallsSupplier = ballTracker::getNumberOfBalls;
+        numBallsSupplier = () -> getNumBalls();
+
+        Constants.configureMotor(leftCompactor, true, true, true);
+        Constants.configureMotor(rightCompactor, true, true, true);
+        Constants.configureMotor(leftConveyor);
+        Constants.configureMotor(rightConveyor, true, true, true);
 
         addDetermination(Undetermined, Idle, new InstantCommand(this::stopAll));
         addTransition(Idle, StartIntakeLeft, new InstantCommand());
@@ -85,7 +87,6 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
 
         addTransition(ShuffleToRight, Idle, new InstantCommand(() -> {stopAll(); setShouldEndIntakeSequence(false);}));
         addTransition(ShuffleToRight, IntakeLeft, new InstantCommand(() -> {stopRightConveyor(); stopRightCompactor();}));
-        //TODO: stop intake
         addTransition(ShuffleToRight, WaitForBallFromLeft, new InstantCommand(() -> {}));
 
         //When the second ball is acquired, reject it if it is the wrong color, end intaking if it is correct
@@ -112,11 +113,9 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
         setContinuousCommand(EjectFromLeft, new RejectOpponentBallsFromLeftCommand(this, ballTracker));
 
         addTransition(EjectFromLeft, Idle, new InstantCommand(this::stopAll));
-        //TODO: Stop intake
         addTransition(EjectFromLeft, WaitForBallFromLeft, new InstantCommand());
         addTransition(EjectFromLeft, IntakeLeft, new InstantCommand());
 
-        //TODO: Stop intake
         addTransition(IntakeLeft, WaitForBallFromLeft, new InstantCommand());
 
         setContinuousCommand(WaitForBallFromLeft, new FunctionalCommand(() -> {}, () -> {},
@@ -166,7 +165,6 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
 
         addTransition(ShuffleToLeft, Idle, new InstantCommand(() -> {stopAll(); setShouldEndIntakeSequence(false);}));
         addTransition(ShuffleToLeft, IntakeRight, new InstantCommand(() -> {stopLeftConveyor(); stopLeftCompactor();}));
-        //TODO: stop intake
         addTransition(ShuffleToLeft, WaitForBallFromRight, new InstantCommand(() -> {}));
 
         //When the second ball is acquired, reject it if it is the wrong color, end intaking if it is correct
@@ -193,11 +191,9 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
         setContinuousCommand(EjectFromRight, new RejectOpponentBallsFromRightCommand(this, ballTracker));
 
         addTransition(EjectFromRight, Idle, new InstantCommand(this::stopAll));
-        //TODO: Stop intake
         addTransition(EjectFromRight, WaitForBallFromRight, new InstantCommand());
         addTransition(EjectFromRight, IntakeRight, new InstantCommand());
 
-        //TODO: Stop intake
         addTransition(IntakeRight, WaitForBallFromRight, new InstantCommand());
 
         setContinuousCommand(WaitForBallFromRight, new FunctionalCommand(() -> {}, () -> {}, (interrupted) ->
@@ -281,38 +277,34 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
 
     @Override
     public void update() {
-        if(getCurrentState() == Idle) setShouldEndIntakeSequence(false);
     }
 
-    //TODO: Make private once finished debugging
-    public void intakeLeftCompactor() {leftCompactor.set(COMPACTOR_SPEED);}
-    public void intakeRightCompactor() {rightCompactor.set(COMPACTOR_SPEED);}
-    public void intakeLeftConveyor() {leftConveyor.set(CONVEYOR_SPEED);}
-    public void intakeRightConveyor() {rightConveyor.set(CONVEYOR_SPEED);}
+    private void intakeLeftCompactor() {leftCompactor.set(COMPACTOR_SPEED);}
+    private void intakeRightCompactor() {rightCompactor.set(COMPACTOR_SPEED);}
+    private void intakeLeftConveyor() {leftConveyor.set(CONVEYOR_SPEED);}
+    private void intakeRightConveyor() {rightConveyor.set(CONVEYOR_SPEED);}
 
-    public void intakeAll() {intakeLeftCompactor(); intakeRightCompactor(); intakeLeftConveyor(); intakeRightConveyor();}
+    private void intakeAll() {intakeLeftCompactor(); intakeRightCompactor(); intakeLeftConveyor(); intakeRightConveyor();}
 
-    public void exhaustLeftCompactor() {leftCompactor.set(-COMPACTOR_SPEED);}
-    public void exhaustRightCompactor() {rightCompactor.set(-COMPACTOR_SPEED);}
-    public void exhaustLeftConveyor() {leftConveyor.set(-CONVEYOR_SPEED);}
-    public void exhaustRightConveyor() {rightConveyor.set(-CONVEYOR_SPEED);}
+    private void exhaustLeftCompactor() {leftCompactor.set(-COMPACTOR_SPEED);}
+    private void exhaustRightCompactor() {rightCompactor.set(-COMPACTOR_SPEED);}
+    private void exhaustLeftConveyor() {leftConveyor.set(-CONVEYOR_SPEED);}
+    private void exhaustRightConveyor() {rightConveyor.set(-CONVEYOR_SPEED);}
 
-    public void exhaustAll() {exhaustLeftCompactor(); exhaustRightCompactor(); exhaustLeftConveyor(); exhaustRightConveyor();}
+    private void exhaustAll() {exhaustLeftCompactor(); exhaustRightCompactor(); exhaustLeftConveyor(); exhaustRightConveyor();}
 
-    public void stopLeftCompactor() {leftCompactor.set(0);}
-    public void stopRightCompactor() {rightCompactor.set(0);}
+    private void stopLeftCompactor() {leftCompactor.set(0);}
+    private void stopRightCompactor() {rightCompactor.set(0);}
     public void stopLeftConveyor() {leftConveyor.set(0);}
     public void stopRightConveyor() {rightConveyor.set(0);}
 
-    public void stopAll() {stopLeftCompactor(); stopRightCompactor(); stopLeftConveyor(); stopRightConveyor();}
+    private void stopAll() {stopLeftCompactor(); stopRightCompactor(); stopLeftConveyor(); stopRightConveyor();}
 
     public MotorState getLeftCompactorState() {return getMotorState(leftCompactor);}
     public MotorState getRightCompactorState() {return getMotorState(rightCompactor);}
 
     public MotorState getLeftConveyorState() {return getMotorState(leftConveyor);}
     public MotorState getRightConveyorState() {return getMotorState(rightConveyor);}
-
-    public int getNumBalls() {return ballTracker.getNumberOfBalls();}
 
 
     /**
@@ -342,6 +334,13 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
         ));
     }
 
+    public int getNumBalls() {
+        return ballTracker.getNumberOfBalls();
+    }
+
+    public void disableColorDetection() {ballTracker.disableColorDetection();}
+    public void enableColorDetection() {ballTracker.enableColorDetection();}
+
     public enum ConveyorState {
         Undetermined, Idle,
         EjectAll, //Ejecting all balls from the bottom
@@ -364,6 +363,7 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
         builder.addDoubleProperty("left-compactor-speed", leftCompactor::get, null);
         builder.addDoubleProperty("right-compactor-speed", rightCompactor::get, null);
         builder.addBooleanProperty("should-end-intake-sequence", this::shouldEndIntakeSequence, null);
+        builder.addBooleanProperty("color-detection-enabled", ballTracker::isColorDetectionEnabled, null);
     }
 
     @Override
