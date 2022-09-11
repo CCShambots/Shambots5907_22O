@@ -1,5 +1,6 @@
 package frc.robot.util;
 
+import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
@@ -52,16 +53,20 @@ public class SwerveModule implements Sendable{
 
     private SwerveModuleState targetState;
 
-    public SwerveModule(String name, int turnID, int driveID, int encoderID, double encoderOffset, boolean reverseDriveMotor) {
+    private boolean reverseTurnEncoder;
+
+    public SwerveModule(String name, int turnID, int driveID, int encoderID, double encoderOffset, boolean reverseDriveMotor, boolean reverseTurnEncoder) {
         this.moduleName = name;
         turnMotor = new WPI_TalonFX(turnID);
         turnMotor.configFactoryDefault();
 
+        this.reverseTurnEncoder = reverseTurnEncoder;
+        
         driveMotor = new WPI_TalonFX(driveID);
         driveMotor.configFactoryDefault();
         if(reverseDriveMotor) driveMotor.setInverted(true);
-        // driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 5);
-
+        driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 5);
+        
         this.turnEncoder = new CANCoder(encoderID);
         turnEncoder.configFactoryDefault();
         turnEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 5);
@@ -84,7 +89,7 @@ public class SwerveModule implements Sendable{
     }
 
     public Rotation2d getTurnAngle(){
-        return new Rotation2d(turnEncoder.getAbsolutePosition() * Constants.SwerveModule.TURN_SENSOR_RATIO)
+        return new Rotation2d(reverseTurnEncoder ? -1 : 1 * turnEncoder.getAbsolutePosition() * Constants.SwerveModule.TURN_SENSOR_RATIO)
                               .minus(Rotation2d.fromDegrees(encoderOffset));
     }
 
@@ -149,7 +154,7 @@ public class SwerveModule implements Sendable{
         builder.addDoubleProperty("Target Velocity", () -> targetState.speedMetersPerSecond, null);
         builder.addDoubleProperty("Encoder offset", () -> encoderOffset, null);
         builder.addDoubleProperty("Target turn velo", () -> turnPIDController.getSetpoint().velocity, null);
-        builder.addDoubleProperty("Measuerd turn velo", () -> turnEncoder.getVelocity(), null);
+        builder.addDoubleProperty("Measuerd turn velo", () -> reverseTurnEncoder ? -1 : 1 * turnEncoder.getVelocity(), null);
         
     }
     
