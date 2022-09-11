@@ -3,9 +3,11 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.util.Shambots5907_SMF.StatedSubsystem;
 
 import static frc.robot.subsystems.Intake.IntakeState.*;
@@ -49,6 +51,47 @@ public class Intake extends StatedSubsystem<Intake.IntakeState> {
         
         addTransition(LeftSideRunning, Ejecting, new InstantCommand(() -> {exhaustLeftMotor(); lowerRightSide(); exhaustRightMotor();}));
         addTransition(RightSideRunning, Ejecting, new InstantCommand(() -> {exhaustRightMotor(); lowerLeftSide(); exhaustLeftMotor();}));
+
+
+        //Intake pump logic
+        addTransition(RightSideRunning, PumpRightSide, new InstantCommand(this::raiseRightSide));
+        setContinuousCommand(PumpRightSide, new WaitCommand(PUMP_TIME_SECONDS).andThen(new InstantCommand(() -> requestTransition(RightSideRunning))));
+        addTransition(PumpRightSide, RightSideRunning, new InstantCommand(this::lowerRightSide));
+
+        addTransition(PumpRightSide, Idle, new InstantCommand(this::stopRightMotor));
+        addTransition(PumpRightSide, Ejecting, new InstantCommand(() -> {
+            lowerLeftSide();
+            lowerRightSide();
+            stopLeftMotor();
+            stopRightMotor();
+        }));
+
+        addTransition(PumpRightSide, LeftSideRunning, new InstantCommand(() -> {
+            stopRightMotor();
+            lowerLeftSide();
+            runLeftMotor();
+        }));
+
+
+        //Right side
+        addTransition(LeftSideRunning, PumpLeftSide, new InstantCommand(this::raiseLeftSide));
+        setContinuousCommand(PumpLeftSide, new WaitCommand(PUMP_TIME_SECONDS).andThen(new InstantCommand(() -> requestTransition(LeftSideRunning))));
+        addTransition(PumpLeftSide, LeftSideRunning, new InstantCommand(this::lowerLeftSide));
+
+        addTransition(PumpLeftSide, Idle, new InstantCommand(this::stopLeftMotor));
+        addTransition(PumpLeftSide, Ejecting, new InstantCommand(() -> {
+            lowerLeftSide();
+            lowerRightSide();
+            stopLeftMotor();
+            stopRightMotor();
+        }));
+
+        addTransition(PumpLeftSide, RightSideRunning, new InstantCommand(() -> {
+            stopLeftMotor();
+            lowerRightSide();
+            runRightMotor();
+        }));
+
     }
 
     private void runLeftMotor() {leftMotor.set(INTAKE_POWER);}
@@ -66,13 +109,21 @@ public class Intake extends StatedSubsystem<Intake.IntakeState> {
     private void raiseLeftSide() {leftSolenoid.set(DoubleSolenoid.Value.kForward);}
     private void raiseRightSide() {rightSolenoid.set(DoubleSolenoid.Value.kForward);}
 
+    /**
+     *
+     * @return The current type of pump that the robot should run, based on the current intaking state
+     */
+    public IntakeState getPumpState() {
+        if(isInState(LeftSideRunning)) return PumpLeftSide;
+        else return PumpRightSide;
+    }
+
     public enum IntakeState {
-        Undetermined, Idle, LeftSideRunning, RightSideRunning, Ejecting
+        Undetermined, Idle, LeftSideRunning, RightSideRunning, Ejecting, PumpRightSide, PumpLeftSide
     }
 
     @Override
     public void update() {
-
     }
 
     @Override

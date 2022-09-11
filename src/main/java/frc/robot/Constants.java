@@ -48,7 +48,6 @@ import java.util.function.UnaryOperator;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-    //TODO: Pick actual CANdle ID
 
     public static AllianceColor alliance = Red;
     public static RobotEnabled botEnabledStatus = RobotEnabled.Disabled;
@@ -308,13 +307,14 @@ public final class Constants {
     public static final class Intake {
         public static final int LEFT_MOTOR_ID = 21;
         public static final int RIGHT_MOTOR_ID = 22;
-        public static final int LEFT_SOLENOID_FORWARD = 0;
-        public static final int LEFT_SOLENOID_REVERSE = 1;
-        public static final int RIGHT_SOLENOID_FORWARD = 2;
-        public static final int RIGHT_SOLENOID_REVERSE = 3;
+        public static final int LEFT_SOLENOID_FORWARD = 3;
+        public static final int LEFT_SOLENOID_REVERSE = 4;
+        public static final int RIGHT_SOLENOID_FORWARD = 0;
+        public static final int RIGHT_SOLENOID_REVERSE = 1;
 
-        //TODO: Increase speed
-        public static final double INTAKE_POWER = 0.25;
+        public static final double INTAKE_POWER = .65;
+        public static final double PUMP_TIME_SECONDS = 0.25;
+    }
 
         public static final double MANUAL_EJECT_TIME = 3; //Seconds
 
