@@ -219,11 +219,10 @@ public final class Constants {
 
         public static final double HOOD_TOLERANCE = 0.5;
 
-        //TODO: Fill in
-        public static final double LIMELIGHT_HEIGHT = 2; //Meters
+        public static final double LIMELIGHT_HEIGHT = 0.81; //Meters
         public static final double LIMELIGHT_ANGLE = Math.toRadians(30); //Radians
-        public static final double GOAL_HEIGHT = 5; //Meters (middle of the tape on the upper goal)
-        public static final double GOAL_TO_CENTER_DISTANCE = 2; //Meters
+        public static final double GOAL_HEIGHT = 2.39; //Meters (middle of the tape on the upper goal)
+        public static final double GOAL_TO_CENTER_DISTANCE = 0.61; //Meters
 
         public static final Translation2d OUR_HANGAR_POINT = new Translation2d(1.75, 6.5);
 
