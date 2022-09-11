@@ -108,7 +108,7 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
         }));
 
         //If we're already intaking right, it's safe to go back to idle
-        addSafeTransitionCondition(IntakeRight, Idle, () -> true);
+        addSafeTransitionCondition(IntakeLeft, Idle, () -> i.isInState(Intake.IntakeState.RightSideRunning));
 
         addTransition(Idle, IntakeLeft, new InstantCommand(() -> {
             i.requestTransition(Intake.IntakeState.LeftSideRunning);
@@ -128,7 +128,7 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
         }));
 
         //If we're already intaking right, it's safe to go back to idle
-        addSafeTransitionCondition(IntakeRight, Idle, () -> true);
+        addSafeTransitionCondition(IntakeRight, Idle, () -> i.isInState(Intake.IntakeState.LeftSideRunning));
 
         addCommutativeTransition(IntakeRight, IntakeLeft,
                 new InstantCommand(() -> {
@@ -142,8 +142,8 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
         );
         
         //If we're already intaking, it's safe to go to the other intaking state
-        addSafeTransitionCondition(IntakeRight, IntakeLeft, () -> true);
-        addSafeTransitionCondition(IntakeLeft, IntakeRight, () -> true);
+        addSafeTransitionCondition(IntakeRight, IntakeLeft, () -> i.isInState(Intake.IntakeState.RightSideRunning));
+        addSafeTransitionCondition(IntakeLeft, IntakeRight, () -> i.isInState(Intake.IntakeState.LeftSideRunning));
 
         AtomicBoolean wasEjecting = new AtomicBoolean(false);
         setContinuousCommand(IntakeRight, new ParallelCommandGroup(
