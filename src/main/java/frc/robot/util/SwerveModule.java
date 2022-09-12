@@ -65,11 +65,11 @@ public class SwerveModule implements Sendable{
         driveMotor = new WPI_TalonFX(driveID);
         driveMotor.configFactoryDefault();
         if(reverseDriveMotor) driveMotor.setInverted(true);
-        driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 5);
+        // driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 5);
         
         this.turnEncoder = new CANCoder(encoderID);
         turnEncoder.configFactoryDefault();
-        turnEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 5);
+        // turnEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 5);
         double radiansCoefficient = (2.0 * Math.PI) / 4096.0;
         turnEncoder.configFeedbackCoefficient(radiansCoefficient, "rad", SensorTimeBase.PerSecond);
         turnEncoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
