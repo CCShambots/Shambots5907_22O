@@ -57,6 +57,11 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
         Constants.configureMotor(leftConveyor);
         Constants.configureMotor(rightConveyor, true, true, true);
 
+        Constants.defaultOptimizeMotor(leftCompactor);
+        Constants.defaultOptimizeMotor(leftConveyor);
+        Constants.defaultOptimizeMotor(rightCompactor);
+        Constants.defaultOptimizeMotor(rightConveyor);
+
         addDetermination(Undetermined, Idle, new InstantCommand(this::stopAll));
         addTransition(Idle, StartIntakeLeft, new InstantCommand());
 

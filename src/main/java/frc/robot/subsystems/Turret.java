@@ -72,13 +72,13 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
 
         flywheel2Motor.follow(flywheel1Motor);
         flywheel2Motor.setInverted(OpposeMaster);
+        Constants.optimizeFollowerMotor(flywheel2Motor);
 
         //Set the tolerance for the PID loop to say it is not busy
         // rotaryPID.setTolerance(ROTARY_TOLERANCE);
         flywheelPID.setTolerance(FLYWHEEL_TOLERANCE);
         hoodPID.setTolerance(HOOD_TOLERANCE);
 
-        
         /* Factory default hardware to prevent unexpected behavior */
 		rotaryMotor.configFactoryDefault();
 

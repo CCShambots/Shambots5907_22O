@@ -28,6 +28,9 @@ public class Intake extends StatedSubsystem<Intake.IntakeState> {
         configureMotor(leftMotor);
         configureMotor(rightMotor);
 
+        defaultOptimizeMotor(leftMotor);
+        defaultOptimizeMotor(rightMotor);
+
         addDetermination(Undetermined, Idle, new InstantCommand(() -> {
             stopLeftMotor();
             stopRightMotor();

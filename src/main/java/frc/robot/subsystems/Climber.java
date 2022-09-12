@@ -41,8 +41,10 @@ public class Climber extends StatedSubsystem<ClimberState> {
         Constants.configureMotor(motor1);
         Constants.configureMotor(motor2);
 
-        motor1.follow(motor2);
-        motor1.setInverted(InvertType.OpposeMaster);
+        motor2.follow(motor1);
+        motor2.setInverted(InvertType.OpposeMaster);
+
+        Constants.optimizeFollowerMotor(motor2);
 
         addDetermination(Undetermined, Idle, new InstantCommand(() -> {
             extendSolenoid();

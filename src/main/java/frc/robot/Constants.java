@@ -347,6 +347,22 @@ public final class Constants {
      */
     public static void configureMotor(WPI_TalonFX motor, boolean configFactoryDefault) {configureMotor(motor, true, false, configFactoryDefault);}
 
+    
+    public static void defaultOptimizeMotor(WPI_TalonFX motor) {
+        motor.setStatusFramePeriod(2, 1000);
+        motor.setStatusFramePeriod(3, 1000);
+        motor.setStatusFramePeriod(4, 1000);
+        motor.setStatusFramePeriod(10, 1000);
+        motor.setStatusFramePeriod(13, 1000);
+        motor.setStatusFramePeriod(14, 1000);
+        motor.setStatusFramePeriod(21, 1000);
+    }
+
+    public static void optimizeFollowerMotor(WPI_TalonFX motor) {
+        defaultOptimizeMotor(motor);
+        motor.setStatusFramePeriod(1, 100); //applied motor output
+    }
+
     public static void pullAllianceFromFMS() {
         boolean isRedAlliance = NetworkTableInstance.getDefault().getTable("FMSInfo").getEntry("IsRedAlliance").getBoolean(true);
         alliance = isRedAlliance ? AllianceColor.Red : AllianceColor.Blue;
