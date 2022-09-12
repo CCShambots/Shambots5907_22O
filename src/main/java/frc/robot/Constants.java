@@ -19,6 +19,9 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import frc.robot.util.math.BoundingRegion;
+
+import frc.robot.util.hardware.Gains;
 import frc.robot.util.math.Range;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;

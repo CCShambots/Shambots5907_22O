@@ -79,6 +79,7 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
         flywheelPID.setTolerance(FLYWHEEL_TOLERANCE);
         hoodPID.setTolerance(HOOD_TOLERANCE);
 
+        
         /* Factory default hardware to prevent unexpected behavior */
 		rotaryMotor.configFactoryDefault();
 
