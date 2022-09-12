@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Joystick;
@@ -40,6 +41,8 @@ public class RobotContainer {
   private void configureButtonBindings() {
 
     new JoystickButton(driverController, 1).whenPressed(new InstantCommand(() -> turret.turnOnLimelight()));
+    new JoystickButton(driverController, 2).whenPressed(new InstantCommand(() -> drivetrain.resetGyro()));
+    new JoystickButton(driverController, 3).whenPressed(new InstantCommand(() -> drivetrain.resetOdometryPose(new Pose2d())));
 
 
   }

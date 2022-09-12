@@ -109,6 +109,8 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
     }
 
+    Pose2d visionPoseEstimation = new Pose2d();
+
     @Override
     public void update() {
         updateOdometry();
@@ -117,7 +119,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         try {
 
             if(Limelight.getInstance().hasTarget()) {
-                Pose2d visionPoseEstimation = ComputerVisionUtil.estimateFieldToRobot(
+                visionPoseEstimation = ComputerVisionUtil.estimateFieldToRobot(
                         LIMELIGHT_HEIGHT, GOAL_HEIGHT, LIMELIGHT_ANGLE, Limelight.getInstance().getYOffset().getRadians(), Limelight.getInstance().getXOffset().plus(getRotaryAngle.get()),
                         getCurrentAngle(), Geometry.getCurrentTargetPose(getDrivetrainAngle.get(), getRotaryAngle.get(), getLimelightXOffsetAngle.get()),
                         new Transform2d(new Translation2d(), new Rotation2d())
@@ -137,10 +139,14 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         try {
 
             odometry.update(getCurrentAngle(),
-                    modules.get("Module 1").getCurrentState(),
-                    modules.get("Module 2").getCurrentState(),
-                    modules.get("Module 3").getCurrentState(),
-                    modules.get("Module 4").getCurrentState()
+                    new SwerveModuleState(0, new Rotation2d()),
+                    new SwerveModuleState(0, new Rotation2d()),
+                    new SwerveModuleState(0, new Rotation2d()),
+                    new SwerveModuleState(0, new Rotation2d())
+                    // modules.get("Module 1").getCurrentState(),
+                    // modules.get("Module 2").getCurrentState(),
+                    // modules.get("Module 3").getCurrentState(),
+                    // modules.get("Module 4").getCurrentState()
             );
         } catch (Exception e) {
             System.out.println("odometry update failed");

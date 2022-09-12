@@ -1,10 +1,8 @@
 package frc.robot.util;
 
-import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
-import com.ctre.phoenix.sensors.CANCoderStatusFrame;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 import com.ctre.phoenix.sensors.SensorTimeBase;
 
@@ -24,10 +22,10 @@ public class SwerveModule implements Sendable{
 
     private final String moduleName;
 
-    private final WPI_TalonFX turnMotor;
-    private final WPI_TalonFX driveMotor;
+    // private final WPI_TalonFX turnMotor;
+    // private final WPI_TalonFX driveMotor;
 
-    private final CANCoder turnEncoder;
+    // private final CANCoder turnEncoder;
     private double encoderOffset;
 
     private final PIDController drivePIDController = new PIDController(
@@ -60,24 +58,24 @@ public class SwerveModule implements Sendable{
 
     public SwerveModule(String name, int turnID, int driveID, int encoderID, double encoderOffset, boolean reverseDriveMotor, boolean reverseTurnEncoder, Translation2d offsetFromCenter) {
         this.moduleName = name;
-        turnMotor = new WPI_TalonFX(turnID);
-        turnMotor.configFactoryDefault();
+        // turnMotor = new WPI_TalonFX(turnID);
+        // turnMotor.configFactoryDefault();
 
         this.reverseTurnEncoder = reverseTurnEncoder;
         
-        driveMotor = new WPI_TalonFX(driveID);
-        driveMotor.configFactoryDefault();
-        if(reverseDriveMotor) driveMotor.setInverted(true);
-        driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 5);
+        // driveMotor = new WPI_TalonFX(driveID);
+        // driveMotor.configFactoryDefault();
+        // if(reverseDriveMotor) driveMotor.setInverted(true);
+        // driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 5);
         
-        this.turnEncoder = new CANCoder(encoderID);
-        turnEncoder.configFactoryDefault();
-        turnEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 5);
+        // this.turnEncoder = new CANCoder(encoderID);
+        // turnEncoder.configFactoryDefault();
+        // turnEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 5);
         double radiansCoefficient = (2.0 * Math.PI) / 4096.0;
-        turnEncoder.configFeedbackCoefficient(radiansCoefficient, "rad", SensorTimeBase.PerSecond);
-        turnEncoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
-        turnEncoder.configAbsoluteSensorRange(AbsoluteSensorRange.Signed_PlusMinus180);
-        turnEncoder.configSensorDirection(false);
+        // turnEncoder.configFeedbackCoefficient(radiansCoefficient, "rad", SensorTimeBase.PerSecond);
+        // turnEncoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
+        // turnEncoder.configAbsoluteSensorRange(AbsoluteSensorRange.Signed_PlusMinus180);
+        // turnEncoder.configSensorDirection(false);
 
         this.encoderOffset = encoderOffset;
 
@@ -95,16 +93,18 @@ public class SwerveModule implements Sendable{
     }
 
     public Rotation2d getTurnAngle(){
-        return new Rotation2d(reverseTurnEncoder ? -1 : 1 * turnEncoder.getAbsolutePosition() * Constants.SwerveModule.TURN_SENSOR_RATIO)
-                              .minus(Rotation2d.fromDegrees(encoderOffset));
+        return new Rotation2d();
+        // return new Rotation2d(reverseTurnEncoder ? -1 : 1 * turnEncoder.getAbsolutePosition() * Constants.SwerveModule.TURN_SENSOR_RATIO)
+                            //   .minus(Rotation2d.fromDegrees(encoderOffset));
     }
 
     public double getDriveMotorRate(){
-        return driveMotor.getSelectedSensorVelocity()
-                * 10.0          // convert sensor ticks per 100ms to sensor ticks per second
-                * (1 / 2048.0)  // convert sensor ticks to revolutions
-                * (1 / Constants.SwerveModule.DRIVE_RATIO)  // convert motor revolutions to wheel revolutions
-                * (2 * Math.PI * Constants.SwerveModule.WHEEL_RADIUS);   // convert wheel revolutions to linear distance
+        return 0;
+        // return driveMotor.getSelectedSensorVelocity()
+                // * 10.0          // convert sensor ticks per 100ms to sensor ticks per second
+                // * (1 / 2048.0)  // convert sensor ticks to revolutions
+                // * (1 / Constants.SwerveModule.DRIVE_RATIO)  // convert motor revolutions to wheel revolutions
+                // * (2 * Math.PI * Constants.SwerveModule.WHEEL_RADIUS);   // convert wheel revolutions to linear distance
     }
 
     public SwerveModuleState getCurrentState() {
@@ -118,8 +118,8 @@ public class SwerveModule implements Sendable{
         double turnFFOutput = turnFeedforwardController.calculate(turnPIDController.getSetpoint().velocity);
         double driveFFOutput = driveFeedforwardController.calculate(targetState.speedMetersPerSecond);
 
-        turnMotor.setVoltage(turnPIDOutput + turnFFOutput);
-        driveMotor.setVoltage(drivePIDOutput + driveFFOutput);
+        // turnMotor.setVoltage(turnPIDOutput + turnFFOutput);
+        // driveMotor.setVoltage(drivePIDOutput + driveFFOutput);
 
         // SmartDashboard.putNumber(this.moduleName + " turn PID output", turnPIDOutput);
         // SmartDashboard.putNumber(this.moduleName + " turn FF output", turnFFOutput);
@@ -160,7 +160,7 @@ public class SwerveModule implements Sendable{
         builder.addDoubleProperty("Target Velocity", () -> targetState.speedMetersPerSecond, null);
         builder.addDoubleProperty("Encoder offset", () -> encoderOffset, null);
         builder.addDoubleProperty("Target turn velo", () -> turnPIDController.getSetpoint().velocity, null);
-        builder.addDoubleProperty("Measuerd turn velo", () -> reverseTurnEncoder ? -1 : 1 * turnEncoder.getVelocity(), null);
+        // builder.addDoubleProperty("Measuerd turn velo", () -> reverseTurnEncoder ? -1 : 1 * turnEncoder.getVelocity(), null);
         
     }
 
