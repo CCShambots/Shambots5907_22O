@@ -46,8 +46,7 @@ public final class Constants {
     public static AllianceColor alliance = AllianceColor.Red;
     public static RobotEnabled botEnabledStatus = RobotEnabled.Disabled;
 
-    public static int PCM_ID = 01;
-    public static int COMPRESSOR_ID = 0;
+    public static int COMPRESSOR_ID = 01;
 
     public static final SupplyCurrentLimitConfiguration CURRENT_LIMIT = new SupplyCurrentLimitConfiguration(true, 20, 20, 0.1); //enable these limits, current limit, trigger threshold, trigger threshold time
     public static final Translation2d GOAL_POS = new Translation2d(8.23, 4.11); //in meters
@@ -95,8 +94,8 @@ public final class Constants {
         public static final int MOTOR_1_ID = 81;
         public static final int MOTOR_2_ID = 82;
 
-        public static final int SOLENOID_1_PORT = 1;
-        public static final int SOLENOID_2_PORT = 2;
+        public static final int SOLENOID_1_PORT = 2;
+        public static final int SOLENOID_2_PORT = 7;
 
         //TODO: Maybe no load PID's (hopefully not though)
         public static final double KS = 0;

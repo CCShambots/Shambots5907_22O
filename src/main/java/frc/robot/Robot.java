@@ -62,6 +62,8 @@ public class Robot extends TimedRobot {
     Constants.botEnabledStatus = Constants.RobotEnabled.Teleop;
 
     Constants.pullAllianceFromFMS();
+
+    m_robotContainer.rescheduleRobotManagerState();
   }
 
   /** This function is called periodically during operator control. */

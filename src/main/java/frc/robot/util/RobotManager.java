@@ -8,7 +8,6 @@ import frc.robot.util.Shambots5907_SMF.SimpleTransition;
 import frc.robot.util.Shambots5907_SMF.StatedSubsystem;
 
 import java.util.*;
-import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 
@@ -55,7 +54,7 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
         setContinuousCommand(Idle, new ParallelCommandGroup(
                 new RunCommand(() -> {
                     //Always set the turret back to active tracking while in idle (but not in a way that constantly cancels a transition)
-                    if(t.isInState(Turret.TurretState.ActiveTracking) && !t.isTransitioning()) {
+                    if(!t.isInState(Turret.TurretState.ActiveTracking) && !t.isTransitioning()) {
                         t.requestTransition(Turret.TurretState.ActiveTracking);
                     }
                 }),
@@ -206,7 +205,16 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
     @Override
     public boolean requestTransition(RobotState state) {
         SimpleTransition<RobotState> t = new SimpleTransition<RobotState>(getParentState(), state); //Generate a SimpleTransition object to describe the current transition
-        List<BooleanSupplier> conditions = safeConditions.get(t); //Find the matching transition in the list of conditions
+        List<BooleanSupplier> conditions = new ArrayList<>(); //Find the matching transition in the list of conditions
+
+        for(Map.Entry<SimpleTransition<RobotState>, List<BooleanSupplier>> c : safeConditions.entrySet()) {
+            SimpleTransition<RobotState> condition = c.getKey();
+
+            if(condition.startState == t.startState && condition.endState == t.endState && condition.interruptionState == t.interruptionState) {
+                    conditions = c.getValue();
+                    break;
+            }
+        }
 
         try {
             for(BooleanSupplier s : conditions) {

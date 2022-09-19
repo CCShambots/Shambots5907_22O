@@ -1,5 +1,7 @@
 package frc.robot.commands.turret;
 
+import java.util.function.BooleanSupplier;
+
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Turret;
 
@@ -16,8 +18,11 @@ public class DetermineTurretState extends CommandBase {
 
     private double hoodStallVelocity = 5;//Minimum deg/sec before stall is counted
 
-    public DetermineTurretState(Turret t) {
+    private BooleanSupplier defaultTrust;
+
+    public DetermineTurretState(Turret t, BooleanSupplier defaultTrust) {
         this.t = t;
+        this.defaultTrust = defaultTrust;
     }
 
     @Override
@@ -36,7 +41,7 @@ public class DetermineTurretState extends CommandBase {
     @Override
     public void execute() {
         //Hood logic
-        if(t.getHoodVelo() < 5) {
+        if(t.getHoodVelo() < hoodStallVelocity) {
             resettingHood = false;
             t.resetHoodPos(0);
         }
@@ -62,7 +67,7 @@ public class DetermineTurretState extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return !resettingHood && !resettingRotary;
+        return (!resettingHood && !resettingRotary ) || defaultTrust.getAsBoolean();
     }
 
 }

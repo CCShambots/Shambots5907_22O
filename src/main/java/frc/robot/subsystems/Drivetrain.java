@@ -138,16 +138,16 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
     public void updateOdometry() {
         try {
 
-            odometry.update(getCurrentAngle(),
-                    new SwerveModuleState(0, new Rotation2d()),
-                    new SwerveModuleState(0, new Rotation2d()),
-                    new SwerveModuleState(0, new Rotation2d()),
-                    new SwerveModuleState(0, new Rotation2d())
-                    // modules.get("Module 1").getCurrentState(),
-                    // modules.get("Module 2").getCurrentState(),
-                    // modules.get("Module 3").getCurrentState(),
-                    // modules.get("Module 4").getCurrentState()
-            );
+            // odometry.update(getCurrentAngle(),
+            //         new SwerveModuleState(0, new Rotation2d()),
+            //         new SwerveModuleState(0, new Rotation2d()),
+            //         new SwerveModuleState(0, new Rotation2d()),
+            //         new SwerveModuleState(0, new Rotation2d())
+            //         // modules.get("Module 1").getCurrentState(),
+            //         // modules.get("Module 2").getCurrentState(),
+            //         // modules.get("Module 3").getCurrentState(),
+            //         // modules.get("Module 4").getCurrentState()
+            // );
         } catch (Exception e) {
             System.out.println("odometry update failed");
             e.printStackTrace();

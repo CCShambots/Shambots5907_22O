@@ -2,32 +2,18 @@ package frc.robot;
 
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
-import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.Joystick;
 import frc.robot.subsystems.*;
 import frc.robot.util.AutonomousLoader;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.util.RobotManager;
+import frc.robot.util.RobotManager.RobotState;
 import frc.robot.util.Shambots5907_SMF.SubsystemManager;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.Turret;
-import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Lights;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.subsystems.Lights;
-import frc.robot.subsystems.Lights.LEDState;
-import frc.robot.util.RobotManager;
-import frc.robot.util.Shambots5907_SMF.SubsystemManager;
-
-import static frc.robot.subsystems.Conveyor.ConveyorState.*;
 
 import java.util.*;
 
@@ -50,18 +36,14 @@ public class RobotContainer {
 
   public RobotContainer() {
 
-    paths.putAll(loadPaths(List.of(
-            "test"
-    )));
+    // paths.putAll(loadPaths(List.of(
+    //         "test"
+    // )));
 
     autoLoader = new AutonomousLoader(robotManager, paths);
     SmartDashboard.putData("Choose Auto Route", autoLoader.getSendableChooser());
 
     setupSubsystems();
-
-    SubsystemManager.getInstance().registerSubsystem(conveyor);
-
-    SubsystemManager.getInstance().registerSubsystem(conveyor);
 
     configureButtonBindings();
 
@@ -91,11 +73,13 @@ public class RobotContainer {
 
   private void configureButtonBindings() {
 
-    new JoystickButton(driverController, 1).whenPressed(new InstantCommand(() -> turret.turnOnLimelight()));
-    new JoystickButton(driverController, 2).whenPressed(new InstantCommand(() -> drivetrain.resetGyro()));
-    new JoystickButton(driverController, 3).whenPressed(new InstantCommand(() -> drivetrain.resetOdometryPose(new Pose2d())));
-
-
+    new JoystickButton(driverController, 3).whenPressed(new InstantCommand(() -> robotManager.requestTransition(RobotState.IntakeLeft)));
+    // new JoystickButton(driverController, 2).whenPressed(new InstantCommand(() -> robotManager.requestTransition(RobotState.IntakeRight)));
+    // new JoystickButton(driverController, 1).whenPressed(new InstantCommand(() -> conveyor.setShouldEndIntakeSequence(true)));
+    new JoystickButton(driverController, 5).whenPressed(new InstantCommand(() -> intake.requestTransition(intake.getPumpState())));
+    new JoystickButton(driverController, 6).whenPressed(new InstantCommand(() -> robotManager.requestTransition(RobotState.Idle)));
+    new JoystickButton(driverController, 1).whenPressed(new InstantCommand(() -> turret.setRotaryTargetAngle(15)));
+    new JoystickButton(driverController, 2).whenPressed(new InstantCommand(() -> turret.setRotaryTargetAngle(-15)));
   }
 
   public void runControlLoops() {
@@ -128,6 +112,11 @@ public class RobotContainer {
     robotManager.enable();
     robotManager.requestTransition(robotManager.getEntryState());
   }
+
+  public void rescheduleRobotManagerState() { 
+    robotManager.rescheduleContinuousCommand();
+  }
+
 
   public void enableLights() {
     SmartDashboard.putData(lights.getName(), lights);

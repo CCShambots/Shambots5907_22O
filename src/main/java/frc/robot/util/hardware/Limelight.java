@@ -45,6 +45,15 @@ public class Limelight{
         );
     }
 
+    public Rotation2d getXOffset() {
+        return Rotation2d.fromDegrees(-getLimeLightTable().getEntry("tx").getDouble(0));
+    }
+
+    public Rotation2d getYOffset() {
+        return Rotation2d.fromDegrees(getLimeLightTable().getEntry("ty").getDouble(0));
+
+    }
+
     /**
      * Turns on the limelight
      */

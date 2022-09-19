@@ -71,11 +71,15 @@ public class ActiveTracking extends CommandBase {
 
         updateLockedIn();
         flywheelAndHoodControl();
+
+
+        System.out.println(mode.name());
     }
 
     private void flywheelAndHoodControl() {
         //Flywheel and hood control
         double distance = odoPoseSupplier.get().getTranslation().getDistance(GOAL_POS);
+
 
         if(ballCountSupplier.getAsInt() > 0) {
             turret.setHoodTargetAngle(hoodLUT.get(distance));
@@ -99,6 +103,7 @@ public class ActiveTracking extends CommandBase {
             //Set the spinner to the target angle only if the limelight should not be deadbanded
             if(Math.abs(targetAngle - turret.getRotaryAngle()) > LIMELIGHT_DEADBAND) turret.setRotaryTargetAngle(targetAngle);
 
+            System.out.println(targetAngle);
             overRotatedCheck();
         } else {
             //Searching for target

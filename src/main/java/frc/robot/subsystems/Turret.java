@@ -60,7 +60,7 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
     private boolean hoodOverextended = false;
     private boolean rotaryOverextended = false;
 
-    private boolean trustResetting = false; //Whether or not the bot should just assume everything is reset properly
+    private boolean trustResetting = true; //Whether or not the bot should just assume everything is reset properly
     private double rotarySetpoint = 0;
 
     public Turret() {
@@ -125,16 +125,16 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
 		// rotaryMotor.setSelectedSensorPosition(0, Constants.Turret.kPIDLoopIdx, Constants.Turret.kTimeoutMs);
 
         //Setup lookup tables for velocity and angle control
-        RPMLUT.add(0, 0);
-        RPMLUT.add(1, 1);
+        RPMLUT.add(0, 15);
+        RPMLUT.add(1, 15);
         RPMLUT.createLUT();
 
-        hoodAngleLUT.add(0, 0);
-        hoodAngleLUT.add(1, 1);
+        hoodAngleLUT.add(0, 25);
+        hoodAngleLUT.add(1000, 25);
         hoodAngleLUT.createLUT();
 
         ejectionRPMLUT.add(0, 0);
-        ejectionRPMLUT.add(1, 1);
+        ejectionRPMLUT.add(1000, 25);
         ejectionRPMLUT.createLUT();;
 
         getRotaryAngle = () -> Rotation2d.fromDegrees(getRotaryAngle());
@@ -164,7 +164,7 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
         addFlagState(ActiveTracking, LockedIn, () -> lockedIn.get());
 
         addTransition(Idle, Resetting, new InstantCommand());
-        setContinuousCommand(Resetting, new DetermineTurretState(this));
+        setContinuousCommand(Resetting, new DetermineTurretState(this, () -> trustResetting));
         addTransition(Resetting, Idle, new InstantCommand());
 
         addTransition(Idle, ClimbLock, new InstantCommand(() -> setRotaryTargetAngle(0)));

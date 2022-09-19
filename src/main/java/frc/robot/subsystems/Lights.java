@@ -15,7 +15,7 @@ import static frc.robot.subsystems.Lights.LEDState.*;
 import static frc.robot.Constants.Lights.*;
 
 public class Lights extends StatedSubsystem<LEDState> {
-    private final CANdle candle = new CANdle(CANdleID, "rio");
+    // private final CANdle candle = new CANdle(CANdleID, "rio");
 
     private Animation currentAnimation = lightsOff;
 
@@ -28,7 +28,7 @@ public class Lights extends StatedSubsystem<LEDState> {
         config.brightnessScalar = 0.1; //TODO: Raise, probably
         // config.vBatOutputMode = VBatOutputMode.Modulated;
         //TODO: Figure out what VBat is supposed to be
-        candle.configAllSettings(config, 100);
+        // candle.configAllSettings(config, 100);
 
         addDetermination(Undetermined, Idle, setAnimation(idleAnimation));
         addCommutativeTransition(Idle, Testing, setAnimation(testingAnimation), setAnimation(lightsOff));
@@ -52,7 +52,9 @@ public class Lights extends StatedSubsystem<LEDState> {
     }   
 
     @Override
-    public void update() {candle.animate(currentAnimation);}
+    public void update() {
+        // candle.animate(currentAnimation);
+    }
 
     @Override
     public String getName() {return "Lights";}
