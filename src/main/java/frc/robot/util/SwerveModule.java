@@ -1,6 +1,7 @@
 package frc.robot.util;
 
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
+import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
@@ -29,38 +30,12 @@ public class SwerveModule implements Sendable{
     private final CANCoder turnEncoder;
     private double encoderOffset;
 
-    private final PIDController drivePIDController = new PIDController(
-                                                        Constants.SwerveModule.P_DRIVE,
-                                                        Constants.SwerveModule.I_DRIVE,
-                                                        Constants.SwerveModule.D_DRIVE);
-    
-    private final ProfiledPIDController turnPIDController = new ProfiledPIDController(
-                                                                Constants.SwerveModule.P_TURN,
-                                                                Constants.SwerveModule.I_TURN,
-                                                                Constants.SwerveModule.D_TURN,
-                                                                new TrapezoidProfile.Constraints(
-                                                                Constants.SwerveModule.MAX_TURN_SPEED,
-                                                                Constants.SwerveModule.MAX_TURN_ACCEL
-                                                                ));
-
-    private final SimpleMotorFeedforward driveFeedforwardController = new SimpleMotorFeedforward(
-                                                                Constants.SwerveModule.KS_DRIVE,
-                                                                Constants.SwerveModule.KV_DRIVE);
-
-    private final SimpleMotorFeedforward turnFeedforwardController = new SimpleMotorFeedforward(
-                                                                Constants.SwerveModule.KS_TURN,
-                                                                Constants.SwerveModule.KV_TURN);
-
     private SwerveModuleState targetState;
-
-    private boolean reverseTurnEncoder;
 
     public SwerveModule(String name, int turnID, int driveID, int encoderID, double encoderOffset, boolean reverseDriveMotor, boolean reverseTurnEncoder) {
         this.moduleName = name;
         turnMotor = new WPI_TalonFX(turnID);
         turnMotor.configFactoryDefault();
-
-        this.reverseTurnEncoder = reverseTurnEncoder;
         
         driveMotor = new WPI_TalonFX(driveID);
         driveMotor.configFactoryDefault();
@@ -70,17 +45,49 @@ public class SwerveModule implements Sendable{
         this.turnEncoder = new CANCoder(encoderID);
         turnEncoder.configFactoryDefault();
         // turnEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 5);
+
+        //can be removed?
+        // vv
         double radiansCoefficient = (2.0 * Math.PI) / 4096.0;
         turnEncoder.configFeedbackCoefficient(radiansCoefficient, "rad", SensorTimeBase.PerSecond);
+        // ^^
+
         turnEncoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
-        turnEncoder.configAbsoluteSensorRange(AbsoluteSensorRange.Signed_PlusMinus180);
+        turnEncoder.configAbsoluteSensorRange(AbsoluteSensorRange.Unsigned_0_to_360);
         turnEncoder.configSensorDirection(false);
 
-        this.encoderOffset = encoderOffset;
+        this.encoderOffset = encoderOffset + 180;
 
-        turnPIDController.enableContinuousInput(-Math.PI, Math.PI);
+        initSelectedTurnEncoder();
+
+        turnMotor.configSelectedFeedbackSensor(
+                TalonFXFeedbackDevice.IntegratedSensor,
+                /*TODO: add constant*/0,
+                /*TODO: add constant*/30
+        );
+
+        turnMotor.configNeutralDeadband(0.001/*TODO: change? or add constant*/);
+
+        //TODO: DO THE REST OF MOTOR CONFIG AS SEEN IN TURRET BRANCH
 
         targetState = new SwerveModuleState(0, getTurnAngle());
+    }
+
+    private void initSelectedTurnEncoder() {
+        turnMotor.setSelectedSensorPosition(degreesToTicks(turnEncoder.getAbsolutePosition() - encoderOffset));
+    }
+
+    private double degreesToTicks(double degrees) {
+        //assuming degrees is always positive
+        return ((degrees % 360) * (4096.0/360.0));
+    }
+
+    private double ticksToDegrees(double ticks) {
+        //prob doesn't work idk :)
+        double out = Math.copySign(ticks, Math.abs(ticks) % 2048);
+        return ticks >= 0 ?
+                (out * (360.0/2048.0)) :
+                ((out + 2048) * (360.0/2048.0));
     }
 
     public void setDesiredState(SwerveModuleState state) {
@@ -89,8 +96,7 @@ public class SwerveModule implements Sendable{
     }
 
     public Rotation2d getTurnAngle(){
-        return new Rotation2d(reverseTurnEncoder ? -1 : 1 * turnEncoder.getAbsolutePosition() * Constants.SwerveModule.TURN_SENSOR_RATIO)
-                              .minus(Rotation2d.fromDegrees(encoderOffset));
+        return Rotation2d.fromDegrees(ticksToDegrees(turnMotor.getSelectedSensorPosition()));
     }
 
     public double getDriveMotorRate(){
@@ -106,19 +112,24 @@ public class SwerveModule implements Sendable{
     }
 
     public void run() {
-        double turnPIDOutput = turnPIDController.calculate(getTurnAngle().getRadians(), targetState.angle.getRadians());
+        //BOO WPI PID >:( (sorry wpi)
+        /*double turnPIDOutput = turnPIDController.calculate(getTurnAngle().getRadians(), targetState.angle.getRadians());
         double drivePIDOutput = drivePIDController.calculate(getDriveMotorRate(), targetState.speedMetersPerSecond);
 
         double turnFFOutput = turnFeedforwardController.calculate(turnPIDController.getSetpoint().velocity);
-        double driveFFOutput = driveFeedforwardController.calculate(targetState.speedMetersPerSecond);
+        double driveFFOutput = driveFeedforwardController.calculate(targetState.speedMetersPerSecond);*/
 
-        turnMotor.setVoltage(turnPIDOutput + turnFFOutput);
-        driveMotor.setVoltage(drivePIDOutput + driveFFOutput);
+        //haha voltages
+        /*turnMotor.setVoltage(turnPIDOutput + turnFFOutput);
+        driveMotor.setVoltage(drivePIDOutput + driveFFOutput);*/
 
+        //remvoe?
         // SmartDashboard.putNumber(this.moduleName + " turn PID output", turnPIDOutput);
         // SmartDashboard.putNumber(this.moduleName + " turn FF output", turnFFOutput);
         // SmartDashboard.putNumber(this.moduleName + " drive PID output", drivePIDOutput);
         // SmartDashboard.putNumber(this.moduleName + " drive FF output", driveFFOutput);
+
+
     }
 
     public void stop() {
@@ -127,8 +138,11 @@ public class SwerveModule implements Sendable{
 
     public void resetControlLoops() {
         stop();
-        drivePIDController.reset();
-        turnPIDController.reset(getTurnAngle().getRadians());
+        /*drivePIDController.reset();
+        turnPIDController.reset(getTurnAngle().getRadians());*/
+        //TODO: idk if this works
+        turnMotor.set(0);
+        driveMotor.set(0);
         stop();
     }
 
@@ -153,8 +167,9 @@ public class SwerveModule implements Sendable{
         builder.addDoubleProperty("Velocity", () -> getDriveMotorRate(), null);
         builder.addDoubleProperty("Target Velocity", () -> targetState.speedMetersPerSecond, null);
         builder.addDoubleProperty("Encoder offset", () -> encoderOffset, null);
-        builder.addDoubleProperty("Target turn velo", () -> turnPIDController.getSetpoint().velocity, null);
-        builder.addDoubleProperty("Measuerd turn velo", () -> reverseTurnEncoder ? -1 : 1 * turnEncoder.getVelocity(), null);
+        //TODO: add these but for ctre pid
+        //builder.addDoubleProperty("Target turn velo", () -> turnPIDController.getSetpoint().velocity, null);
+        //builder.addDoubleProperty("Measuerd turn velo", () -> reverseTurnEncoder ? -1 : 1 * turnEncoder.getVelocity(), null);
         
     }
     
