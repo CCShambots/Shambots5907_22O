@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import frc.robot.util.hardware.Gains;
 
 import java.util.function.UnaryOperator;
 
@@ -52,6 +53,18 @@ public final class Constants {
         public static final double KV_TURN = 0.5; //0.15
         public static final double MAX_TURN_SPEED = 50; // Rad/S //50
         public static final double MAX_TURN_ACCEL = 400; // Rad/S^2
+
+        public static final Gains turnGains = new Gains(
+                P_TURN,
+                I_TURN,
+                D_TURN,
+                KV_TURN,
+                0, //TODO: change this if needed
+                20 //TODO: change this
+        );
+        public static final int kTimeoutMs = 30;//TODO: change these if needed vv
+        public static final int kPIDLoopIdx = 0;
+        public static final int kSlotIdx = 0;
     }
 
     public static final class SwerveDrivetrain{
@@ -96,6 +109,7 @@ public final class Constants {
                 new SwerveModuleState(0, Rotation2d.fromDegrees(45)),
                 new SwerveModuleState(0, Rotation2d.fromDegrees(-45))
         };
+
 
         public static final int PigeonID = 01;
 

@@ -1,5 +1,7 @@
 package frc.robot.util;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
@@ -66,11 +68,47 @@ public class SwerveModule implements Sendable{
                 /*TODO: add constant*/30
         );
 
+        initTurnPID();
+
         turnMotor.configNeutralDeadband(0.001/*TODO: change? or add constant*/);
 
-        //TODO: DO THE REST OF MOTOR CONFIG AS SEEN IN TURRET BRANCH
+        //TODO: DO THE REST OF MOTOR CONFIG AS SEEN IN SwerveModule BRANCH
 
         targetState = new SwerveModuleState(0, getTurnAngle());
+    }
+
+    private void initTurnPID() {
+        turnMotor.setSensorPhase(false);
+        turnMotor.setInverted(true);
+        turnMotor.configSupplyCurrentLimit(Constants.CURRENT_LIMIT);
+
+        /* Set relevant frame periods to be at least as fast as periodic rate */
+        turnMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 10, Constants.SwerveModule.kTimeoutMs);
+        turnMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 10, Constants.SwerveModule.kTimeoutMs);
+
+        /* Set the peak and nominal outputs */
+        turnMotor.configNominalOutputForward(0, Constants.SwerveModule.kTimeoutMs);
+        turnMotor.configNominalOutputReverse(0, Constants.SwerveModule.kTimeoutMs);
+        turnMotor.configPeakOutputForward(1, Constants.SwerveModule.kTimeoutMs);
+        turnMotor.configPeakOutputReverse(-1, Constants.SwerveModule.kTimeoutMs);
+
+        /* Set Motion Magic gains in slot0 - see documentation */
+        turnMotor.selectProfileSlot(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.kPIDLoopIdx);
+        turnMotor.config_kF(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.turnGains.kF, Constants.SwerveModule.kTimeoutMs);
+        turnMotor.config_kP(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.turnGains.kP, Constants.SwerveModule.kTimeoutMs);
+        turnMotor.config_kI(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.turnGains.kI, Constants.SwerveModule.kTimeoutMs);
+        turnMotor.config_kD(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.turnGains.kD, Constants.SwerveModule.kTimeoutMs);
+
+        /* Set acceleration and vcruise velocity - see documentation */
+        turnMotor.configMotionCruiseVelocity(
+                degreesToTicks(Math.toDegrees(Constants.SwerveModule.MAX_TURN_SPEED)),
+                Constants.SwerveModule.kTimeoutMs
+        );
+
+        turnMotor.configMotionAcceleration(
+                degreesToTicks(Math.toDegrees(Constants.SwerveModule.MAX_TURN_ACCEL)),
+                Constants.SwerveModule.kTimeoutMs
+        );
     }
 
     private void initSelectedTurnEncoder() {
@@ -129,7 +167,12 @@ public class SwerveModule implements Sendable{
         // SmartDashboard.putNumber(this.moduleName + " drive PID output", drivePIDOutput);
         // SmartDashboard.putNumber(this.moduleName + " drive FF output", driveFFOutput);
 
-
+        turnMotor.set(
+                ControlMode.MotionMagic,
+                degreesToTicks(targetState.angle.getDegrees()),
+                DemandType.ArbitraryFeedForward,
+                Constants.SwerveModule.KS_TURN
+        );
     }
 
     public void stop() {
