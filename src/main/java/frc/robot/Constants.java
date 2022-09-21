@@ -53,6 +53,8 @@ public final class Constants {
         public static final double KV_TURN = 0.5; //0.15
         public static final double MAX_TURN_SPEED = 50; // Rad/S //50
         public static final double MAX_TURN_ACCEL = 400; // Rad/S^2
+        public static final double MAX_DRIVE_SPEED = 0;//TODO: CHANGE THIS
+        public static final double MAX_DRIVE_ACCEL = 0;//TODO: CHANGE THIS
 
         public static final Gains turnGains = new Gains(
                 P_TURN,
@@ -62,6 +64,16 @@ public final class Constants {
                 0, //TODO: change this if needed
                 20 //TODO: change this
         );
+
+        public static final Gains driveGains = new Gains(
+                P_DRIVE,
+                I_DRIVE,
+                D_DRIVE,
+                KV_DRIVE,
+                0, //TODO: change this if needed,
+                20 //TODO: change this
+        );
+
         public static final int kTimeoutMs = 30;//TODO: change these if needed vv
         public static final int kPIDLoopIdx = 0;
         public static final int kSlotIdx = 0;

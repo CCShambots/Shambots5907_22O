@@ -1,9 +1,6 @@
 package frc.robot.util;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.DemandType;
-import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
-import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
+import com.ctre.phoenix.motorcontrol.*;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
@@ -62,6 +59,12 @@ public class SwerveModule implements Sendable{
 
         initSelectedTurnEncoder();
 
+        driveMotor.configSelectedFeedbackCoefficient(
+                (1 / 2048.0)
+                * (1 / Constants.SwerveModule.DRIVE_RATIO)
+                * (2 * Math.PI * Constants.SwerveModule.WHEEL_RADIUS)
+        );
+
         turnMotor.configSelectedFeedbackSensor(
                 TalonFXFeedbackDevice.IntegratedSensor,
                 /*TODO: add constant*/0,
@@ -77,9 +80,38 @@ public class SwerveModule implements Sendable{
         targetState = new SwerveModuleState(0, getTurnAngle());
     }
 
+    private void initDrivePID() {
+        driveMotor.setSensorPhase(false);
+
+        driveMotor.configSupplyCurrentLimit(Constants.CURRENT_LIMIT);
+
+        driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 10, Constants.SwerveModule.kTimeoutMs);
+        driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 10, Constants.SwerveModule.kTimeoutMs);
+
+        driveMotor.configNominalOutputForward(0, Constants.SwerveModule.kTimeoutMs);
+        driveMotor.configNominalOutputReverse(0, Constants.SwerveModule.kTimeoutMs);
+        driveMotor.configPeakOutputForward(1, Constants.SwerveModule.kTimeoutMs);
+        driveMotor.configPeakOutputReverse(-1, Constants.SwerveModule.kTimeoutMs);
+
+        turnMotor.selectProfileSlot(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.kPIDLoopIdx);
+        turnMotor.config_kF(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.driveGains.kF, Constants.SwerveModule.kTimeoutMs);
+        turnMotor.config_kP(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.driveGains.kP, Constants.SwerveModule.kTimeoutMs);
+        turnMotor.config_kI(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.driveGains.kI, Constants.SwerveModule.kTimeoutMs);
+        turnMotor.config_kD(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.driveGains.kD, Constants.SwerveModule.kTimeoutMs);
+
+        driveMotor.configMotionCruiseVelocity(
+                degreesToTicks(Math.toDegrees(Constants.SwerveModule.MAX_DRIVE_SPEED)),
+                Constants.SwerveModule.kTimeoutMs
+        );
+
+        driveMotor.configMotionAcceleration(
+                degreesToTicks(Math.toDegrees(Constants.SwerveModule.MAX_DRIVE_ACCEL)),
+                Constants.SwerveModule.kTimeoutMs
+        );
+    }
+
     private void initTurnPID() {
         turnMotor.setSensorPhase(false);
-        turnMotor.setInverted(true);
         turnMotor.configSupplyCurrentLimit(Constants.CURRENT_LIMIT);
 
         /* Set relevant frame periods to be at least as fast as periodic rate */
@@ -122,10 +154,14 @@ public class SwerveModule implements Sendable{
 
     private double ticksToDegrees(double ticks) {
         //prob doesn't work idk :)
+        return normalizeTicks(ticks) * (360.0/4096.0);
+    }
+
+    private double normalizeTicks(double ticks) {
         double out = Math.copySign(ticks, Math.abs(ticks) % 2048);
         return ticks >= 0 ?
-                (out * (360.0/2048.0)) :
-                ((out + 2048) * (360.0/2048.0));
+                out :
+                out + 2048;
     }
 
     public void setDesiredState(SwerveModuleState state) {
@@ -138,11 +174,7 @@ public class SwerveModule implements Sendable{
     }
 
     public double getDriveMotorRate(){
-        return driveMotor.getSelectedSensorVelocity()
-                * 10.0          // convert sensor ticks per 100ms to sensor ticks per second
-                * (1 / 2048.0)  // convert sensor ticks to revolutions
-                * (1 / Constants.SwerveModule.DRIVE_RATIO)  // convert motor revolutions to wheel revolutions
-                * (2 * Math.PI * Constants.SwerveModule.WHEEL_RADIUS);   // convert wheel revolutions to linear distance
+        return driveMotor.getSelectedSensorVelocity() * 10.0;
     } 
 
     public SwerveModuleState getCurrentState() {
@@ -150,28 +182,19 @@ public class SwerveModule implements Sendable{
     }
 
     public void run() {
-        //BOO WPI PID >:( (sorry wpi)
-        /*double turnPIDOutput = turnPIDController.calculate(getTurnAngle().getRadians(), targetState.angle.getRadians());
-        double drivePIDOutput = drivePIDController.calculate(getDriveMotorRate(), targetState.speedMetersPerSecond);
-
-        double turnFFOutput = turnFeedforwardController.calculate(turnPIDController.getSetpoint().velocity);
-        double driveFFOutput = driveFeedforwardController.calculate(targetState.speedMetersPerSecond);*/
-
-        //haha voltages
-        /*turnMotor.setVoltage(turnPIDOutput + turnFFOutput);
-        driveMotor.setVoltage(drivePIDOutput + driveFFOutput);*/
-
-        //remvoe?
-        // SmartDashboard.putNumber(this.moduleName + " turn PID output", turnPIDOutput);
-        // SmartDashboard.putNumber(this.moduleName + " turn FF output", turnFFOutput);
-        // SmartDashboard.putNumber(this.moduleName + " drive PID output", drivePIDOutput);
-        // SmartDashboard.putNumber(this.moduleName + " drive FF output", driveFFOutput);
-
+        double turnPos = turnMotor.getSelectedSensorPosition();
         turnMotor.set(
                 ControlMode.MotionMagic,
-                degreesToTicks(targetState.angle.getDegrees()),
+                turnPos + (degreesToTicks(targetState.angle.getDegrees()) - normalizeTicks(turnPos)),
                 DemandType.ArbitraryFeedForward,
                 Constants.SwerveModule.KS_TURN
+        );
+
+        driveMotor.set(
+                ControlMode.Velocity,
+                targetState.speedMetersPerSecond/10,
+                DemandType.ArbitraryFeedForward,
+                Constants.SwerveModule.KS_DRIVE
         );
     }
 
@@ -184,8 +207,8 @@ public class SwerveModule implements Sendable{
         /*drivePIDController.reset();
         turnPIDController.reset(getTurnAngle().getRadians());*/
         //TODO: idk if this works
-        turnMotor.set(0);
-        driveMotor.set(0);
+        turnMotor.set(ControlMode.PercentOutput, 0);
+        driveMotor.set(ControlMode.PercentOutput, 0);
         stop();
     }
 
