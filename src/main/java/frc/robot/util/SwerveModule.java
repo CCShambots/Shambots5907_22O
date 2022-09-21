@@ -60,6 +60,7 @@ public class SwerveModule implements Sendable{
         initSelectedTurnEncoder();
 
         driveMotor.configSelectedFeedbackCoefficient(
+                //TODO: idk if this math is correct
                 (1 / 2048.0)
                 * (1 / Constants.SwerveModule.DRIVE_RATIO)
                 * (2 * Math.PI * Constants.SwerveModule.WHEEL_RADIUS)
