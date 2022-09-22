@@ -101,12 +101,14 @@ public class SwerveModule implements Sendable{
         turnMotor.config_kD(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.driveGains.kD, Constants.SwerveModule.kTimeoutMs);
 
         driveMotor.configMotionCruiseVelocity(
-                degreesToTicks(Math.toDegrees(Constants.SwerveModule.MAX_DRIVE_SPEED)),
+                //TODO: change coefficient and this to m/s
+                Math.toDegrees(Constants.SwerveModule.MAX_DRIVE_SPEED),
                 Constants.SwerveModule.kTimeoutMs
         );
 
         driveMotor.configMotionAcceleration(
-                degreesToTicks(Math.toDegrees(Constants.SwerveModule.MAX_DRIVE_ACCEL)),
+                //TODO: change coefficient and this to m/s
+                Math.toDegrees(Constants.SwerveModule.MAX_DRIVE_ACCEL),
                 Constants.SwerveModule.kTimeoutMs
         );
     }
@@ -134,35 +136,28 @@ public class SwerveModule implements Sendable{
 
         /* Set acceleration and vcruise velocity - see documentation */
         turnMotor.configMotionCruiseVelocity(
-                degreesToTicks(Math.toDegrees(Constants.SwerveModule.MAX_TURN_SPEED)),
+                Math.toDegrees(Constants.SwerveModule.MAX_TURN_SPEED),
                 Constants.SwerveModule.kTimeoutMs
         );
 
         turnMotor.configMotionAcceleration(
-                degreesToTicks(Math.toDegrees(Constants.SwerveModule.MAX_TURN_ACCEL)),
+                Math.toDegrees(Constants.SwerveModule.MAX_TURN_ACCEL),
                 Constants.SwerveModule.kTimeoutMs
         );
     }
 
     private void initSelectedTurnEncoder() {
-        turnMotor.setSelectedSensorPosition(degreesToTicks(turnEncoder.getAbsolutePosition() - encoderOffset));
+        turnMotor.configSelectedFeedbackCoefficient(
+                Constants.SwerveModule.TURN_SENSOR_RATIO * (360.0/2048.0)
+        );
+        turnMotor.setSelectedSensorPosition(normalizeDegrees(turnEncoder.getAbsolutePosition() - encoderOffset));
     }
 
-    private double degreesToTicks(double degrees) {
-        //assuming degrees is always positive
-        return ((degrees % 360) * (4096.0/360.0));
-    }
-
-    private double ticksToDegrees(double ticks) {
-        //prob doesn't work idk :)
-        return normalizeTicks(ticks) * (360.0/4096.0);
-    }
-
-    private double normalizeTicks(double ticks) {
-        double out = Math.copySign(ticks, Math.abs(ticks) % 2048);
-        return ticks >= 0 ?
+    private double normalizeDegrees(double degrees) {
+        double out = Math.copySign(degrees, Math.abs(degrees) % 360);
+        return out >= 0 ?
                 out :
-                out + 2048;
+                out + 360;
     }
 
     public void setDesiredState(SwerveModuleState state) {
@@ -171,7 +166,7 @@ public class SwerveModule implements Sendable{
     }
 
     public Rotation2d getTurnAngle(){
-        return Rotation2d.fromDegrees(ticksToDegrees(turnMotor.getSelectedSensorPosition()));
+        return Rotation2d.fromDegrees(normalizeDegrees(turnMotor.getSelectedSensorPosition()));
     }
 
     public double getDriveMotorRate(){
@@ -186,16 +181,16 @@ public class SwerveModule implements Sendable{
         double turnPos = turnMotor.getSelectedSensorPosition();
         turnMotor.set(
                 ControlMode.MotionMagic,
-                turnPos + (degreesToTicks(targetState.angle.getDegrees()) - normalizeTicks(turnPos)),
+                turnPos + (targetState.angle.getDegrees() - normalizeDegrees(turnPos)),
                 DemandType.ArbitraryFeedForward,
-                Constants.SwerveModule.KS_TURN
+                Constants.SwerveModule.KS_TURN/12
         );
 
         driveMotor.set(
                 ControlMode.Velocity,
                 targetState.speedMetersPerSecond/10,
                 DemandType.ArbitraryFeedForward,
-                Constants.SwerveModule.KS_DRIVE
+                Constants.SwerveModule.KS_DRIVE/12
         );
     }
 

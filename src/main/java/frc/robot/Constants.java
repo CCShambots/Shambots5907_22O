@@ -32,7 +32,7 @@ public final class Constants {
         // Physical Constants
         public static final double WHEEL_RADIUS = 0.0508;
         // Use this ratio to convert from CANCoder absolute position to radians
-        public static final double TURN_SENSOR_RATIO = 1;
+        public static final double TURN_SENSOR_RATIO = 1.0/(150.0/7.0);
 
         // Drive motor PID controller coefficients
         public static final double P_DRIVE = 1;
