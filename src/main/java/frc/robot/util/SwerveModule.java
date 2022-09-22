@@ -31,6 +31,8 @@ public class SwerveModule implements Sendable{
 
     private SwerveModuleState targetState;
 
+    private double targetEncoderPos;
+
     public SwerveModule(String name, int turnID, int driveID, int encoderID, double encoderOffset, boolean reverseDriveMotor, boolean reverseTurnEncoder) {
         this.moduleName = name;
         turnMotor = new WPI_TalonFX(turnID);
@@ -73,12 +75,15 @@ public class SwerveModule implements Sendable{
         );
 
         initTurnPID();
+        initDrivePID();
 
         turnMotor.configNeutralDeadband(0.001/*TODO: change? or add constant*/);
 
         //TODO: DO THE REST OF MOTOR CONFIG AS SEEN IN SwerveModule BRANCH
 
-        targetState = new SwerveModuleState(0, getTurnAngle());
+        setDesiredState(
+                new SwerveModuleState(0, getTurnAngle())
+        );
     }
 
     private void initDrivePID() {
@@ -163,6 +168,8 @@ public class SwerveModule implements Sendable{
     public void setDesiredState(SwerveModuleState state) {
         SwerveModuleState optimizedState = SwerveModuleState.optimize(state, getTurnAngle());
         targetState = optimizedState;
+        double turnPos = turnMotor.getSelectedSensorPosition();
+        targetEncoderPos = turnPos + (targetState.angle.getDegrees() - normalizeDegrees(turnPos));
     }
 
     public Rotation2d getTurnAngle(){
@@ -178,10 +185,9 @@ public class SwerveModule implements Sendable{
     }
 
     public void run() {
-        double turnPos = turnMotor.getSelectedSensorPosition();
         turnMotor.set(
                 ControlMode.MotionMagic,
-                turnPos + (targetState.angle.getDegrees() - normalizeDegrees(turnPos)),
+                targetEncoderPos,
                 DemandType.ArbitraryFeedForward,
                 Constants.SwerveModule.KS_TURN/12
         );
