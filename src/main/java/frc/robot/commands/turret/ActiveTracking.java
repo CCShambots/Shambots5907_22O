@@ -71,9 +71,6 @@ public class ActiveTracking extends CommandBase {
 
         updateLockedIn();
         flywheelAndHoodControl();
-
-
-        System.out.println(mode.name());
     }
 
     private void flywheelAndHoodControl() {
@@ -103,11 +100,10 @@ public class ActiveTracking extends CommandBase {
             //Set the spinner to the target angle only if the limelight should not be deadbanded
             if(Math.abs(targetAngle - turret.getRotaryAngle()) > LIMELIGHT_DEADBAND) turret.setRotaryTargetAngle(targetAngle);
 
-            System.out.println(targetAngle);
-            overRotatedCheck();
+            // overRotatedCheck();
         } else {
             //Searching for target
-            mode = Searching;
+            // mode = Searching;
 
             //Slow down the spinner's velocity for searching for the target
             turret.setRotarySpeed(Search);
@@ -181,6 +177,7 @@ public class ActiveTracking extends CommandBase {
     }
 
     private void updateLockedIn() {
+
         if(
             turret.doesLimelightHaveTarget() &&
             !turret.isRotaryBusy() &&
@@ -196,7 +193,7 @@ public class ActiveTracking extends CommandBase {
     @Override
     public void end(boolean interrupted) {
         turret.setRotaryTargetAngle(turret.getRotaryAngle());
-
+        turret.turnOffLimelight();
         timer.stop();
     }
 

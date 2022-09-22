@@ -10,6 +10,13 @@
       "/FMSInfo": "FMSInfo",
       "/LiveWindow/RobotManager": "Subsystem",
       "/LiveWindow/Turret": "Subsystem",
+      "/LiveWindow/Ungrouped/DigitalInput[0]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[1]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[2]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[4]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[5]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[6]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[7]": "Digital Input",
       "/LiveWindow/Ungrouped/DigitalInput[8]": "Digital Input",
       "/LiveWindow/Ungrouped/DigitalInput[9]": "Digital Input",
       "/LiveWindow/Ungrouped/PIDController[10]": "PIDController",
@@ -17,6 +24,7 @@
       "/LiveWindow/Ungrouped/PIDController[12]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[13]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[14]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[15]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[1]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[2]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[3]": "PIDController",
@@ -37,10 +45,25 @@
       "/LiveWindow/Ungrouped/Talon FX [16]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon FX [17]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon FX [18]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [21]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [22]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [31]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [32]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [33]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [34]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon FX [41]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon FX [42]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon FX [43]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon FX [44]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [81]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [82]": "Motor Controller",
+      "/SmartDashboard/Choose Auto Route": "String Chooser",
+      "/SmartDashboard/climber/test/extend piston": "Command",
+      "/SmartDashboard/climber/test/lower climber": "Command",
+      "/SmartDashboard/climber/test/raise climber": "Command",
+      "/SmartDashboard/climber/test/reset climber pos": "Command",
+      "/SmartDashboard/climber/test/retract piston": "Command",
+      "/SmartDashboard/climber/test/stop climber": "Command",
       "/SmartDashboard/drivetrain": "Subsystem",
       "/SmartDashboard/drivetrain/field": "Field2d",
       "/SmartDashboard/drivetrain/thetaControllerTele": "PIDController",
@@ -52,9 +75,6 @@
       "/SmartDashboard/drivetrain/field": {
         "Module 1": {
           "style": "Box/Image"
-        },
-        "window": {
-          "visible": true
         }
       }
     }
@@ -268,6 +288,16 @@
               "id": "NT:/SmartDashboard/drivetrain/Module 1/Target turn velo"
             }
           ]
+        }
+      ],
+      "window": {
+        "visible": false
+      }
+    },
+    "Plot <8>": {
+      "plots": [
+        {
+          "height": 338
         }
       ]
     }

@@ -231,11 +231,13 @@ public final class Constants {
         public static final int CENTER_LIM_SWITCH_ID = 9;
 
         public static final double FLYWHEEL_KS = 1.05;
-        public static final double FLYWHEEL_KV = 0.00228;
-        public static final double FLYWHEEL_KP = 0.0035;
+        public static final double FLYWHEEL_KV = 0.004;
+        public static final double FLYWHEEL_KP = 0.0; //0.14
         public static final double FLYWHEEL_KI = 0;
         public static final double FLYWHEEL_KD = 0;
-        public static final double FLYWHEEL_TOLERANCE = 25;
+        public static final double FLYWHEEL_TOLERANCE = 100;
+
+        public static final double SHOOT_DELAY = 1;
 
 	    public static final int kSlotIdx = 0;
 
@@ -255,7 +257,7 @@ public final class Constants {
          * Gains used in Motion Magic, to be adjusted accordingly
          * Gains(kp, ki, kd, kf, izone, peak output);
          */
-        public static final Gains rotaryGains = new Gains(0.15, 0.0, 0.0, 0.1, 0, 1.0);
+        public static final Gains rotaryGains = new Gains(0.15, 0.0, 0.0, 0.45, 0, 1.0);
 
         public static final double ROTARY_KS = 1.45;
         public static final double ROTARY_KV = 0.003;
@@ -293,7 +295,7 @@ public final class Constants {
 
         public static final Range HOOD_RANGE = new Range(HOOD_MIN_ANGLE, HOOD_MAX_ANGLE);
 
-        public static final double HOOD_TOLERANCE = 0.5;
+        public static final double HOOD_TOLERANCE = 10;
 
         public static final double LIMELIGHT_HEIGHT = 0.81; //Meters
         public static final double LIMELIGHT_ANGLE = Math.toRadians(30); //Radians
@@ -326,7 +328,7 @@ public final class Constants {
         public static final double INTAKE_POWER = .65;
         public static final double PUMP_TIME_SECONDS = 0.25;
 
-        public static final double MANUAL_EJECT_TIME = 3; //Seconds
+        public static final double MANUAL_EJECT_TIME = 1; //Seconds
 
     }
 

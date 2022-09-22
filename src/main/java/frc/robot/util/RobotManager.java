@@ -1,9 +1,11 @@
 package frc.robot.util;
 
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Constants;
 import frc.robot.subsystems.*;
+import frc.robot.subsystems.Conveyor.ConveyorState;
 import frc.robot.util.Shambots5907_SMF.SimpleTransition;
 import frc.robot.util.Shambots5907_SMF.StatedSubsystem;
 
@@ -107,7 +109,7 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
         }));
 
         //If we're already intaking right, it's safe to go back to idle
-        addSafeTransitionCondition(IntakeLeft, Idle, () -> i.isInState(Intake.IntakeState.RightSideRunning));
+        addSafeTransitionCondition(IntakeLeft, Idle, () -> i.isInState(Intake.IntakeState.LeftSideRunning));
 
         addTransition(Idle, IntakeLeft, new InstantCommand(() -> {
             i.requestTransition(Intake.IntakeState.LeftSideRunning);
@@ -127,7 +129,7 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
         }));
 
         //If we're already intaking right, it's safe to go back to idle
-        addSafeTransitionCondition(IntakeRight, Idle, () -> i.isInState(Intake.IntakeState.LeftSideRunning));
+        addSafeTransitionCondition(IntakeRight, Idle, () -> i.isInState(Intake.IntakeState.RightSideRunning));
 
         addCommutativeTransition(IntakeRight, IntakeLeft,
                 new InstantCommand(() -> {
@@ -153,7 +155,10 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
                     } else if(wasEjecting.get()) {
                         //we're done ejecting
                         t.requestTransition(Turret.TurretState.ActiveTracking);
-                        wasEjecting.set(false);}
+                        wasEjecting.set(false);
+                    }
+
+                    if(co.isInState(ConveyorState.Idle)) requestTransition(Idle);
                 }),
                 getLightControlCommand() //Run light control while intaking to indicate number of balls
         ));
@@ -167,16 +172,24 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
                         //we're done ejecting
                         t.requestTransition(Turret.TurretState.ActiveTracking);
                         wasEjecting.set(false);}
+
+                    if(co.isInState(ConveyorState.Idle)) requestTransition(Idle);
+
                 }),
                 getLightControlCommand() //Run light control while intaking to indicate number of balls
         ));
+        Timer shootDelayTimer = new Timer();
 
-        addTransition(Idle, AttemptShooting, new InstantCommand());
+        addTransition(Idle, AttemptShooting, new InstantCommand(() -> {
+            shootDelayTimer.reset();
+            shootDelayTimer.stop();
+        }));
         setContinuousCommand(AttemptShooting, new InstantCommand(() -> {
             if(t.getCurrentState() == Turret.TurretState.LockedIn) {
                 requestTransition(Shoot);
             } else requestTransition(Idle);
         }));
+
 
         //Only start shooting if the conveyor and intakes are idle
         addSafeTransitionCondition(Idle, AttemptShooting, () -> true);
@@ -187,6 +200,21 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
         
         //If we're already attempting to shoot, it is safe to start shooting
         addSafeTransitionCondition(AttemptShooting, Shoot, () -> true);
+
+        setContinuousCommand(Shoot, new RunCommand(() -> {
+            if(co.isInState(ConveyorState.Idle)) {
+                if(shootDelayTimer.get() > Constants.Turret.SHOOT_DELAY) {
+                    requestTransition(Idle);
+
+                } else if(shootDelayTimer.get() == 0) {
+                    shootDelayTimer.reset();
+                    shootDelayTimer.start();
+                }
+            }
+        }));
+
+        addTransition(Shoot, Idle, new InstantCommand());
+        addSafeTransitionCondition(Shoot, Idle, () -> true);
 
         //Climb lock-out logic
         //No transition conditions here because if the bot is in idle everything else has already been requested to stop

@@ -74,12 +74,15 @@ public class RobotContainer {
   private void configureButtonBindings() {
 
     new JoystickButton(driverController, 3).whenPressed(new InstantCommand(() -> robotManager.requestTransition(RobotState.IntakeLeft)));
-    // new JoystickButton(driverController, 2).whenPressed(new InstantCommand(() -> robotManager.requestTransition(RobotState.IntakeRight)));
-    // new JoystickButton(driverController, 1).whenPressed(new InstantCommand(() -> conveyor.setShouldEndIntakeSequence(true)));
+    new JoystickButton(driverController, 2).whenPressed(new InstantCommand(() -> robotManager.requestTransition(RobotState.IntakeRight)));
+    new JoystickButton(driverController, 1).whenPressed(new InstantCommand(() -> {
+      if(robotManager.isInState(RobotState.IntakeRight, RobotState.IntakeLeft)) {
+        robotManager.requestTransition(RobotState.Idle);
+      }
+    }));
     new JoystickButton(driverController, 5).whenPressed(new InstantCommand(() -> intake.requestTransition(intake.getPumpState())));
-    new JoystickButton(driverController, 6).whenPressed(new InstantCommand(() -> robotManager.requestTransition(RobotState.Idle)));
-    new JoystickButton(driverController, 1).whenPressed(new InstantCommand(() -> turret.setRotaryTargetAngle(15)));
-    new JoystickButton(driverController, 2).whenPressed(new InstantCommand(() -> turret.setRotaryTargetAngle(-15)));
+    new JoystickButton(driverController, 6).whenPressed(new InstantCommand(() -> robotManager.requestTransition(RobotState.AttemptShooting)));
+    new JoystickButton(driverController, 4).whenPressed(new InstantCommand(() -> robotManager.requestTransition(RobotState.EjectBottom)));
   }
 
   public void runControlLoops() {

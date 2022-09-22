@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
@@ -29,7 +30,7 @@ import static frc.robot.subsystems.Turret.TurretState.*;
 import static java.lang.Math.abs;
 
 public class Turret extends StatedSubsystem<Turret.TurretState> {
-    private final WPI_TalonFX rotaryMotor = new WPI_TalonFX(ROTARY_MOTOR_ID);
+    private final WPI_TalonFX rotaryMotor = new WPI_TalonFX(ROTARY_MOTOR_ID, "Drivetrain");
     private final WPI_TalonFX hoodMotor = new WPI_TalonFX(HOOD_MOTOR_ID);
     private final WPI_TalonFX flywheel1Motor = new WPI_TalonFX(FLYWHEEL_MOTOR1_ID);
     private final WPI_TalonFX flywheel2Motor = new WPI_TalonFX(FLYWHEEL_MOTOR2_ID);
@@ -125,8 +126,8 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
 		// rotaryMotor.setSelectedSensorPosition(0, Constants.Turret.kPIDLoopIdx, Constants.Turret.kTimeoutMs);
 
         //Setup lookup tables for velocity and angle control
-        RPMLUT.add(0, 15);
-        RPMLUT.add(1, 15);
+        RPMLUT.add(0, 5600);
+        RPMLUT.add(1000, 5600);
         RPMLUT.createLUT();
 
         hoodAngleLUT.add(0, 25);
@@ -195,11 +196,10 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
         double clippedDegrees = ROTARY_RANGE.clipToRange(degrees);
         if(clippedDegrees != degrees) rotaryOverextended = true;
         else if (rotaryOverextended) rotaryOverextended = false;
-        // rotaryPID.setGoal(clippedDegrees);
 
         rotarySetpoint = clippedDegrees;
 
-        rotaryMotor.set(TalonFXControlMode.MotionMagic, degreesToTicks(clippedDegrees));
+        // rotaryMotor.set(TalonFXControlMode.MotionMagic, degreesToTicks(clippedDegrees), DemandType.ArbitraryFeedForward, 0.15);
     }
 
     private double degreesToTicks(double degrees) {
@@ -257,13 +257,16 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
 
         //Hood calculations
         updateHood();
+
+        prevRotaryAngle = getRotaryAngle();
     }
 
     private void updateFlywheel() {
         double flywheelFFOutput = flywheelFeedForward.calculate(flywheelPID.getSetpoint());
         double flywheelPIDOutput = flywheelPID.calculate(getFlywheelRPM());
 
-        flywheel1Motor.setVoltage(flywheelFFOutput + flywheelPIDOutput);
+        // flywheel1Motor.setVoltage(flywheelFFOutput + flywheelPIDOutput);
+        flywheel1Motor.set(1);
     }
 
     private void updateHood() {
@@ -350,8 +353,11 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
     public double getPrevRotaryAngle() {return prevRotaryAngle;}
 
     public boolean isRotaryBusy() {return Math.abs(getRotaryAngle() - rotarySetpoint) <= ROTARY_TOLERANCE;}
-    public boolean isFlywheelBusy() {return flywheelPID.atSetpoint();}
-    public boolean isHoodBusy() {return hoodPID.atGoal();}
+    public boolean isFlywheelBusy() {
+        // return Math.abs(getFlywheelRPM() - getFlywheelTarget()) > FLYWHEEL_TOLERANCE;
+        return false;
+    }
+    public boolean isHoodBusy() {return Math.abs(getHoodAngle() - getHoodTarget()) > HOOD_TOLERANCE;}
 
     public boolean isRotaryOverextended() {return rotaryOverextended;}
     public boolean isHoodOverextended() {return hoodOverextended;}
@@ -405,16 +411,20 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
         builder.addDoubleProperty("flywheel velo", this::getFlywheelRPM, null);
         builder.addDoubleProperty("flywheel target", this::getFlywheelTarget, null);
         builder.addDoubleProperty("flywheel error", this::getFlywheelError, null);
+        builder.addBooleanProperty("flywheel busy", this::isFlywheelBusy, null);
+        builder.addDoubleProperty("flywheel voltage", flywheel1Motor::getMotorOutputVoltage, null);
         builder.addDoubleProperty("rotary degrees", this::getRotaryAngle, null);
         builder.addDoubleProperty("rotary velo", this::getRotaryVelo, null);
         builder.addDoubleProperty("rotary target", this::getRotaryTarget, null);
         builder.addDoubleProperty("rotary error", this::getRotaryError, null);
+        builder.addBooleanProperty("rotary busy", this::isRotaryBusy, null);
         builder.addDoubleProperty("rotary voltage", () -> rotaryMotor.getMotorOutputVoltage(), null);
         builder.addDoubleProperty("hood degrees", this::getHoodAngle, null);
         builder.addDoubleProperty("hood velo", this::getHoodVelo, null);
         builder.addDoubleProperty("hood target velo", () -> hoodPID.getSetpoint().velocity, null);
         builder.addDoubleProperty("hood target", this::getHoodTarget, null);
         builder.addDoubleProperty("hood error", this::getHoodError, null);
+        builder.addBooleanProperty("hood busy", this::isHoodBusy, null);
         builder.addBooleanProperty("sensor 1 pressed", this::isOuterLimPressed, null);
         builder.addBooleanProperty("sensor 2 pressed", this::isCenterLimPressed, null);
 
