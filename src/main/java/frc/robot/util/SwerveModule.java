@@ -17,10 +17,10 @@ public class SwerveModule implements Sendable{
 
     private final String moduleName;
 
-    // private final WPI_TalonFX turnMotor;
-    // private final WPI_TalonFX driveMotor;
+    private final WPI_TalonFX turnMotor;
+    private final WPI_TalonFX driveMotor;
 
-    // private final CANCoder turnEncoder;
+    private final CANCoder turnEncoder;
     private double encoderOffset;
 
     private SwerveModuleState targetState;

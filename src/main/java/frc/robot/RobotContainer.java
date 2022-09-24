@@ -13,6 +13,7 @@ import frc.robot.util.RobotManager.RobotState;
 import frc.robot.util.Shambots5907_SMF.SubsystemManager;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.Turret;
+import frc.robot.subsystems.Drivetrain.SwerveState;
 import frc.robot.subsystems.Lights;
 
 import java.util.*;
@@ -20,7 +21,7 @@ import java.util.*;
 
 public class RobotContainer {
   private final Joystick driverController = new Joystick(0);
-  // private final Joystick operatorController = new Joystick(1);
+  private final Joystick operatorController = new Joystick(1);
 
   private final Drivetrain drivetrain = new Drivetrain(driverController);
   private final Intake intake = new Intake();
@@ -73,16 +74,22 @@ public class RobotContainer {
 
   private void configureButtonBindings() {
 
-    new JoystickButton(driverController, 3).whenPressed(new InstantCommand(() -> robotManager.requestTransition(RobotState.IntakeLeft)));
-    new JoystickButton(driverController, 2).whenPressed(new InstantCommand(() -> robotManager.requestTransition(RobotState.IntakeRight)));
-    new JoystickButton(driverController, 1).whenPressed(new InstantCommand(() -> {
+    //Intake control
+    new JoystickButton(operatorController, 1).whenPressed(new InstantCommand(() -> robotManager.requestTransition(RobotState.IntakeLeft)));
+    new JoystickButton(operatorController, 4).whenPressed(new InstantCommand(() -> robotManager.requestTransition(RobotState.IntakeRight)));
+    new JoystickButton(operatorController, 2).whenPressed(new InstantCommand(() -> {
       if(robotManager.isInState(RobotState.IntakeRight, RobotState.IntakeLeft)) {
         robotManager.requestTransition(RobotState.Idle);
       }
     }));
-    new JoystickButton(driverController, 5).whenPressed(new InstantCommand(() -> intake.requestTransition(intake.getPumpState())));
-    new JoystickButton(driverController, 6).whenPressed(new InstantCommand(() -> robotManager.requestTransition(RobotState.AttemptShooting)));
-    new JoystickButton(driverController, 4).whenPressed(new InstantCommand(() -> robotManager.requestTransition(RobotState.EjectBottom)));
+    new JoystickButton(operatorController, 3).whenPressed(new InstantCommand(() -> intake.requestTransition(intake.getPumpState())));
+
+
+    new JoystickButton(operatorController, 5).whenPressed(new InstantCommand(() -> robotManager.requestTransition(RobotState.AttemptShooting)));
+    new JoystickButton(operatorController, 6).whenPressed(new InstantCommand(() -> robotManager.requestTransition(RobotState.EjectBottom)));
+
+    new JoystickButton(driverController, 3).whenPressed(new InstantCommand(() -> drivetrain.requestTransition(SwerveState.XShape)))
+      .whenReleased(new InstantCommand(() -> drivetrain.requestTransition(SwerveState.Teleop)));
   }
 
   public void runControlLoops() {

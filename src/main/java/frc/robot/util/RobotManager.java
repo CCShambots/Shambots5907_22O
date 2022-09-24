@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Constants;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.Conveyor.ConveyorState;
+import frc.robot.subsystems.Drivetrain.SwerveState;
 import frc.robot.util.Shambots5907_SMF.SimpleTransition;
 import frc.robot.util.Shambots5907_SMF.StatedSubsystem;
 
@@ -58,6 +59,10 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
                     //Always set the turret back to active tracking while in idle (but not in a way that constantly cancels a transition)
                     if(!t.isInState(Turret.TurretState.ActiveTracking) && !t.isTransitioning()) {
                         t.requestTransition(Turret.TurretState.ActiveTracking);
+                    }
+                    if(!dt.isInState(SwerveState.Teleop, SwerveState.XShape
+                    ) && !dt.isTransitioning()) {
+                        dt.requestTransition(SwerveState.Teleop);
                     }
                 }),
                 getLightControlCommand() //Run light control for displaying stuff while in Idle mode
