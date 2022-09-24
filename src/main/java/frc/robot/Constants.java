@@ -231,10 +231,10 @@ public final class Constants {
         public static final int CENTER_LIM_SWITCH_ID = 9;
 
         public static final double FLYWHEEL_KS = 1.05;
-        public static final double FLYWHEEL_KV = 0.004;
-        public static final double FLYWHEEL_KP = 0.0; //0.14
+        public static final double FLYWHEEL_KV = 0.0021;
+        public static final double FLYWHEEL_KP = 0.008; //0.14
         public static final double FLYWHEEL_KI = 0;
-        public static final double FLYWHEEL_KD = 0;
+        public static final double FLYWHEEL_KD = 0.00008;
         public static final double FLYWHEEL_TOLERANCE = 100;
 
         public static final double SHOOT_DELAY = 1;

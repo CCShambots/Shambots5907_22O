@@ -1,9 +1,6 @@
 {
   "NetworkTables": {
     "SmartDashboard": {
-      "drivetrain": {
-        "open": true
-      },
       "open": true
     },
     "types": {
@@ -75,6 +72,9 @@
       "/SmartDashboard/drivetrain/field": {
         "Module 1": {
           "style": "Box/Image"
+        },
+        "window": {
+          "visible": true
         }
       }
     }
@@ -295,6 +295,13 @@
       }
     },
     "Plot <8>": {
+      "plots": [
+        {
+          "height": 338
+        }
+      ]
+    },
+    "Plot <9>": {
       "plots": [
         {
           "height": 338

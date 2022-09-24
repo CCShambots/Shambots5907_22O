@@ -158,7 +158,7 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
                         wasEjecting.set(false);
                     }
 
-                    if(co.isInState(ConveyorState.Idle)) requestTransition(Idle);
+                    if(co.isInState(ConveyorState.Idle) && !co.isTransitioning()) requestTransition(Idle);
                 }),
                 getLightControlCommand() //Run light control while intaking to indicate number of balls
         ));
@@ -173,7 +173,7 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
                         t.requestTransition(Turret.TurretState.ActiveTracking);
                         wasEjecting.set(false);}
 
-                    if(co.isInState(ConveyorState.Idle)) requestTransition(Idle);
+                    if(co.isInState(ConveyorState.Idle) && !co.isTransitioning()) requestTransition(Idle);
 
                 }),
                 getLightControlCommand() //Run light control while intaking to indicate number of balls

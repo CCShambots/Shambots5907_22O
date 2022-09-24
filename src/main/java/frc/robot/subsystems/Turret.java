@@ -73,7 +73,6 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
 
         flywheel2Motor.follow(flywheel1Motor);
         flywheel2Motor.setInverted(OpposeMaster);
-        Constants.optimizeFollowerMotor(flywheel2Motor);
 
         //Set the tolerance for the PID loop to say it is not busy
         // rotaryPID.setTolerance(ROTARY_TOLERANCE);
@@ -126,8 +125,8 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
 		// rotaryMotor.setSelectedSensorPosition(0, Constants.Turret.kPIDLoopIdx, Constants.Turret.kTimeoutMs);
 
         //Setup lookup tables for velocity and angle control
-        RPMLUT.add(0, 5600);
-        RPMLUT.add(1000, 5600);
+        RPMLUT.add(0, 2000);
+        RPMLUT.add(1000, 2000);
         RPMLUT.createLUT();
 
         hoodAngleLUT.add(0, 25);
@@ -265,8 +264,7 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
         double flywheelFFOutput = flywheelFeedForward.calculate(flywheelPID.getSetpoint());
         double flywheelPIDOutput = flywheelPID.calculate(getFlywheelRPM());
 
-        // flywheel1Motor.setVoltage(flywheelFFOutput + flywheelPIDOutput);
-        flywheel1Motor.set(1);
+        flywheel1Motor.setVoltage(flywheelFFOutput + flywheelPIDOutput);
     }
 
     private void updateHood() {
@@ -412,7 +410,8 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
         builder.addDoubleProperty("flywheel target", this::getFlywheelTarget, null);
         builder.addDoubleProperty("flywheel error", this::getFlywheelError, null);
         builder.addBooleanProperty("flywheel busy", this::isFlywheelBusy, null);
-        builder.addDoubleProperty("flywheel voltage", flywheel1Motor::getMotorOutputVoltage, null);
+        builder.addDoubleProperty("flywheel 1 voltage", flywheel1Motor::getMotorOutputVoltage, null);
+        builder.addDoubleProperty("flywheel 2 voltage", flywheel2Motor::getMotorOutputVoltage, null);
         builder.addDoubleProperty("rotary degrees", this::getRotaryAngle, null);
         builder.addDoubleProperty("rotary velo", this::getRotaryVelo, null);
         builder.addDoubleProperty("rotary target", this::getRotaryTarget, null);

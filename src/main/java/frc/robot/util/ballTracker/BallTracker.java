@@ -32,15 +32,13 @@ public class BallTracker {
     public BallTracker(ColorSensor leftColor, ColorSensor rightColor, ProximitySensor leftProx, ProximitySensor rightProx, ProximitySensor centerProx, Conveyor conveyor) {
 
         leftProx.registerTrigger(true, () -> {
-                if(conveyor.getLeftConveyorState() == Intaking) {
                     if(findBall(PastLeft) != null) {
                         safeSetBallPos(Left, PastLeft);
+                    } else if(conveyor.getLeftConveyorState() == Exhausting) {
+                        safeSetBallPos(BetweenLeftAndCenter, Center);
                     } else {
                         createNewBall(evaluateBallColorType(leftColor.getColor()), Left);
                     }
-                } else if(conveyor.getLeftConveyorState() == Exhausting) {
-                    safeSetBallPos(BetweenLeftAndCenter, Center);
-                }
             }
         );
 
@@ -77,14 +75,12 @@ public class BallTracker {
         });
 
         rightProx.registerTrigger(true, () -> {
-            if(conveyor.getRightConveyorState() == Intaking) {
-                if(findBall(PastRight) != null) {
-                    safeSetBallPos(Right, PastRight);
-                } else {
-                    createNewBall(evaluateBallColorType(rightColor.getColor()), Right);
-                }
+            if(findBall(PastRight) != null) {
+                safeSetBallPos(Right, PastRight);
             } else if(conveyor.getRightConveyorState() == Exhausting) {
-                safeSetBallPos(BetweenRightAndCenter, Center);
+                    safeSetBallPos(BetweenRightAndCenter, Center);
+            } else {
+                createNewBall(evaluateBallColorType(rightColor.getColor()), Right);
             }
         });
 
