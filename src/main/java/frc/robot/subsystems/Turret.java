@@ -29,7 +29,7 @@ import static frc.robot.subsystems.Turret.TurretState.*;
 import static java.lang.Math.abs;
 
 public class Turret extends StatedSubsystem<Turret.TurretState> {
-    private final WPI_TalonFX rotaryMotor = new WPI_TalonFX(ROTARY_MOTOR_ID);
+    private final WPI_TalonFX rotaryMotor = new WPI_TalonFX(ROTARY_MOTOR_ID, "Drivetrian");
     private final WPI_TalonFX hoodMotor = new WPI_TalonFX(HOOD_MOTOR_ID);
     private final WPI_TalonFX flywheel1Motor = new WPI_TalonFX(FLYWHEEL_MOTOR1_ID);
     private final WPI_TalonFX flywheel2Motor = new WPI_TalonFX(FLYWHEEL_MOTOR2_ID);
@@ -195,11 +195,10 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
         double clippedDegrees = ROTARY_RANGE.clipToRange(degrees);
         if(clippedDegrees != degrees) rotaryOverextended = true;
         else if (rotaryOverextended) rotaryOverextended = false;
-        // rotaryPID.setGoal(clippedDegrees);
 
         rotarySetpoint = clippedDegrees;
 
-        rotaryMotor.set(TalonFXControlMode.MotionMagic, degreesToTicks(clippedDegrees));
+        // rotaryMotor.set(TalonFXControlMode.MotionMagic, degreesToTicks(clippedDegrees));
     }
 
     private double degreesToTicks(double degrees) {

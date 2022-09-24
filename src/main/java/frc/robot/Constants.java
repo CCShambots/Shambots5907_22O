@@ -104,12 +104,14 @@ public final class Constants {
         public static final double MAX_ROTATION = (MAX_LINEAR_SPEED / rotationRadius) * (2 * Math.PI);
         public static final double MAX_ROT_ACCEL = MAX_ROTATION * 3;
 
-        public static final SwerveDriveKinematics kDriveKinematics =
-                new SwerveDriveKinematics(
-                        new Translation2d(WHEEL_BASE / 2, TRACK_WIDTH / 2),
+        public static final Translation2d[] moduleOffsets = {
+            new Translation2d(WHEEL_BASE / 2, TRACK_WIDTH / 2),
                         new Translation2d(WHEEL_BASE / 2, -TRACK_WIDTH / 2),
                         new Translation2d(-WHEEL_BASE / 2, -TRACK_WIDTH / 2),
-                        new Translation2d(-WHEEL_BASE / 2, TRACK_WIDTH / 2));
+                        new Translation2d(-WHEEL_BASE / 2, TRACK_WIDTH / 2)
+        };
+
+        public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(moduleOffsets);
 
         public static final double P_HOLDANGLETELE = 2.5; //.5
         public static final double I_HOLDANGLETELE = 0.25; 
@@ -154,6 +156,9 @@ public final class Constants {
         public static final int MODULE_4_TURN_ID = 18;
         public static final int MODULE_4_ENCODER_ID = 17;
         public static final double MODULE_4_OFFSET = -153.1;
+
+        public static Supplier<Pose2d> getOdoPose;
+        public static Supplier<Rotation2d> getDrivetrainAngle;
     }
 
     public static final class ControllerConversions{

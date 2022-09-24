@@ -7,6 +7,7 @@ import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
@@ -26,7 +27,11 @@ public class SwerveModule implements Sendable{
 
     private double targetEncoderPos;
 
-    public SwerveModule(String name, int turnID, int driveID, int encoderID, double encoderOffset, boolean reverseDriveMotor, boolean reverseTurnMotor) {
+    private Translation2d moduleOffset;
+
+    public SwerveModule(String name, int turnID, int driveID, int encoderID, double encoderOffset, boolean reverseDriveMotor, boolean reverseTurnMotor, Translation2d moduleOffset) {
+        this.moduleOffset = moduleOffset;
+        
         this.moduleName = name;
         turnMotor = new WPI_TalonFX(turnID, "Drivetrain");
         turnMotor.configFactoryDefault();
@@ -191,6 +196,8 @@ public class SwerveModule implements Sendable{
     public SwerveModuleState getCurrentState() {
         return new SwerveModuleState(getDriveMotorRate(), getTurnAngle());
     }
+
+    public Translation2d getModuleOffset() {return moduleOffset;}
 
     public void run() {
         // driveMotor.set(0.5);
