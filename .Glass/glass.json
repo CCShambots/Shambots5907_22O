@@ -1,7 +1,16 @@
 {
   "NetworkTables": {
     "SmartDashboard": {
-      "open": true
+      "drivetrain": {
+        "Module 1": {
+          "open": true
+        },
+        "open": true
+      },
+      "open": true,
+      "turret": {
+        "open": true
+      }
     },
     "types": {
       "/FMSInfo": "FMSInfo",
@@ -55,6 +64,7 @@
       "/LiveWindow/Ungrouped/Talon FX [81]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon FX [82]": "Motor Controller",
       "/SmartDashboard/Choose Auto Route": "String Chooser",
+      "/SmartDashboard/Intake": "Subsystem",
       "/SmartDashboard/climber/test/extend piston": "Command",
       "/SmartDashboard/climber/test/lower climber": "Command",
       "/SmartDashboard/climber/test/raise climber": "Command",
@@ -86,7 +96,7 @@
     "Plot <0>": {
       "plots": [
         {
-          "height": -37,
+          "height": 735,
           "series": [
             {
               "color": [
@@ -95,7 +105,7 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/turret/flywheel velo"
+              "id": "NT:/SmartDashboard/drivetrain/Module 1/Angle"
             },
             {
               "color": [
@@ -104,14 +114,11 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/turret/flywheel target"
+              "id": "NT:/SmartDashboard/drivetrain/Module 1/Target Angle"
             }
           ]
         }
-      ],
-      "window": {
-        "visible": false
-      }
+      ]
     },
     "Plot <1>": {
       "plots": [
@@ -125,7 +132,7 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/turret/hood degrees"
+              "id": "NT:/SmartDashboard/drivetrain/Module 1/Raw Setpoint"
             },
             {
               "color": [
@@ -134,14 +141,11 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/turret/hood target"
+              "id": "NT:/SmartDashboard/drivetrain/Module 1/Raw Angle"
             }
           ]
         }
-      ],
-      "window": {
-        "visible": false
-      }
+      ]
     },
     "Plot <2>": {
       "plots": [
@@ -155,7 +159,7 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/turret/hood velo"
+              "id": "NT:/SmartDashboard/drivetrain/Module 1/Target Velocity"
             },
             {
               "color": [
@@ -164,149 +168,16 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/turret/hood target velo"
+              "id": "NT:/SmartDashboard/drivetrain/Module 1/Velocity"
             }
           ]
         }
-      ],
-      "window": {
-        "visible": false
-      }
+      ]
     },
     "Plot <3>": {
-      "plots": [
-        {
-          "height": 338
-        }
-      ],
       "window": {
         "visible": false
       }
-    },
-    "Plot <4>": {
-      "plots": [
-        {
-          "height": 338,
-          "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/turret/rotary degrees"
-            },
-            {
-              "color": [
-                0.8666667342185974,
-                0.5176470875740051,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/turret/rotary target"
-            }
-          ]
-        }
-      ],
-      "window": {
-        "visible": false
-      }
-    },
-    "Plot <5>": {
-      "plots": [
-        {
-          "height": 338,
-          "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/turret/rotary velo"
-            },
-            {
-              "color": [
-                0.8666667342185974,
-                0.5176470875740051,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/turret/rotary target velo"
-            }
-          ]
-        }
-      ],
-      "window": {
-        "visible": false
-      }
-    },
-    "Plot <6>": {
-      "plots": [
-        {
-          "height": 338,
-          "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/turret/rotary voltage"
-            }
-          ]
-        }
-      ],
-      "window": {
-        "visible": false
-      }
-    },
-    "Plot <7>": {
-      "plots": [
-        {
-          "height": 338,
-          "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/drivetrain/Module 1/Measuerd turn velo"
-            },
-            {
-              "color": [
-                0.8666667342185974,
-                0.5176470875740051,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/drivetrain/Module 1/Target turn velo"
-            }
-          ]
-        }
-      ],
-      "window": {
-        "visible": false
-      }
-    },
-    "Plot <8>": {
-      "plots": [
-        {
-          "height": 338
-        }
-      ]
-    },
-    "Plot <9>": {
-      "plots": [
-        {
-          "height": 338
-        }
-      ]
     }
   }
 }

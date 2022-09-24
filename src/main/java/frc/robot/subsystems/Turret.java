@@ -30,7 +30,7 @@ import static frc.robot.subsystems.Turret.TurretState.*;
 import static java.lang.Math.abs;
 
 public class Turret extends StatedSubsystem<Turret.TurretState> {
-    private final WPI_TalonFX rotaryMotor = new WPI_TalonFX(ROTARY_MOTOR_ID, "Drivetrain");
+    private final WPI_TalonFX rotaryMotor = new WPI_TalonFX(ROTARY_MOTOR_ID, "Drivetrian");
     private final WPI_TalonFX hoodMotor = new WPI_TalonFX(HOOD_MOTOR_ID);
     private final WPI_TalonFX flywheel1Motor = new WPI_TalonFX(FLYWHEEL_MOTOR1_ID);
     private final WPI_TalonFX flywheel2Motor = new WPI_TalonFX(FLYWHEEL_MOTOR2_ID);
@@ -198,7 +198,7 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
 
         rotarySetpoint = clippedDegrees;
 
-        // rotaryMotor.set(TalonFXControlMode.MotionMagic, degreesToTicks(clippedDegrees), DemandType.ArbitraryFeedForward, 0.15);
+        // rotaryMotor.set(TalonFXControlMode.MotionMagic, degreesToTicks(clippedDegrees));
     }
 
     private double degreesToTicks(double degrees) {
@@ -352,8 +352,7 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
 
     public boolean isRotaryBusy() {return Math.abs(getRotaryAngle() - rotarySetpoint) <= ROTARY_TOLERANCE;}
     public boolean isFlywheelBusy() {
-        // return Math.abs(getFlywheelRPM() - getFlywheelTarget()) > FLYWHEEL_TOLERANCE;
-        return false;
+        return Math.abs(getFlywheelRPM() - getFlywheelTarget()) > FLYWHEEL_TOLERANCE;
     }
     public boolean isHoodBusy() {return Math.abs(getHoodAngle() - getHoodTarget()) > HOOD_TOLERANCE;}
 

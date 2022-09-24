@@ -1,22 +1,16 @@
 package frc.robot.util;
 
-import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
+import com.ctre.phoenix.motorcontrol.*;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
-import com.ctre.phoenix.sensors.SensorTimeBase;
 
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.Preferences;
 import frc.robot.Constants;
 
 public class SwerveModule implements Sendable{
@@ -29,122 +23,187 @@ public class SwerveModule implements Sendable{
     // private final CANCoder turnEncoder;
     private double encoderOffset;
 
-    private final PIDController drivePIDController = new PIDController(
-                                                        Constants.SwerveModule.P_DRIVE,
-                                                        Constants.SwerveModule.I_DRIVE,
-                                                        Constants.SwerveModule.D_DRIVE);
-    
-    private final ProfiledPIDController turnPIDController = new ProfiledPIDController(
-                                                                Constants.SwerveModule.P_TURN,
-                                                                Constants.SwerveModule.I_TURN,
-                                                                Constants.SwerveModule.D_TURN,
-                                                                new TrapezoidProfile.Constraints(
-                                                                Constants.SwerveModule.MAX_TURN_SPEED,
-                                                                Constants.SwerveModule.MAX_TURN_ACCEL
-                                                                ));
-
-    private final SimpleMotorFeedforward driveFeedforwardController = new SimpleMotorFeedforward(
-                                                                Constants.SwerveModule.KS_DRIVE,
-                                                                Constants.SwerveModule.KV_DRIVE);
-
-    private final SimpleMotorFeedforward turnFeedforwardController = new SimpleMotorFeedforward(
-                                                                Constants.SwerveModule.KS_TURN,
-                                                                Constants.SwerveModule.KV_TURN);
-
     private SwerveModuleState targetState;
 
-    private Translation2d offsetFromCenter;
+    private double targetEncoderPos;
 
-    private boolean reverseTurnEncoder;
+    private Translation2d moduleOffset;
 
-    public SwerveModule(String name, int turnID, int driveID, int encoderID, double encoderOffset, boolean reverseDriveMotor, boolean reverseTurnEncoder, Translation2d offsetFromCenter) {
+    public SwerveModule(String name, int turnID, int driveID, int encoderID, double encoderOffset, boolean reverseDriveMotor, boolean reverseTurnMotor, Translation2d moduleOffset) {
+        this.moduleOffset = moduleOffset;
+        
         this.moduleName = name;
-        // turnMotor = new WPI_TalonFX(turnID);
-        // turnMotor.configFactoryDefault();
+        turnMotor = new WPI_TalonFX(turnID, "Drivetrain");
+        turnMotor.configFactoryDefault();
+        if(reverseTurnMotor) turnMotor.setInverted(true);
+        
+        driveMotor = new WPI_TalonFX(driveID, "Drivetrain");
+        driveMotor.configFactoryDefault();
+        if(reverseDriveMotor) driveMotor.setInverted(true);
+        
+        this.turnEncoder = new CANCoder(encoderID);
+        turnEncoder.configFactoryDefault();
 
-        this.reverseTurnEncoder = reverseTurnEncoder;
-        
-        // driveMotor = new WPI_TalonFX(driveID);
-        // driveMotor.configFactoryDefault();
-        // if(reverseDriveMotor) driveMotor.setInverted(true);
-        // driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 5);
-        
-        // this.turnEncoder = new CANCoder(encoderID);
-        // turnEncoder.configFactoryDefault();
-        // turnEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 5);
-        double radiansCoefficient = (2.0 * Math.PI) / 4096.0;
-        // turnEncoder.configFeedbackCoefficient(radiansCoefficient, "rad", SensorTimeBase.PerSecond);
-        // turnEncoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
-        // turnEncoder.configAbsoluteSensorRange(AbsoluteSensorRange.Signed_PlusMinus180);
-        // turnEncoder.configSensorDirection(false);
+        turnEncoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
+        turnEncoder.configAbsoluteSensorRange(AbsoluteSensorRange.Signed_PlusMinus180);
+        turnEncoder.configSensorDirection(false);
 
         this.encoderOffset = encoderOffset;
 
-        turnPIDController.enableContinuousInput(-Math.PI, Math.PI);
+        initTurnMotor();
+        initDriveMotor();
 
-        targetState = new SwerveModuleState(0, getTurnAngle());
+        setDesiredState(
+            new SwerveModuleState(0, getTurnAngle())
+        );
+    }   
+        
+    private void initTurnMotor() {
+        turnMotor.setSensorPhase(false);
+        turnMotor.configSupplyCurrentLimit(Constants.CURRENT_LIMIT);
 
-        this.offsetFromCenter = offsetFromCenter;
+        /* Set relevant frame periods to be at least as fast as periodic rate */
+        turnMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 10, Constants.SwerveModule.kTimeoutMs);
+        turnMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 10, Constants.SwerveModule.kTimeoutMs);
+
+        /* Set the peak and nominal outputs */
+        turnMotor.configNominalOutputForward(0, Constants.SwerveModule.kTimeoutMs);
+        turnMotor.configNominalOutputReverse(0, Constants.SwerveModule.kTimeoutMs);
+        turnMotor.configPeakOutputForward(1, Constants.SwerveModule.kTimeoutMs);
+        turnMotor.configPeakOutputReverse(-1, Constants.SwerveModule.kTimeoutMs);
+
+        /* Set Motion Magic gains in slot0 - see documentation */
+        turnMotor.selectProfileSlot(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.kPIDLoopIdx);
+        turnMotor.config_kF(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.turnGains.kF, Constants.SwerveModule.kTimeoutMs);
+        turnMotor.config_kP(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.turnGains.kP, Constants.SwerveModule.kTimeoutMs);
+        turnMotor.config_kI(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.turnGains.kI, Constants.SwerveModule.kTimeoutMs);
+        turnMotor.config_kD(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.turnGains.kD, Constants.SwerveModule.kTimeoutMs);
+
+        /* Set acceleration and cruise velocity - see documentation */
+        turnMotor.configMotionCruiseVelocity(
+                Math.toDegrees(Constants.SwerveModule.MAX_TURN_SPEED),
+                Constants.SwerveModule.kTimeoutMs
+        );
+
+        turnMotor.configMotionAcceleration(
+                Math.toDegrees(Constants.SwerveModule.MAX_TURN_ACCEL),
+                Constants.SwerveModule.kTimeoutMs
+        );
+
+        turnMotor.configNeutralDeadband(0.001);
+
+        turnMotor.configSelectedFeedbackSensor(
+                TalonFXFeedbackDevice.IntegratedSensor,
+                /*TODO: add constant*/0,
+                /*TODO: add constant*/30
+        );
+
+        turnMotor.configSelectedFeedbackCoefficient(
+                Constants.SwerveModule.TURN_SENSOR_RATIO * (360.0/2048.0)
+        );
+        turnMotor.setSelectedSensorPosition(normalizeDegrees(turnEncoder.getAbsolutePosition() - encoderOffset));
     }
 
+    private void initDriveMotor() {
+        driveMotor.setSensorPhase(false);
+        driveMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 30);
+        
+        driveMotor.configSupplyCurrentLimit(Constants.CURRENT_LIMIT);
+        
+        driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 10, Constants.SwerveModule.kTimeoutMs);
+
+        driveMotor.configNominalOutputForward(0, Constants.SwerveModule.kTimeoutMs);
+        driveMotor.configNominalOutputReverse(0, Constants.SwerveModule.kTimeoutMs);
+        driveMotor.configPeakOutputForward(1, Constants.SwerveModule.kTimeoutMs);
+        driveMotor.configPeakOutputReverse(-1, Constants.SwerveModule.kTimeoutMs);
+
+        driveMotor.selectProfileSlot(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.kPIDLoopIdx);
+        driveMotor.config_kF(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.driveGains.kF, Constants.SwerveModule.kTimeoutMs);
+        driveMotor.config_kP(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.driveGains.kP, Constants.SwerveModule.kTimeoutMs);
+        driveMotor.config_kI(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.driveGains.kI, Constants.SwerveModule.kTimeoutMs);
+        driveMotor.config_kD(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.driveGains.kD, Constants.SwerveModule.kTimeoutMs);
+
+        driveMotor.configMotionCruiseVelocity(
+                //TODO: change coefficient and this to m/s
+                Math.toDegrees(Constants.SwerveModule.MAX_DRIVE_SPEED),
+                Constants.SwerveModule.kTimeoutMs
+        );
+
+        driveMotor.configMotionAcceleration(
+                //TODO: change coefficient and this to m/s
+                Math.toDegrees(Constants.SwerveModule.MAX_DRIVE_ACCEL),
+                Constants.SwerveModule.kTimeoutMs
+        );
+
+        // driveMotor.configSelectedFeedbackCoefficient(
+        //         //TODO: idk if this math is correct
+        //         (1 / 2048.0)
+        //         * (1 / Constants.SwerveModule.DRIVE_RATIO)
+        //         * (2 * Math.PI * Constants.SwerveModule.WHEEL_RADIUS)      
+        // );
+    }
+
+    private double driveTicksToMeters(double ticks) {
+        return ticks 
+        / 2048.0
+        * (1 / Constants.SwerveModule.DRIVE_RATIO)
+        * (2 * Math.PI * Constants.SwerveModule.WHEEL_RADIUS);
+    }
+
+    private double driveMetersToTicks(double meters) {
+        return meters
+        / (2 * Math.PI * Constants.SwerveModule.WHEEL_RADIUS)
+        / (1 / Constants.SwerveModule.DRIVE_RATIO)
+        * 2048;
+    }
+
+
+    private double normalizeDegrees(double degrees) {
+        double rads = Math.toRadians(degrees);
+        return new Rotation2d(Math.cos(rads), Math.sin(rads)).getDegrees();
+    }
 
     public void setDesiredState(SwerveModuleState state) {
         SwerveModuleState optimizedState = SwerveModuleState.optimize(state, getTurnAngle());
-        targetState = optimizedState;
+        targetState = optimizedState;        
+        double turnPos = turnMotor.getSelectedSensorPosition();
+        targetEncoderPos = turnPos + (targetState.angle.getDegrees() - normalizeDegrees(turnPos));
+
+        turnMotor.set(
+                ControlMode.MotionMagic,
+                targetEncoderPos
+                // DemandType.ArbitraryFeedForward,
+                // Constants.SwerveModule.KS_TURN/12
+        );
+
+        driveMotor.set(
+            ControlMode.Velocity,
+            driveMetersToTicks(targetState.speedMetersPerSecond)/10
+            // DemandType.ArbitraryFeedForward,
+            // Constants.SwerveModule.KS_DRIVE/12
+        );
+
     }
 
     public Rotation2d getTurnAngle(){
-        return new Rotation2d();
-        // return new Rotation2d(reverseTurnEncoder ? -1 : 1 * turnEncoder.getAbsolutePosition() * Constants.SwerveModule.TURN_SENSOR_RATIO)
-                            //   .minus(Rotation2d.fromDegrees(encoderOffset));
+        return Rotation2d.fromDegrees(normalizeDegrees(turnMotor.getSelectedSensorPosition()));
     }
 
     public double getDriveMotorRate(){
-        return 0;
-        // return driveMotor.getSelectedSensorVelocity()
-                // * 10.0          // convert sensor ticks per 100ms to sensor ticks per second
-                // * (1 / 2048.0)  // convert sensor ticks to revolutions
-                // * (1 / Constants.SwerveModule.DRIVE_RATIO)  // convert motor revolutions to wheel revolutions
-                // * (2 * Math.PI * Constants.SwerveModule.WHEEL_RADIUS);   // convert wheel revolutions to linear distance
-    }
+        return driveTicksToMeters(driveMotor.getSelectedSensorVelocity()) * 10.0;
+    } 
 
     public SwerveModuleState getCurrentState() {
         return new SwerveModuleState(getDriveMotorRate(), getTurnAngle());
     }
 
-    public void run() {
-        double turnPIDOutput = turnPIDController.calculate(getTurnAngle().getRadians(), targetState.angle.getRadians());
-        double drivePIDOutput = drivePIDController.calculate(getDriveMotorRate(), targetState.speedMetersPerSecond);
+    public Translation2d getModuleOffset() {return moduleOffset;}
 
-        double turnFFOutput = turnFeedforwardController.calculate(turnPIDController.getSetpoint().velocity);
-        double driveFFOutput = driveFeedforwardController.calculate(targetState.speedMetersPerSecond);
-
-        // turnMotor.setVoltage(turnPIDOutput + turnFFOutput);
-        // driveMotor.setVoltage(drivePIDOutput + driveFFOutput);
-
-        // SmartDashboard.putNumber(this.moduleName + " turn PID output", turnPIDOutput);
-        // SmartDashboard.putNumber(this.moduleName + " turn FF output", turnFFOutput);
-        // SmartDashboard.putNumber(this.moduleName + " drive PID output", drivePIDOutput);
-        // SmartDashboard.putNumber(this.moduleName + " drive FF output", driveFFOutput);
+    public void run() {    
     }
 
     public void stop() {
-        targetState = new SwerveModuleState(0.0, getTurnAngle());
-    }
-
-    public void resetControlLoops() {
-        stop();
-        drivePIDController.reset();
-        turnPIDController.reset(getTurnAngle().getRadians());
-        stop();
-    }
-
-    public void setEncoderOffset(){
-        double newOffset = getTurnAngle().getRadians() + encoderOffset;
-        if (newOffset > Math.PI){ newOffset -= Math.PI; }
-        if (newOffset < -Math.PI){ newOffset += Math.PI; }
-        Preferences.setDouble(moduleName + "-encoder-offset", newOffset);
-        encoderOffset = newOffset;
+        setDesiredState(new SwerveModuleState(0.0, getTurnAngle()));
     }
 
     public String getModuleName() {
@@ -156,16 +215,17 @@ public class SwerveModule implements Sendable{
         builder.setSmartDashboardType("Swerve Module");
 
         builder.addDoubleProperty("Angle", () -> getTurnAngle().getDegrees(), null);
+        builder.addDoubleProperty("Raw Angle", () -> turnMotor.getSelectedSensorPosition(), null);
+        builder.addDoubleProperty("Raw Setpoint", () -> turnMotor.getClosedLoopTarget(0), null);
+        builder.addDoubleProperty("Absolute Angle", () -> turnEncoder.getAbsolutePosition(), null);
         builder.addDoubleProperty("Target Angle", () -> targetState.angle.getDegrees(), null);
         builder.addDoubleProperty("Velocity", () -> getDriveMotorRate(), null);
         builder.addDoubleProperty("Target Velocity", () -> targetState.speedMetersPerSecond, null);
         builder.addDoubleProperty("Encoder offset", () -> encoderOffset, null);
-        builder.addDoubleProperty("Target turn velo", () -> turnPIDController.getSetpoint().velocity, null);
-        // builder.addDoubleProperty("Measuerd turn velo", () -> reverseTurnEncoder ? -1 : 1 * turnEncoder.getVelocity(), null);
+        //TODO: add these but for ctre pid
+        //builder.addDoubleProperty("Target turn velo", () -> turnPIDController.getSetpoint().velocity, null);
+        //builder.addDoubleProperty("Measuerd turn velo", () -> reverseTurnEncoder ? -1 : 1 * turnEncoder.getVelocity(), null);
         
     }
-
-
-    public Translation2d getOffsetFromCenter() {return offsetFromCenter;}
-
+    
 }
