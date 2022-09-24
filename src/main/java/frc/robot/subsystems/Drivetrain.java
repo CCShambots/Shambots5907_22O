@@ -8,6 +8,7 @@ import com.ctre.phoenix.sensors.WPI_Pigeon2;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 
+import edu.wpi.first.math.ComputerVisionUtil;
 import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.controller.PIDController;
@@ -36,7 +37,6 @@ import frc.robot.commands.drivetrain.DriveCommand;
 import frc.robot.util.Shambots5907_SMF.StatedSubsystem;
 import frc.robot.util.SwerveModule;
 import frc.robot.util.hardware.Limelight;
-import frc.robot.util.math.ComputerVisionUtil;
 import frc.robot.util.math.Geometry;
 
 import static frc.robot.Constants.SwerveDrivetrain.*;
