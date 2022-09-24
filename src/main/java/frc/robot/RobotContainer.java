@@ -1,6 +1,8 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -34,16 +36,16 @@ public class RobotContainer {
     new JoystickButton(driverController, 6).whenPressed(drivetrain.goToStateCommand(Drivetrain.SwerveState.Teleop));
 
     new JoystickButton(driverController, 1).whenPressed(
-      new InstantCommand(() -> drivetrain.setAllModules(new SwerveModuleState(0, Rotation2d.fromDegrees(180)))));
+      new InstantCommand(() -> drivetrain.setAllModules(new SwerveModuleState(1, Rotation2d.fromDegrees(180)))));
 
     new JoystickButton(driverController, 2).whenPressed(
-      new InstantCommand(() -> drivetrain.setAllModules(new SwerveModuleState(0, Rotation2d.fromDegrees(-90)))));
+      new InstantCommand(() -> drivetrain.drive(new ChassisSpeeds(1, 1, 1))));
 
     new JoystickButton(driverController, 3).whenPressed(
-      new InstantCommand(() -> drivetrain.setAllModules(new SwerveModuleState(0, Rotation2d.fromDegrees(90)))));
+      new InstantCommand(() -> drivetrain.resetOdometryPose(new Pose2d())));
 
     new JoystickButton(driverController, 4).whenPressed(
-      new InstantCommand(() -> drivetrain.setAllModules(new SwerveModuleState(0, Rotation2d.fromDegrees(0)))));
+      new InstantCommand(() -> drivetrain.setAllModules(new SwerveModuleState(1, Rotation2d.fromDegrees(0)))));
   }
 
   public void runControlLoops() {

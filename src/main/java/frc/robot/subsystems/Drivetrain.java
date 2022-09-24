@@ -55,15 +55,16 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         super(SwerveState.class);
 
         modules = new HashMap<>();
-        modules.put("Module 1", new SwerveModule("Module-1", MODULE_1_TURN_ID, MODULE_1_DRIVE_ID, MODULE_1_ENCODER_ID, MODULE_1_OFFSET, false, false));
+        modules.put("Module 1", new SwerveModule("Module-1", MODULE_1_TURN_ID, MODULE_1_DRIVE_ID, MODULE_1_ENCODER_ID, MODULE_1_OFFSET, false, true));
         modules.put("Module 2", new SwerveModule("Module-2", MODULE_2_TURN_ID, MODULE_2_DRIVE_ID, MODULE_2_ENCODER_ID, MODULE_2_OFFSET, false, true));
-        modules.put("Module 3", new SwerveModule("Module-3", MODULE_3_TURN_ID, MODULE_3_DRIVE_ID, MODULE_3_ENCODER_ID, MODULE_3_OFFSET, true, false));
-        modules.put("Module 4", new SwerveModule("Module-4", MODULE_4_TURN_ID, MODULE_4_DRIVE_ID, MODULE_4_ENCODER_ID, MODULE_4_OFFSET, true, false));
+        modules.put("Module 3", new SwerveModule("Module-3", MODULE_3_TURN_ID, MODULE_3_DRIVE_ID, MODULE_3_ENCODER_ID, MODULE_3_OFFSET, false, true));
+        modules.put("Module 4", new SwerveModule("Module-4", MODULE_4_TURN_ID, MODULE_4_DRIVE_ID, MODULE_4_ENCODER_ID, MODULE_4_OFFSET, false, true));
 
         gyro.configFactoryDefault();
 
         rotationOffset = getGyroHeading();
         holdAngle = new Rotation2d(rotationOffset);
+        thetaHoldControllerTele.setTolerance(1.5);
         
         odometry = new SwerveDriveOdometry(kDriveKinematics, getCurrentAngle());
 
@@ -84,7 +85,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         addCommutativeTransition(Idle, Teleop, new InstantCommand(), new InstantCommand(() -> setAllModules(STOPPED_STATE)));
 
         //TODO: Fix axes
-        setContinuousCommand(Teleop, new DriveCommand(this, () -> driverController.getRawAxis(0), () -> driverController.getRawAxis(1), () -> driverController.getRawAxis(4)));
+        setContinuousCommand(Teleop, new DriveCommand(this, () -> -driverController.getRawAxis(1), () -> -driverController.getRawAxis(0), () -> -driverController.getRawAxis(4)));
 
         addCommutativeTransition(Idle, XShape, new InstantCommand(() -> setModuleStates(X_SHAPE_ARRAY)), new InstantCommand(() -> setAllModules(STOPPED_STATE)));
         addCommutativeTransition(Teleop, XShape, new InstantCommand(() -> setModuleStates(X_SHAPE_ARRAY)), new InstantCommand(() -> setAllModules(STOPPED_STATE)));
@@ -111,7 +112,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
     }
 
     public void drive(ChassisSpeeds speeds) {
-        if(speeds.omegaRadiansPerSecond == 0) {
+        if(speeds.omegaRadiansPerSecond == 0 && !thetaHoldControllerTele.atSetpoint()) {
             speeds.omegaRadiansPerSecond += thetaHoldControllerTele.calculate(getCurrentAngle().getRadians(), holdAngle.getRadians());
             if(Math.abs(Math.toDegrees(speeds.omegaRadiansPerSecond)) < 4) speeds.omegaRadiansPerSecond = 0;
         } else holdAngle = getCurrentAngle();
@@ -202,7 +203,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
     /* RESET COMMANDS FOR DIFFERENT ASPECTS */
 
     public void resetGyro(Rotation2d angle) {
-         gyro.setYaw(angle.getDegrees());
+        gyro.setYaw(angle.getDegrees());
         rotationOffset = 0;
         holdAngle = getCurrentAngle();
     }
@@ -234,6 +235,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
     protected void additionalSendableData(SendableBuilder builder) {
         builder.addDoubleProperty("Hold angle", () -> holdAngle.getDegrees(), null);
         builder.addDoubleProperty("Measured Angle", () -> getCurrentAngle().getDegrees(), null);
+        builder.addBooleanProperty("field relative", this::isFieldRelative, null);
     }
 
     @Override
