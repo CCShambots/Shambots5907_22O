@@ -119,8 +119,8 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
 		rotaryMotor.config_kD(Constants.Turret.kSlotIdx, Constants.Turret.rotaryGains.kD, Constants.Turret.kTimeoutMs);
 
 		/* Set acceleration and vcruise velocity - see documentation */
-		rotaryMotor.configMotionCruiseVelocity(degreesToTicks(ROTARY_MAX_VEL), Constants.Turret.kTimeoutMs);
-		rotaryMotor.configMotionAcceleration(degreesToTicks(ROTARY_MAX_ACCEL), Constants.Turret.kTimeoutMs);
+		rotaryMotor.configMotionCruiseVelocity(degreesToTicks(ROTARY_MAX_VEL) * 10, Constants.Turret.kTimeoutMs);
+		rotaryMotor.configMotionAcceleration(degreesToTicks(ROTARY_MAX_ACCEL) * 10, Constants.Turret.kTimeoutMs);
 
 		/* Zero the sensor once on robot boot up */
 		// rotaryMotor.setSelectedSensorPosition(0, Constants.Turret.kPIDLoopIdx, Constants.Turret.kTimeoutMs);
