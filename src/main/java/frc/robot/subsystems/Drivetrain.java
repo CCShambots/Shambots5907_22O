@@ -74,7 +74,6 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         //State machine stuff
         addDetermination(Undetermined, Idle, new InstantCommand(() -> {
             setAllModules(new SwerveModuleState(0, new Rotation2d()));
-            resetModuleControlLoops();
             resetGyro();
             resetHoldAngle();
         }));
@@ -102,7 +101,6 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
     @Override
     protected void onEnable() {
-        resetModuleControlLoops();
     }
 
     @Override
@@ -221,10 +219,6 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
     public void resetOdometryPose(Pose2d newPose) {
         odometry.resetPosition(newPose, getCurrentAngle());
         resetGyro(newPose.getRotation());
-    }
-
-    public void resetModuleControlLoops() {
-        modules.forEach((name, module) -> module.resetControlLoops());
     }
 
     public enum SwerveState {

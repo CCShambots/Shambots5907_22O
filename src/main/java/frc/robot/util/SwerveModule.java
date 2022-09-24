@@ -4,19 +4,12 @@ import com.ctre.phoenix.motorcontrol.*;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
-import com.ctre.phoenix.sensors.CANCoderStatusFrame;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
-import com.ctre.phoenix.sensors.SensorTimeBase;
 
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.Preferences;
 import frc.robot.Constants;
 
 public class SwerveModule implements Sendable{
@@ -35,38 +28,63 @@ public class SwerveModule implements Sendable{
 
     public SwerveModule(String name, int turnID, int driveID, int encoderID, double encoderOffset, boolean reverseDriveMotor, boolean reverseTurnEncoder) {
         this.moduleName = name;
-        turnMotor = new WPI_TalonFX(turnID);
+        turnMotor = new WPI_TalonFX(turnID, "Drivetrain");
         turnMotor.configFactoryDefault();
         
-        driveMotor = new WPI_TalonFX(driveID);
+        driveMotor = new WPI_TalonFX(driveID, "Drivetrain");
         driveMotor.configFactoryDefault();
         if(reverseDriveMotor) driveMotor.setInverted(true);
-        // driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 5);
         
         this.turnEncoder = new CANCoder(encoderID);
         turnEncoder.configFactoryDefault();
-        // turnEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 5);
-
-        //can be removed?
-        // vv
-        double radiansCoefficient = (2.0 * Math.PI) / 4096.0;
-        turnEncoder.configFeedbackCoefficient(radiansCoefficient, "rad", SensorTimeBase.PerSecond);
-        // ^^
 
         turnEncoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
         turnEncoder.configAbsoluteSensorRange(AbsoluteSensorRange.Unsigned_0_to_360);
         turnEncoder.configSensorDirection(false);
 
-        this.encoderOffset = encoderOffset + 180;
+        this.encoderOffset = encoderOffset;
 
-        initSelectedTurnEncoder();
+        initTurnMotor();
+        initDriveMotor();
 
-        driveMotor.configSelectedFeedbackCoefficient(
-                //TODO: idk if this math is correct
-                (1 / 2048.0)
-                * (1 / Constants.SwerveModule.DRIVE_RATIO)
-                * (2 * Math.PI * Constants.SwerveModule.WHEEL_RADIUS)
+        setDesiredState(
+            new SwerveModuleState(0, getTurnAngle())
         );
+    }   
+        
+    private void initTurnMotor() {
+        turnMotor.setSensorPhase(false);
+        turnMotor.configSupplyCurrentLimit(Constants.CURRENT_LIMIT);
+
+        /* Set relevant frame periods to be at least as fast as periodic rate */
+        turnMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 10, Constants.SwerveModule.kTimeoutMs);
+        turnMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 10, Constants.SwerveModule.kTimeoutMs);
+
+        /* Set the peak and nominal outputs */
+        turnMotor.configNominalOutputForward(0, Constants.SwerveModule.kTimeoutMs);
+        turnMotor.configNominalOutputReverse(0, Constants.SwerveModule.kTimeoutMs);
+        turnMotor.configPeakOutputForward(1, Constants.SwerveModule.kTimeoutMs);
+        turnMotor.configPeakOutputReverse(-1, Constants.SwerveModule.kTimeoutMs);
+
+        /* Set Motion Magic gains in slot0 - see documentation */
+        turnMotor.selectProfileSlot(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.kPIDLoopIdx);
+        turnMotor.config_kF(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.turnGains.kF, Constants.SwerveModule.kTimeoutMs);
+        turnMotor.config_kP(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.turnGains.kP, Constants.SwerveModule.kTimeoutMs);
+        turnMotor.config_kI(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.turnGains.kI, Constants.SwerveModule.kTimeoutMs);
+        turnMotor.config_kD(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.turnGains.kD, Constants.SwerveModule.kTimeoutMs);
+
+        /* Set acceleration and cruise velocity - see documentation */
+        turnMotor.configMotionCruiseVelocity(
+                Math.toDegrees(Constants.SwerveModule.MAX_TURN_SPEED),
+                Constants.SwerveModule.kTimeoutMs
+        );
+
+        turnMotor.configMotionAcceleration(
+                Math.toDegrees(Constants.SwerveModule.MAX_TURN_ACCEL),
+                Constants.SwerveModule.kTimeoutMs
+        );
+
+        turnMotor.configNeutralDeadband(0.001);
 
         turnMotor.configSelectedFeedbackSensor(
                 TalonFXFeedbackDevice.IntegratedSensor,
@@ -74,25 +92,18 @@ public class SwerveModule implements Sendable{
                 /*TODO: add constant*/30
         );
 
-        initTurnPID();
-        initDrivePID();
-
-        turnMotor.configNeutralDeadband(0.001/*TODO: change? or add constant*/);
-
-        //TODO: DO THE REST OF MOTOR CONFIG AS SEEN IN SwerveModule BRANCH
-
-        setDesiredState(
-                new SwerveModuleState(0, getTurnAngle())
+        turnMotor.configSelectedFeedbackCoefficient(
+                Constants.SwerveModule.TURN_SENSOR_RATIO * (360.0/2048.0)
         );
+        turnMotor.setSelectedSensorPosition(normalizeDegrees(turnEncoder.getAbsolutePosition() - encoderOffset));
     }
 
-    private void initDrivePID() {
+    private void initDriveMotor() {
         driveMotor.setSensorPhase(false);
-
+        
         driveMotor.configSupplyCurrentLimit(Constants.CURRENT_LIMIT);
-
+        
         driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 10, Constants.SwerveModule.kTimeoutMs);
-        driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 10, Constants.SwerveModule.kTimeoutMs);
 
         driveMotor.configNominalOutputForward(0, Constants.SwerveModule.kTimeoutMs);
         driveMotor.configNominalOutputReverse(0, Constants.SwerveModule.kTimeoutMs);
@@ -116,53 +127,20 @@ public class SwerveModule implements Sendable{
                 Math.toDegrees(Constants.SwerveModule.MAX_DRIVE_ACCEL),
                 Constants.SwerveModule.kTimeoutMs
         );
-    }
 
-    private void initTurnPID() {
-        turnMotor.setSensorPhase(false);
-        turnMotor.configSupplyCurrentLimit(Constants.CURRENT_LIMIT);
-
-        /* Set relevant frame periods to be at least as fast as periodic rate */
-        turnMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 10, Constants.SwerveModule.kTimeoutMs);
-        turnMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 10, Constants.SwerveModule.kTimeoutMs);
-
-        /* Set the peak and nominal outputs */
-        turnMotor.configNominalOutputForward(0, Constants.SwerveModule.kTimeoutMs);
-        turnMotor.configNominalOutputReverse(0, Constants.SwerveModule.kTimeoutMs);
-        turnMotor.configPeakOutputForward(1, Constants.SwerveModule.kTimeoutMs);
-        turnMotor.configPeakOutputReverse(-1, Constants.SwerveModule.kTimeoutMs);
-
-        /* Set Motion Magic gains in slot0 - see documentation */
-        turnMotor.selectProfileSlot(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.kPIDLoopIdx);
-        turnMotor.config_kF(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.turnGains.kF, Constants.SwerveModule.kTimeoutMs);
-        turnMotor.config_kP(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.turnGains.kP, Constants.SwerveModule.kTimeoutMs);
-        turnMotor.config_kI(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.turnGains.kI, Constants.SwerveModule.kTimeoutMs);
-        turnMotor.config_kD(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.turnGains.kD, Constants.SwerveModule.kTimeoutMs);
-
-        /* Set acceleration and vcruise velocity - see documentation */
-        turnMotor.configMotionCruiseVelocity(
-                Math.toDegrees(Constants.SwerveModule.MAX_TURN_SPEED),
-                Constants.SwerveModule.kTimeoutMs
-        );
-
-        turnMotor.configMotionAcceleration(
-                Math.toDegrees(Constants.SwerveModule.MAX_TURN_ACCEL),
-                Constants.SwerveModule.kTimeoutMs
+        driveMotor.configSelectedFeedbackCoefficient(
+                //TODO: idk if this math is correct
+                (1 / 2048.0)
+                * (1 / Constants.SwerveModule.DRIVE_RATIO)
+                * (2 * Math.PI * Constants.SwerveModule.WHEEL_RADIUS)      
         );
     }
 
-    private void initSelectedTurnEncoder() {
-        turnMotor.configSelectedFeedbackCoefficient(
-                Constants.SwerveModule.TURN_SENSOR_RATIO * (360.0/2048.0)
-        );
-        turnMotor.setSelectedSensorPosition(normalizeDegrees(turnEncoder.getAbsolutePosition() - encoderOffset));
-    }
+
 
     private double normalizeDegrees(double degrees) {
-        double out = Math.copySign(degrees, Math.abs(degrees) % 360);
-        return out >= 0 ?
-                out :
-                out + 360;
+        double out = Math.copySign(Math.abs(degrees) % 180, degrees);
+        return out;
     }
 
     public void setDesiredState(SwerveModuleState state) {
@@ -170,6 +148,14 @@ public class SwerveModule implements Sendable{
         targetState = optimizedState;
         double turnPos = turnMotor.getSelectedSensorPosition();
         targetEncoderPos = turnPos + (targetState.angle.getDegrees() - normalizeDegrees(turnPos));
+
+        turnMotor.set(
+                ControlMode.MotionMagic,
+                targetEncoderPos,
+                DemandType.ArbitraryFeedForward,
+                Constants.SwerveModule.KS_TURN/12
+        );
+
     }
 
     public Rotation2d getTurnAngle(){
@@ -185,13 +171,7 @@ public class SwerveModule implements Sendable{
     }
 
     public void run() {
-        turnMotor.set(
-                ControlMode.MotionMagic,
-                targetEncoderPos,
-                DemandType.ArbitraryFeedForward,
-                Constants.SwerveModule.KS_TURN/12
-        );
-
+        
         driveMotor.set(
                 ControlMode.Velocity,
                 targetState.speedMetersPerSecond/10,
@@ -201,25 +181,7 @@ public class SwerveModule implements Sendable{
     }
 
     public void stop() {
-        targetState = new SwerveModuleState(0.0, getTurnAngle());
-    }
-
-    public void resetControlLoops() {
-        stop();
-        /*drivePIDController.reset();
-        turnPIDController.reset(getTurnAngle().getRadians());*/
-        //TODO: idk if this works
-        turnMotor.set(ControlMode.PercentOutput, 0);
-        driveMotor.set(ControlMode.PercentOutput, 0);
-        stop();
-    }
-
-    public void setEncoderOffset(){
-        double newOffset = getTurnAngle().getRadians() + encoderOffset;
-        if (newOffset > Math.PI){ newOffset -= Math.PI; }
-        if (newOffset < -Math.PI){ newOffset += Math.PI; }
-        Preferences.setDouble(moduleName + "-encoder-offset", newOffset);
-        encoderOffset = newOffset;
+        setDesiredState(new SwerveModuleState(0.0, getTurnAngle()));
     }
 
     public String getModuleName() {
