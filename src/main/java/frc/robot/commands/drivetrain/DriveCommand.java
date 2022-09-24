@@ -37,9 +37,9 @@ public class DriveCommand extends CommandBase{
 
     @Override
     public void execute() {
-      double correctedX =  xLimiter.calculate(convertRawInput(xSupplier.getAsDouble(), MAX_LINEAR_SPEED));
-      double correctedY =  yLimiter.calculate(convertRawInput(ySupplier.getAsDouble(), MAX_LINEAR_SPEED));
-      double correctedRot =  thetaLimiter.calculate(convertRawInput(turnSupplier.getAsDouble(), MAX_ROTATION));
+      double correctedX =  convertRawInput(xSupplier.getAsDouble(), MAX_LINEAR_SPEED);
+      double correctedY =  convertRawInput(ySupplier.getAsDouble(), MAX_LINEAR_SPEED);
+      double correctedRot =  convertRawInput(turnSupplier.getAsDouble(), MAX_ROTATION);
 
       ChassisSpeeds speeds;
 
@@ -52,12 +52,10 @@ public class DriveCommand extends CommandBase{
         speeds = new ChassisSpeeds(correctedX, correctedY, correctedRot);
       }
 
-      //TODO: Remove
-      SmartDashboard.putNumber("drivetrain/Target chassis speed x", speeds.vxMetersPerSecond);
-      SmartDashboard.putNumber("drivetrain/Target chassis speed y", speeds.vyMetersPerSecond);
-      SmartDashboard.putNumber("drivetrain/Target chassis speed theta", Math.toDegrees(speeds.omegaRadiansPerSecond));
-
-
+      speeds.vxMetersPerSecond = xLimiter.calculate(speeds.vxMetersPerSecond);
+      speeds.vyMetersPerSecond = yLimiter.calculate(speeds.vyMetersPerSecond);
+      speeds.omegaRadiansPerSecond = thetaLimiter.calculate(speeds.omegaRadiansPerSecond);
+      
       drivetrain.drive(speeds);
     }
 

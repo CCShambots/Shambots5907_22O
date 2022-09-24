@@ -2,14 +2,27 @@
   "NetworkTables": {
     "SmartDashboard": {
       "drivetrain": {
+        "Module 1": {
+          "open": true
+        },
         "open": true
       },
-      "open": true
+      "open": true,
+      "turret": {
+        "open": true
+      }
     },
     "types": {
       "/FMSInfo": "FMSInfo",
       "/LiveWindow/RobotManager": "Subsystem",
       "/LiveWindow/Turret": "Subsystem",
+      "/LiveWindow/Ungrouped/DigitalInput[0]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[1]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[2]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[4]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[5]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[6]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[7]": "Digital Input",
       "/LiveWindow/Ungrouped/DigitalInput[8]": "Digital Input",
       "/LiveWindow/Ungrouped/DigitalInput[9]": "Digital Input",
       "/LiveWindow/Ungrouped/PIDController[10]": "PIDController",
@@ -17,6 +30,7 @@
       "/LiveWindow/Ungrouped/PIDController[12]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[13]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[14]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[15]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[1]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[2]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[3]": "PIDController",
@@ -37,10 +51,26 @@
       "/LiveWindow/Ungrouped/Talon FX [16]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon FX [17]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon FX [18]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [21]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [22]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [31]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [32]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [33]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [34]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon FX [41]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon FX [42]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon FX [43]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon FX [44]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [81]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [82]": "Motor Controller",
+      "/SmartDashboard/Choose Auto Route": "String Chooser",
+      "/SmartDashboard/Intake": "Subsystem",
+      "/SmartDashboard/climber/test/extend piston": "Command",
+      "/SmartDashboard/climber/test/lower climber": "Command",
+      "/SmartDashboard/climber/test/raise climber": "Command",
+      "/SmartDashboard/climber/test/reset climber pos": "Command",
+      "/SmartDashboard/climber/test/retract piston": "Command",
+      "/SmartDashboard/climber/test/stop climber": "Command",
       "/SmartDashboard/drivetrain": "Subsystem",
       "/SmartDashboard/drivetrain/field": "Field2d",
       "/SmartDashboard/drivetrain/thetaControllerTele": "PIDController",
@@ -66,7 +96,7 @@
     "Plot <0>": {
       "plots": [
         {
-          "height": -37,
+          "height": 735,
           "series": [
             {
               "color": [
@@ -75,7 +105,7 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/turret/flywheel velo"
+              "id": "NT:/SmartDashboard/drivetrain/Module 1/Angle"
             },
             {
               "color": [
@@ -84,14 +114,11 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/turret/flywheel target"
+              "id": "NT:/SmartDashboard/drivetrain/Module 1/Target Angle"
             }
           ]
         }
-      ],
-      "window": {
-        "visible": false
-      }
+      ]
     },
     "Plot <1>": {
       "plots": [
@@ -105,7 +132,7 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/turret/hood degrees"
+              "id": "NT:/SmartDashboard/drivetrain/Module 1/Raw Setpoint"
             },
             {
               "color": [
@@ -114,14 +141,11 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/turret/hood target"
+              "id": "NT:/SmartDashboard/drivetrain/Module 1/Raw Angle"
             }
           ]
         }
-      ],
-      "window": {
-        "visible": false
-      }
+      ]
     },
     "Plot <2>": {
       "plots": [
@@ -135,7 +159,7 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/turret/hood velo"
+              "id": "NT:/SmartDashboard/drivetrain/Module 1/Target Velocity"
             },
             {
               "color": [
@@ -144,132 +168,16 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/turret/hood target velo"
-            }
-          ]
-        }
-      ],
-      "window": {
-        "visible": false
-      }
-    },
-    "Plot <3>": {
-      "plots": [
-        {
-          "height": 338
-        }
-      ],
-      "window": {
-        "visible": false
-      }
-    },
-    "Plot <4>": {
-      "plots": [
-        {
-          "height": 338,
-          "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/turret/rotary degrees"
-            },
-            {
-              "color": [
-                0.8666667342185974,
-                0.5176470875740051,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/turret/rotary target"
-            }
-          ]
-        }
-      ],
-      "window": {
-        "visible": false
-      }
-    },
-    "Plot <5>": {
-      "plots": [
-        {
-          "height": 338,
-          "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/turret/rotary velo"
-            },
-            {
-              "color": [
-                0.8666667342185974,
-                0.5176470875740051,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/turret/rotary target velo"
-            }
-          ]
-        }
-      ],
-      "window": {
-        "visible": false
-      }
-    },
-    "Plot <6>": {
-      "plots": [
-        {
-          "height": 338,
-          "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/turret/rotary voltage"
-            }
-          ]
-        }
-      ],
-      "window": {
-        "visible": false
-      }
-    },
-    "Plot <7>": {
-      "plots": [
-        {
-          "height": 338,
-          "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/drivetrain/Module 1/Measuerd turn velo"
-            },
-            {
-              "color": [
-                0.8666667342185974,
-                0.5176470875740051,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/drivetrain/Module 1/Target turn velo"
+              "id": "NT:/SmartDashboard/drivetrain/Module 1/Velocity"
             }
           ]
         }
       ]
+    },
+    "Plot <3>": {
+      "window": {
+        "visible": false
+      }
     }
   }
 }

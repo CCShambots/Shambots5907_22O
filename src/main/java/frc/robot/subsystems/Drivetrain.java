@@ -13,7 +13,6 @@ import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -31,8 +30,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
-import frc.robot.Constants;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.commands.drivetrain.DriveCommand;
 import frc.robot.util.Shambots5907_SMF.StatedSubsystem;
 import frc.robot.util.SwerveModule;
@@ -66,21 +63,18 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         super(SwerveState.class);
 
         modules = new HashMap<>();
-        modules.put("Module 1", new SwerveModule("Module-1", MODULE_1_TURN_ID, MODULE_1_DRIVE_ID, MODULE_1_ENCODER_ID, MODULE_1_OFFSET, false, false, moduleOffsets[0]));
-        modules.put("Module 2", new SwerveModule("Module-2", MODULE_2_TURN_ID, MODULE_2_DRIVE_ID, MODULE_2_ENCODER_ID, MODULE_2_OFFSET, false, true, moduleOffsets[1]));
-        modules.put("Module 3", new SwerveModule("Module-3", MODULE_3_TURN_ID, MODULE_3_DRIVE_ID, MODULE_3_ENCODER_ID, MODULE_3_OFFSET, true, false, moduleOffsets[2]));
-        modules.put("Module 4", new SwerveModule("Module-4", MODULE_4_TURN_ID, MODULE_4_DRIVE_ID, MODULE_4_ENCODER_ID, MODULE_4_OFFSET, true, false, moduleOffsets[3]));
+        modules.put("Module 1", new SwerveModule("Module-1", MODULE_1_TURN_ID, MODULE_1_DRIVE_ID, MODULE_1_ENCODER_ID, MODULE_1_OFFSET, false, true));
+        modules.put("Module 2", new SwerveModule("Module-2", MODULE_2_TURN_ID, MODULE_2_DRIVE_ID, MODULE_2_ENCODER_ID, MODULE_2_OFFSET, false, true));
+        modules.put("Module 3", new SwerveModule("Module-3", MODULE_3_TURN_ID, MODULE_3_DRIVE_ID, MODULE_3_ENCODER_ID, MODULE_3_OFFSET, false, true));
+        modules.put("Module 4", new SwerveModule("Module-4", MODULE_4_TURN_ID, MODULE_4_DRIVE_ID, MODULE_4_ENCODER_ID, MODULE_4_OFFSET, false, true));
 
         gyro.configFactoryDefault();
 
-        rotationOffsetDegrees = getGyroHeading();
-        holdAngle = new Rotation2d(rotationOffsetDegrees);
-
-        odometry = new SwerveDrivePoseEstimator(getCurrentAngle(), new Pose2d(), kDriveKinematics,
-                new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.02, 0.02, 0.01),
-                new MatBuilder<>(Nat.N1(), Nat.N1()).fill(0),
-                new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0, 0, 0)
-                );
+        rotationOffset = getGyroHeading();
+        holdAngle = new Rotation2d(rotationOffset);
+        thetaHoldControllerTele.setTolerance(1.5);
+        
+        odometry = new SwerveDriveOdometry(kDriveKinematics, getCurrentAngle());
 
         thetaHoldControllerTele.enableContinuousInput(-Math.PI, Math.PI);
         field = new Field2d();
@@ -91,7 +85,6 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         //State machine stuff
         addDetermination(Undetermined, Idle, new InstantCommand(() -> {
             setAllModules(new SwerveModuleState(0, new Rotation2d()));
-            resetModuleControlLoops();
             resetGyro();
             resetHoldAngle();
         }));
@@ -102,7 +95,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         addCommutativeTransition(Idle, Teleop, new InstantCommand(), new InstantCommand(() -> setAllModules(STOPPED_STATE)));
 
         //TODO: Fix axes
-        setContinuousCommand(Teleop, new DriveCommand(this, () -> driverController.getRawAxis(0), () -> driverController.getRawAxis(1), () -> driverController.getRawAxis(4)));
+        setContinuousCommand(Teleop, new DriveCommand(this, () -> -driverController.getRawAxis(1), () -> -driverController.getRawAxis(0), () -> -driverController.getRawAxis(4)));
 
         addCommutativeTransition(Idle, XShape, new InstantCommand(() -> setModuleStates(X_SHAPE_ARRAY)), new InstantCommand(() -> setAllModules(STOPPED_STATE)));
         addCommutativeTransition(Teleop, XShape, new InstantCommand(() -> setModuleStates(X_SHAPE_ARRAY)), new InstantCommand(() -> setAllModules(STOPPED_STATE)));
@@ -176,7 +169,6 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
     @Override
     protected void onEnable() {
-        resetModuleControlLoops();
     }
 
     @Override
@@ -187,7 +179,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
     }
 
     public void drive(ChassisSpeeds speeds) {
-        if(speeds.omegaRadiansPerSecond == 0) {
+        if(speeds.omegaRadiansPerSecond == 0 && !thetaHoldControllerTele.atSetpoint()) {
             speeds.omegaRadiansPerSecond += thetaHoldControllerTele.calculate(getCurrentAngle().getRadians(), holdAngle.getRadians());
             if(Math.abs(Math.toDegrees(speeds.omegaRadiansPerSecond)) < 4) speeds.omegaRadiansPerSecond = 0;
         } else holdAngle = getCurrentAngle();
@@ -270,7 +262,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
     public void resetGyro(Rotation2d angle) {
         gyro.setYaw(angle.getDegrees());
-        rotationOffsetDegrees = 0;
+        rotationOffset = 0;
         holdAngle = getCurrentAngle();
     }
 
@@ -288,10 +280,6 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         resetGyro(newPose.getRotation());
     }
 
-    public void resetModuleControlLoops() {
-        modules.forEach((name, module) -> module.resetControlLoops());
-    }
-
     public enum SwerveState {
         Undetermined, Idle, Trajectory, PurePursuit, Teleop, XShape
     }
@@ -305,6 +293,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
     protected void additionalSendableData(SendableBuilder builder) {
         builder.addDoubleProperty("Hold angle", () -> holdAngle.getDegrees(), null);
         builder.addDoubleProperty("Measured Angle", () -> getCurrentAngle().getDegrees(), null);
+        builder.addBooleanProperty("field relative", this::isFieldRelative, null);
     }
 
     @Override
