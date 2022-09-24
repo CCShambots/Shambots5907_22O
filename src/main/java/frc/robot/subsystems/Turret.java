@@ -400,8 +400,8 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
     public void turnOnLimelight() {limelight.setOn();}
     public void turnOffLimelight() {limelight.setOff();}
     public boolean doesLimelightHaveTarget() {return limelight.hasTarget();}
-    public double getLimelightXOffsetDegrees() {return limelight.targetOffset().getX();}
-    public double getLimelightYOffsetDegrees() {return limelight.targetOffset().getY();}
+    public double getLimelightXOffsetDegrees() {return limelight.getXOffset().getDegrees();}
+    public double getLimelightYOffsetDegrees() {return limelight.getYOffset().getDegrees();}
 
     @Override
     public String getName() {return "turret";}

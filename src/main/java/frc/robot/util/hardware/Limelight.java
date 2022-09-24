@@ -5,9 +5,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
-import static frc.robot.Constants.Turret.*;
-import static java.lang.Math.*;
-
 public class Limelight{
 
     private static Limelight instance;
@@ -32,17 +29,6 @@ public class Limelight{
      */
     public boolean hasTarget() {
         return getLimeLightTable().getEntry("tv").getDouble(0) == 1;
-    }
-
-    /**
-     * Note: The returned values are raw from the limelight. They are negated (if needed) in the turret subsystem
-     * @return how far the detected target is from the center of the limelight frame in degrees
-     */
-    public Translation2d targetOffset() {
-        return new Translation2d(
-            -getLimeLightTable().getEntry("tx").getDouble(0),
-            getLimeLightTable().getEntry("ty").getDouble(0)
-        );
     }
 
     public Rotation2d getXOffset() {
