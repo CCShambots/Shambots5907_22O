@@ -84,6 +84,8 @@ public class RobotContainer {
     }));
     new JoystickButton(operatorController, 3).whenPressed(new InstantCommand(() -> intake.requestTransition(intake.getPumpState())));
 
+    new JoystickButton(driverController, 6).whenPressed(new InstantCommand(() -> drivetrain.incrementModules()));
+
     new JoystickButton(driverController, 5).whenPressed(new InstantCommand(() -> drivetrain.resetGyro()));
 
 

@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 
 public class SwerveModule implements Sendable{
@@ -167,8 +168,8 @@ public class SwerveModule implements Sendable{
         SwerveModuleState optimizedState = SwerveModuleState.optimize(state, getTurnAngle());
         targetState = optimizedState;        
         double turnPos = turnMotor.getSelectedSensorPosition();
-        targetEncoderPos = turnPos + (targetState.angle.getDegrees() - normalizeDegrees(turnPos));
-
+        targetEncoderPos = turnPos + (normalizeDegrees(optimizedState.angle.getDegrees() - normalizeDegrees(turnPos)));
+        
         turnMotor.set(
                 ControlMode.MotionMagic,
                 targetEncoderPos
