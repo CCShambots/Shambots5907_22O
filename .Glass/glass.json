@@ -82,9 +82,6 @@
       "/SmartDashboard/drivetrain/field": {
         "Module 1": {
           "style": "Box/Image"
-        },
-        "window": {
-          "visible": true
         }
       }
     }
@@ -118,7 +115,10 @@
             }
           ]
         }
-      ]
+      ],
+      "window": {
+        "visible": false
+      }
     },
     "Plot <1>": {
       "plots": [
@@ -145,7 +145,10 @@
             }
           ]
         }
-      ]
+      ],
+      "window": {
+        "visible": false
+      }
     },
     "Plot <2>": {
       "plots": [

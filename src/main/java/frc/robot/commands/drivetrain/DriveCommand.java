@@ -4,7 +4,6 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.Drivetrain;
@@ -20,7 +19,6 @@ public class DriveCommand extends CommandBase{
     private SlewRateLimiter xLimiter = new SlewRateLimiter(MAX_LINEAR_ACCELERATION);
     private SlewRateLimiter yLimiter = new SlewRateLimiter(MAX_LINEAR_ACCELERATION);
     private SlewRateLimiter thetaLimiter = new SlewRateLimiter(MAX_ROT_ACCEL);
-
 
     public DriveCommand(Drivetrain drivetrain, DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier turnSupplier) {
         this.drivetrain = drivetrain;

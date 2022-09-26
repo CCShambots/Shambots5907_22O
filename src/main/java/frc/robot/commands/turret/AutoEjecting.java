@@ -3,14 +3,11 @@ package frc.robot.commands.turret;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Constants;
 import frc.robot.subsystems.Turret;
 import frc.robot.util.math.Geometry;
 import frc.robot.util.math.InterpLUT;
 
 import java.util.function.Supplier;
-
-import static frc.robot.Constants.Turret.*;
 
 public class AutoEjecting extends CommandBase {
     private Turret t;

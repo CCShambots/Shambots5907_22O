@@ -26,8 +26,6 @@ import frc.robot.util.math.Range;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import frc.robot.util.hardware.Gains;
-import frc.robot.util.math.BoundingRegion;
 
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
@@ -172,8 +170,8 @@ public final class Constants {
         public static final double WHEEL_BASE = 0.52705;
 
         // Maximum linear chassis speed in meters per second (MK4 standard modules capable of 4.1)
-        public static final double MAX_LINEAR_SPEED = 2;
-        public static final double MAX_LINEAR_ACCELERATION = 2;
+        public static final double MAX_LINEAR_SPEED = 3;
+        public static final double MAX_LINEAR_ACCELERATION = 5;
         // Maximum chassis rotational speed in radians per second
         public static final double rotationRadius = Math.sqrt(Math.pow(TRACK_WIDTH / 2.0, 2) + Math.pow(WHEEL_BASE / 2.0, 2)) * 2 * Math.PI;
         public static final double MAX_ROTATION = (MAX_LINEAR_SPEED / rotationRadius) * (2 * Math.PI);

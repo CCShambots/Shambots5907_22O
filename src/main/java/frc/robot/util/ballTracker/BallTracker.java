@@ -9,8 +9,6 @@ import frc.robot.util.hardware.ColorSensor;
 import frc.robot.util.hardware.ColorSensor.ColorSensorOutput;
 import frc.robot.util.hardware.ProximitySensor;
 
-import java.sql.Array;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,7 +34,7 @@ public class BallTracker {
                         safeSetBallPos(Left, PastLeft);
                     } else if(conveyor.getLeftConveyorState() == Exhausting) {
                         safeSetBallPos(BetweenLeftAndCenter, Center);
-                    } else {
+                    } else if(conveyor.getLeftConveyorState() == Intaking) {
                         createNewBall(evaluateBallColorType(leftColor.getColor()), Left);
                     }
             }
@@ -79,7 +77,7 @@ public class BallTracker {
                 safeSetBallPos(Right, PastRight);
             } else if(conveyor.getRightConveyorState() == Exhausting) {
                     safeSetBallPos(BetweenRightAndCenter, Center);
-            } else {
+            } else if(conveyor.getRightConveyorState() == Intaking){
                 createNewBall(evaluateBallColorType(rightColor.getColor()), Right);
             }
         });
