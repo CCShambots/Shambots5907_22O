@@ -27,11 +27,9 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.commands.drivetrain.DriveCommand;
+import frc.robot.commands.drivetrain.LimeLightHoldAngleCommand;
 import frc.robot.util.Shambots5907_SMF.StatedSubsystem;
 import frc.robot.util.SwerveModule;
 import frc.robot.util.hardware.Limelight;
@@ -104,6 +102,29 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         addCommutativeTransition(Idle, XShape, new InstantCommand(() -> setModuleStates(X_SHAPE_ARRAY)), new InstantCommand(() -> setAllModules(STOPPED_STATE)));
         addCommutativeTransition(Teleop, XShape, new InstantCommand(() -> setModuleStates(X_SHAPE_ARRAY)), new InstantCommand(() -> setAllModules(STOPPED_STATE)));
 
+        //TODO: big boy transition declaration
+        addCommutativeTransition(
+                Teleop,
+                TeleopLimeLightTracking,
+                new ParallelRaceGroup(
+                        new DriveCommand(
+                                this,
+                                () -> -driverController.getRawAxis(1),
+                                () -> -driverController.getRawAxis(0),
+                                //disallow driver turning
+                                () -> 0
+                        ),
+                        new LimeLightHoldAngleCommand(
+                                this
+                        )
+                ),
+                new DriveCommand(
+                        this,
+                        () -> -driverController.getRawAxis(1),
+                        () -> -driverController.getRawAxis(0),
+                        () -> -driverController.getRawAxis(4)
+                )
+        );
     }
 
     Pose2d visionPoseEstimation = new Pose2d();
@@ -274,13 +295,17 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         holdAngle = getCurrentAngle();
     }
 
+    public void setHoldAngle(Rotation2d angle) {
+        holdAngle = angle;
+    }
+
     public void resetOdometryPose(Pose2d newPose) {
         odometry.resetPosition(newPose, getCurrentAngle());
         resetGyro(newPose.getRotation());
     }
 
     public enum SwerveState {
-        Undetermined, Idle, Trajectory, PurePursuit, Teleop, XShape
+        Undetermined, Idle, Trajectory, PurePursuit, Teleop, XShape, TeleopLimeLightTracking
     }
 
     @Override
