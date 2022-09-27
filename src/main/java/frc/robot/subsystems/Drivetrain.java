@@ -102,11 +102,9 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         addCommutativeTransition(Idle, XShape, new InstantCommand(() -> setModuleStates(X_SHAPE_ARRAY)), new InstantCommand(() -> setAllModules(STOPPED_STATE)));
         addCommutativeTransition(Teleop, XShape, new InstantCommand(() -> setModuleStates(X_SHAPE_ARRAY)), new InstantCommand(() -> setAllModules(STOPPED_STATE)));
 
-        //TODO: big boy transition declaration
-        addCommutativeTransition(
-                Teleop,
+        setContinuousCommand(
                 TeleopLimeLightTracking,
-                new ParallelRaceGroup(
+                new ParallelCommandGroup(
                         new DriveCommand(
                                 this,
                                 () -> -driverController.getRawAxis(1),
@@ -117,14 +115,10 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
                         new LimeLightHoldAngleCommand(
                                 this
                         )
-                ),
-                new DriveCommand(
-                        this,
-                        () -> -driverController.getRawAxis(1),
-                        () -> -driverController.getRawAxis(0),
-                        () -> -driverController.getRawAxis(4)
                 )
         );
+
+        addCommutativeTransition(TeleopLimeLightTracking, Teleop, new InstantCommand(), new InstantCommand());
     }
 
     Pose2d visionPoseEstimation = new Pose2d();
