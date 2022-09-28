@@ -113,37 +113,27 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         updateOdometry();
 
         updateField2dObject();
-        try {
 
-            if(Limelight.getInstance().hasTarget()) {
-                visionPoseEstimation = ComputerVisionUtil.estimateFieldToRobot(
-                        LIMELIGHT_HEIGHT, GOAL_HEIGHT, LIMELIGHT_ANGLE, Limelight.getInstance().getYOffset().getRadians(), Limelight.getInstance().getXOffset().plus(getRotaryAngle.get()),
-                        getCurrentAngle(), Geometry.getCurrentTargetPose(getDrivetrainAngle.get(), getRotaryAngle.get(), getLimelightXOffsetAngle.get()),
-                        new Transform2d(new Translation2d(), new Rotation2d())
-                );
-    
-                field.getObject("limelight").setPose(visionPoseEstimation);
-    
-                odometry.addVisionMeasurement(visionPoseEstimation, Timer.getFPGATimestamp());
-            }
-        } catch (Exception e) {
+        if(Limelight.getInstance().hasTarget()) {
+            visionPoseEstimation = ComputerVisionUtil.estimateFieldToRobot(
+                    LIMELIGHT_HEIGHT, GOAL_HEIGHT, LIMELIGHT_ANGLE, Limelight.getInstance().getYOffset().getRadians(), Limelight.getInstance().getXOffset().plus(getRotaryAngle.get()),
+                    getCurrentAngle(), Geometry.getCurrentTargetPose(getDrivetrainAngle.get(), getRotaryAngle.get(), getLimelightXOffsetAngle.get()),
+                    new Transform2d(new Translation2d(), new Rotation2d())
+            );
 
+            field.getObject("limelight").setPose(visionPoseEstimation);
+
+            odometry.addVisionMeasurement(visionPoseEstimation, Timer.getFPGATimestamp());
         }
     }
 
     public void updateOdometry() {
-        try {
-
-            odometry.update(getCurrentAngle(),
-                    modules.get("Module 1").getCurrentState(),
-                    modules.get("Module 2").getCurrentState(),
-                    modules.get("Module 3").getCurrentState(),
-                    modules.get("Module 4").getCurrentState()
-            );
-        } catch (Exception e) {
-            System.out.println("odometry update failed");
-            e.printStackTrace();
-        }
+        odometry.update(getCurrentAngle(),
+                modules.get("Module 1").getCurrentState(),
+                modules.get("Module 2").getCurrentState(),
+                modules.get("Module 3").getCurrentState(),
+                modules.get("Module 4").getCurrentState()
+        );
     }
 
     private void updateField2dObject() {

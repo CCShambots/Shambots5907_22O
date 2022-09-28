@@ -18,7 +18,6 @@ import frc.robot.subsystems.Lights;
 
 import java.util.*;
 
-
 public class RobotContainer {
   private final Joystick driverController = new Joystick(0);
   private final Joystick operatorController = new Joystick(1);
@@ -30,16 +29,20 @@ public class RobotContainer {
   private final Climber climber = new Climber();
   private final Lights lights = new Lights();
 
-  private final RobotManager robotManager = new RobotManager(drivetrain, intake, conveyor, turret, climber, lights);
+  private final RobotManager robotManager;
 
   private final AutonomousLoader autoLoader;
   private final Map<String, PathPlannerTrajectory> paths = new HashMap<>();
 
   public RobotContainer() {
 
-    // paths.putAll(loadPaths(List.of(
-    //         "test"
-    // )));
+    //Pull trajectories from Pathplanner
+     paths.putAll(loadPaths(List.of(
+             "example"
+     )));
+
+     //Instantiate the robot manager
+    robotManager = new RobotManager(drivetrain, intake, conveyor, turret, climber, lights, paths);
 
     autoLoader = new AutonomousLoader(robotManager, paths);
     SmartDashboard.putData("Choose Auto Route", autoLoader.getSendableChooser());

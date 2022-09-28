@@ -1,5 +1,7 @@
 package frc.robot.util;
 
+import com.pathplanner.lib.PathPlannerTrajectory;
+import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.*;
@@ -24,13 +26,15 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
     private Climber c;
     private Lights l;
 
+    private Map<String, PathPlannerTrajectory> trajectories;
+
     private Map<SimpleTransition<RobotState>, List<BooleanSupplier>> safeConditions = new HashMap<>();
 
     private int prevBallCount;
     private boolean prevShouldDisplayBallCount;
     private Constants.RobotEnabled prevBotEnabledStatus;
 
-    public RobotManager(Drivetrain dt, Intake i, Conveyor co, Turret t, Climber c, Lights l) {
+    public RobotManager(Drivetrain dt, Intake i, Conveyor co, Turret t, Climber c, Lights l, Map<String, PathPlannerTrajectory> trajectories) {
         super(RobotState.class);
 
         this.dt = dt;
@@ -39,6 +43,8 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
         this.t = t;
         this.c = c;
         this.l = l;
+
+        this.trajectories = trajectories;
 
         //Determination Logic; this transition will start instantly upon boot of robot code, but won't finish until every subsystem is enabled
         addDetermination(Undetermined, Idle, new ParallelCommandGroup(
@@ -61,7 +67,7 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
                         t.requestTransition(Turret.TurretState.ActiveTracking);
                     }
                     if(!dt.isInState(SwerveState.Teleop, SwerveState.XShape
-                    ) && !dt.isTransitioning()) {
+                    ) && !dt.isTransitioning() && Constants.botEnabledStatus == Constants.RobotEnabled.Teleop) {
                         dt.requestTransition(SwerveState.Teleop);
                     }
                 }),
@@ -324,6 +330,22 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
                     return;
             }
         } else requestTransition(Climb);
+    }
+
+    public Command trajectoryOnDt(String name, boolean resetPose) {
+        Command toRun = dt.getTrajectoryCommand(trajectories.get(name), resetPose)
+                .andThen(() -> dt.requestTransition(SwerveState.Idle));
+
+        return dt.goToStateCommand(SwerveState.Trajectory, toRun);
+    }
+
+    /**
+     * Get a command to run on the drivetrain
+     * @param name name of the trajectory
+     * @return command to run
+     */
+    public Command trajectoryOnDt(String name) {
+        return trajectoryOnDt(name, false);
     }
 
     @Override

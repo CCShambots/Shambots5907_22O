@@ -42,6 +42,5 @@ public class AutonomousLoader {
 
     public enum Route {
         FiveBall
-
     }
 }
