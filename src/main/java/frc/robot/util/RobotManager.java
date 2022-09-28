@@ -60,7 +60,7 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
                     if(!t.isInState(Turret.TurretState.ActiveTracking) && !t.isTransitioning()) {
                         t.requestTransition(Turret.TurretState.ActiveTracking);
                     }
-                    if(!dt.isInState(SwerveState.Teleop, SwerveState.XShape
+                    if(!dt.isInState(SwerveState.Teleop, SwerveState.XShape, SwerveState.TeleopLimeLightTracking
                     ) && !dt.isTransitioning()) {
                         dt.requestTransition(SwerveState.Teleop);
                     }
@@ -99,12 +99,15 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
         addTransition(Idle, IntakeRight, new InstantCommand(() -> {
             i.requestTransition(Intake.IntakeState.RightSideRunning);
             co.requestTransition(Conveyor.ConveyorState.StartIntakeRight);
+            
+            System.out.println("going idle to right");
         }));
 
         //The bot should only be allowed to start intaking if the conveyor and intake are idling (i.e. not still running from "eject bottom")
         addSafeTransitionCondition(Idle, IntakeRight, () -> co.isInState(Conveyor.ConveyorState.Idle), () -> i.isInState(Intake.IntakeState.Idle));
 
         addTransition(IntakeRight, Idle, new InstantCommand(() -> {
+            System.out.println("going right to idle");
             i.requestTransition(Intake.IntakeState.Idle);
             co.setShouldEndIntakeSequence(true); //We shouldn't directly request Idle because the intaking subroutine occurs with the shouldEndIntakeSequence flag
 

@@ -20,11 +20,15 @@ public class DriveCommand extends CommandBase{
     private SlewRateLimiter yLimiter = new SlewRateLimiter(MAX_LINEAR_ACCELERATION);
     private SlewRateLimiter thetaLimiter = new SlewRateLimiter(MAX_ROT_ACCEL);
 
-    public DriveCommand(Drivetrain drivetrain, DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier turnSupplier) {
+    private boolean useTurning;
+
+    public DriveCommand(Drivetrain drivetrain, DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier turnSupplier, boolean useTurning) {
         this.drivetrain = drivetrain;
         this.xSupplier = xSupplier;
         this.ySupplier = ySupplier;
         this.turnSupplier = turnSupplier;
+
+        this.useTurning = useTurning;
 
         addRequirements(drivetrain);
     }
@@ -54,7 +58,7 @@ public class DriveCommand extends CommandBase{
       speeds.vyMetersPerSecond = yLimiter.calculate(speeds.vyMetersPerSecond);
       speeds.omegaRadiansPerSecond = thetaLimiter.calculate(speeds.omegaRadiansPerSecond);
       
-      drivetrain.drive(speeds);
+      drivetrain.drive(speeds, useTurning);
     }
 
     @Override
