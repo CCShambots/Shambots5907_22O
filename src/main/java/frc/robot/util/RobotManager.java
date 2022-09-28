@@ -1,7 +1,5 @@
 package frc.robot.util;
 
-import com.pathplanner.lib.PathPlannerTrajectory;
-import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.*;
@@ -26,15 +24,13 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
     private Climber c;
     private Lights l;
 
-    private Map<String, PathPlannerTrajectory> trajectories;
-
     private Map<SimpleTransition<RobotState>, List<BooleanSupplier>> safeConditions = new HashMap<>();
 
     private int prevBallCount;
     private boolean prevShouldDisplayBallCount;
     private Constants.RobotEnabled prevBotEnabledStatus;
 
-    public RobotManager(Drivetrain dt, Intake i, Conveyor co, Turret t, Climber c, Lights l, Map<String, PathPlannerTrajectory> trajectories) {
+    public RobotManager(Drivetrain dt, Intake i, Conveyor co, Turret t, Climber c, Lights l) {
         super(RobotState.class);
 
         this.dt = dt;
@@ -43,8 +39,6 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
         this.t = t;
         this.c = c;
         this.l = l;
-
-        this.trajectories = trajectories;
 
         //Determination Logic; this transition will start instantly upon boot of robot code, but won't finish until every subsystem is enabled
         addDetermination(Undetermined, Idle, new ParallelCommandGroup(
@@ -66,8 +60,8 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
                     if(!t.isInState(Turret.TurretState.ActiveTracking) && !t.isTransitioning()) {
                         t.requestTransition(Turret.TurretState.ActiveTracking);
                     }
-                    if(!dt.isInState(SwerveState.Teleop, SwerveState.XShape
-                    ) && !dt.isTransitioning() && Constants.botEnabledStatus == Constants.RobotEnabled.Teleop) {
+                    if(!dt.isInState(SwerveState.Teleop, SwerveState.XShape, SwerveState.TeleopLimeLightTracking
+                    ) && !dt.isTransitioning()) {
                         dt.requestTransition(SwerveState.Teleop);
                     }
                 }),
@@ -105,12 +99,15 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
         addTransition(Idle, IntakeRight, new InstantCommand(() -> {
             i.requestTransition(Intake.IntakeState.RightSideRunning);
             co.requestTransition(Conveyor.ConveyorState.StartIntakeRight);
+            
+            System.out.println("going idle to right");
         }));
 
         //The bot should only be allowed to start intaking if the conveyor and intake are idling (i.e. not still running from "eject bottom")
         addSafeTransitionCondition(Idle, IntakeRight, () -> co.isInState(Conveyor.ConveyorState.Idle), () -> i.isInState(Intake.IntakeState.Idle));
 
         addTransition(IntakeRight, Idle, new InstantCommand(() -> {
+            System.out.println("going right to idle");
             i.requestTransition(Intake.IntakeState.Idle);
             co.setShouldEndIntakeSequence(true); //We shouldn't directly request Idle because the intaking subroutine occurs with the shouldEndIntakeSequence flag
 
@@ -330,22 +327,6 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
                     return;
             }
         } else requestTransition(Climb);
-    }
-
-    public Command trajectoryOnDt(String name, boolean resetPose) {
-        Command toRun = dt.getTrajectoryCommand(trajectories.get(name), resetPose)
-                .andThen(() -> dt.requestTransition(SwerveState.Idle));
-
-        return dt.goToStateCommand(SwerveState.Trajectory, toRun);
-    }
-
-    /**
-     * Get a command to run on the drivetrain
-     * @param name name of the trajectory
-     * @return command to run
-     */
-    public Command trajectoryOnDt(String name) {
-        return trajectoryOnDt(name, false);
     }
 
     @Override

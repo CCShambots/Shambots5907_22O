@@ -97,6 +97,10 @@ public class RobotContainer {
 
     new JoystickButton(driverController, 3).whenPressed(new InstantCommand(() -> drivetrain.requestTransition(SwerveState.XShape)))
       .whenReleased(new InstantCommand(() -> drivetrain.requestTransition(SwerveState.Teleop)));
+
+    new JoystickButton(driverController, 4)
+      .whenPressed(new InstantCommand(() -> drivetrain.requestTransition(SwerveState.TeleopLimeLightTracking)))
+      .whenReleased(new InstantCommand(() -> drivetrain.requestTransition(SwerveState.Teleop)));
   }
 
   public void runControlLoops() {

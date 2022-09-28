@@ -27,11 +27,9 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.commands.drivetrain.DriveCommand;
+import frc.robot.commands.drivetrain.LimeLightHoldAngleCommand;
 import frc.robot.util.Shambots5907_SMF.StatedSubsystem;
 import frc.robot.util.SwerveModule;
 import frc.robot.util.hardware.Limelight;
@@ -73,7 +71,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
         rotationOffset = getGyroHeading();
         holdAngle = new Rotation2d(rotationOffset);
-        thetaHoldControllerTele.setTolerance(1.5);
+        thetaHoldControllerTele.setTolerance(Math.toRadians(1.5));
         
         odometry = new SwerveDrivePoseEstimator(getCurrentAngle(), new Pose2d(), kDriveKinematics,
                 new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.02, 0.02, 0.01),
@@ -99,11 +97,29 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
         addCommutativeTransition(Idle, Teleop, new InstantCommand(), new InstantCommand(() -> setAllModules(STOPPED_STATE)));
 
-        setContinuousCommand(Teleop, new DriveCommand(this, () -> -driverController.getRawAxis(1), () -> -driverController.getRawAxis(0), () -> -driverController.getRawAxis(4)));
+        setContinuousCommand(Teleop, new DriveCommand(this, () -> -driverController.getRawAxis(1), () -> -driverController.getRawAxis(0), () -> -driverController.getRawAxis(4), true));
 
         addCommutativeTransition(Idle, XShape, new InstantCommand(() -> setModuleStates(X_SHAPE_ARRAY)), new InstantCommand(() -> setAllModules(STOPPED_STATE)));
         addCommutativeTransition(Teleop, XShape, new InstantCommand(() -> setModuleStates(X_SHAPE_ARRAY)), new InstantCommand(() -> setAllModules(STOPPED_STATE)));
 
+        setContinuousCommand(
+                TeleopLimeLightTracking,
+                new ParallelCommandGroup(
+                        new DriveCommand(
+                                this,
+                                () -> -driverController.getRawAxis(1),
+                                () -> -driverController.getRawAxis(0),
+                                //disallow driver turning
+                                () -> 0,
+                                false
+                        ),
+                        new LimeLightHoldAngleCommand(
+                                this
+                        )
+                )
+        );
+
+        addCommutativeTransition(TeleopLimeLightTracking, Teleop, new InstantCommand(), new InstantCommand());
     }
 
     Pose2d visionPoseEstimation = new Pose2d();
@@ -167,11 +183,14 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         });
     }
 
-    public void drive(ChassisSpeeds speeds) {
+    public void drive(ChassisSpeeds speeds, boolean allowHoldAngleChange) {
         if(speeds.omegaRadiansPerSecond == 0 && !thetaHoldControllerTele.atSetpoint()) {
-            speeds.omegaRadiansPerSecond += thetaHoldControllerTele.calculate(getCurrentAngle().getRadians(), holdAngle.getRadians());
-            if(Math.abs(Math.toDegrees(speeds.omegaRadiansPerSecond)) < 4) speeds.omegaRadiansPerSecond = 0;
-        } else holdAngle = getCurrentAngle();
+            speeds.omegaRadiansPerSecond += thetaHoldControllerTele.calculate(getCurrentAngle().getRadians());
+            if(Math.abs(Math.toDegrees(speeds.omegaRadiansPerSecond)) < 4) {
+                speeds.omegaRadiansPerSecond = 0;
+            }
+
+        } else if(allowHoldAngleChange) setHoldAngle(getCurrentAngle());
 
         SwerveModuleState[] swerveModuleStates = kDriveKinematics.toSwerveModuleStates(speeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, MAX_LINEAR_SPEED);
@@ -258,10 +277,16 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
     public void resetGyro() {
         resetGyro(new Rotation2d());
+        resetHoldAngle();
     }
 
     public void resetHoldAngle(){
-        holdAngle = getCurrentAngle();
+        setHoldAngle(new Rotation2d());
+    }
+
+    public void setHoldAngle(Rotation2d angle) {
+        holdAngle = angle;
+        thetaHoldControllerTele.setSetpoint(angle.getRadians());
     }
 
     public void resetOdometryPose(Pose2d newPose) {
@@ -270,7 +295,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
     }
 
     public enum SwerveState {
-        Undetermined, Idle, Trajectory, PurePursuit, Teleop, XShape
+        Undetermined, Idle, Trajectory, PurePursuit, Teleop, XShape, TeleopLimeLightTracking
     }
 
     @Override
