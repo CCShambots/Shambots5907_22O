@@ -14,6 +14,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 
+import com.pathplanner.lib.PathPlannerTrajectory;
+
 import static frc.robot.util.RobotManager.RobotState.*;
 
 public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
@@ -26,11 +28,13 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
 
     private Map<SimpleTransition<RobotState>, List<BooleanSupplier>> safeConditions = new HashMap<>();
 
+    private Map<String, PathPlannerTrajectory> trajectories;
+
     private int prevBallCount;
     private boolean prevShouldDisplayBallCount;
     private Constants.RobotEnabled prevBotEnabledStatus;
 
-    public RobotManager(Drivetrain dt, Intake i, Conveyor co, Turret t, Climber c, Lights l) {
+    public RobotManager(Drivetrain dt, Intake i, Conveyor co, Turret t, Climber c, Lights l, Map<String, PathPlannerTrajectory> trajectories) {
         super(RobotState.class);
 
         this.dt = dt;
@@ -61,7 +65,7 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
                         t.requestTransition(Turret.TurretState.ActiveTracking);
                     }
                     if(!dt.isInState(SwerveState.Teleop, SwerveState.XShape, SwerveState.TeleopLimeLightTracking
-                    ) && !dt.isTransitioning()) {
+                    ) && !dt.isTransitioning()  && Constants.botEnabledStatus == Constants.RobotEnabled.Teleop) {
                         dt.requestTransition(SwerveState.Teleop);
                     }
                 }),
@@ -276,6 +280,22 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
      */
     private void addSafeTransitionCondition(RobotState startState, RobotState endState, BooleanSupplier... conditions) {
         safeConditions.put(new SimpleTransition<RobotState>(startState, endState), List.of(conditions));
+    }
+
+    public Command trajectoryOnDt(String name, boolean resetPose) {
+        Command toRun = dt.getTrajectoryCommand(trajectories.get(name), resetPose)
+                .andThen(() -> dt.requestTransition(SwerveState.Idle));
+
+        return dt.goToStateCommand(SwerveState.Trajectory, toRun);
+    }
+
+    /**
+     * Get a command to run on the drivetrain
+     * @param name name of the trajectory
+     * @return command to run
+     */
+    public Command trajectoryOnDt(String name) {
+        return trajectoryOnDt(name, false);
     }
 
     @Override
