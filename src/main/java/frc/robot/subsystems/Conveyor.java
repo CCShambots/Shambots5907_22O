@@ -363,10 +363,10 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
 
     @Override
     public void additionalSendableData(SendableBuilder builder) {
-        builder.addDoubleProperty("left-conveyor-speed", leftConveyor::get, null);
-        builder.addDoubleProperty("right-conveyor-speed", rightConveyor::get, null);
-        builder.addDoubleProperty("left-compactor-speed", leftCompactor::get, null);
-        builder.addDoubleProperty("right-compactor-speed", rightCompactor::get, null);
+        // builder.addDoubleProperty("left-conveyor-speed", leftConveyor::get, null);
+        // builder.addDoubleProperty("right-conveyor-speed", rightConveyor::get, null);
+        // builder.addDoubleProperty("left-compactor-speed", leftCompactor::get, null);
+        // builder.addDoubleProperty("right-compactor-speed", rightCompactor::get, null);
         builder.addBooleanProperty("should-end-intake-sequence", this::shouldEndIntakeSequence, null);
         builder.addBooleanProperty("color-detection-enabled", ballTracker::isColorDetectionEnabled, null);
     }

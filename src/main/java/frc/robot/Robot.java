@@ -26,6 +26,7 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
 
     CommandScheduler.getInstance().run();
+
   }
 
   @Override
@@ -43,10 +44,13 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    SubsystemManager.getInstance().prepSubsystems().schedule();
+    SubsystemManager.getInstance().prepSubsystems()
+      .andThen(() -> m_robotContainer.getAutoCommand().schedule()).schedule();
     DashboardInterface.getInstance().setTab(Auto);
 
     Constants.botEnabledStatus = Constants.RobotEnabled.Auto;
+
+    m_robotContainer.rescheduleRobotManagerState();
 
     Constants.pullAllianceFromFMS();
   }

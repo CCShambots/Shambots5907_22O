@@ -1,11 +1,10 @@
 package frc.robot.util;
 
 import com.pathplanner.lib.PathPlannerTrajectory;
-import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-
+import frc.robot.commands.auto.Example;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +18,7 @@ public class AutonomousLoader {
 
         //Sensor routes
         autoRoutes.put(Route.FiveBall, new InstantCommand());
+        autoRoutes.put(Route.Example, new Example(rm));
 
         this.chooser = composeSendableChooser();
     }
@@ -41,6 +41,6 @@ public class AutonomousLoader {
     }
 
     public enum Route {
-        FiveBall
+        FiveBall, Example
     }
 }
