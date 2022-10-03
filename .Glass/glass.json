@@ -86,7 +86,29 @@
     "windows": {
       "/SmartDashboard/drivetrain/field": {
         "Module 1": {
-          "style": "Box/Image"
+          "image": "C:\\Users\\barta\\Documents\\GitHub\\Shambots5907_22O\\Glass Configuration\\circle.png",
+          "length": 0.25,
+          "style": "Box/Image",
+          "width": 0.25
+        },
+        "Module 2": {
+          "image": "C:\\Users\\barta\\Documents\\GitHub\\Shambots5907_22O\\Glass Configuration\\circle.png",
+          "length": 0.25,
+          "width": 0.25
+        },
+        "Module 3": {
+          "image": "C:\\Users\\barta\\Documents\\GitHub\\Shambots5907_22O\\Glass Configuration\\circle.png",
+          "length": 0.25,
+          "width": 0.25
+        },
+        "Module 4": {
+          "image": "C:\\Users\\barta\\Documents\\GitHub\\Shambots5907_22O\\Glass Configuration\\circle.png",
+          "length": 0.25,
+          "width": 0.25
+        },
+        "traj": {
+          "arrows": false,
+          "style": "Line"
         },
         "window": {
           "visible": true
