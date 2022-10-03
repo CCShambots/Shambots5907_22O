@@ -44,6 +44,8 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
         this.c = c;
         this.l = l;
 
+        this.trajectories = trajectories;
+
         //Determination Logic; this transition will start instantly upon boot of robot code, but won't finish until every subsystem is enabled
         addDetermination(Undetermined, Idle, new ParallelCommandGroup(
                 dt.waitForState(dt.getEntryState()),

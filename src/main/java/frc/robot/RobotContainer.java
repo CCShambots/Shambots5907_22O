@@ -2,9 +2,13 @@ package frc.robot;
 
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Joystick;
 import frc.robot.subsystems.*;
 import frc.robot.util.AutonomousLoader;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.subsystems.Drivetrain;
@@ -101,10 +105,17 @@ public class RobotContainer {
     new JoystickButton(driverController, 4)
       .whenPressed(new InstantCommand(() -> drivetrain.requestTransition(SwerveState.TeleopLimeLightTracking)))
       .whenReleased(new InstantCommand(() -> drivetrain.requestTransition(SwerveState.Teleop)));
+
+    new JoystickButton(driverController, 2)
+      .whenPressed(new InstantCommand(() -> drivetrain.resetOdometryPose(new Pose2d(5, 5, Rotation2d.fromDegrees(45)))));
   }
 
   public void runControlLoops() {
     drivetrain.runModuleControlLoops();
+  }
+
+  public Command getAutoCommand() {
+    return autoLoader.getCurrentSelection();
   }
 
   /**

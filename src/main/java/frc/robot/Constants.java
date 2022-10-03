@@ -170,7 +170,7 @@ public final class Constants {
         public static final double WHEEL_BASE = 0.52705;
 
         // Maximum linear chassis speed in meters per second (MK4 standard modules capable of 4.1)
-        public static final double MAX_LINEAR_SPEED = 2.5;
+        public static final double MAX_LINEAR_SPEED = 1.5;
         public static final double MAX_LINEAR_ACCELERATION = 5;
         // Maximum chassis rotational speed in radians per second
         public static final double rotationRadius = Math.sqrt(Math.pow(TRACK_WIDTH / 2.0, 2) + Math.pow(WHEEL_BASE / 2.0, 2)) * 2 * Math.PI;

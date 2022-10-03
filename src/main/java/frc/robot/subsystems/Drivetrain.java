@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import com.ctre.phoenix.sensors.WPI_Pigeon2;
 import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 
 import edu.wpi.first.math.ComputerVisionUtil;
@@ -80,6 +81,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         );
 
         thetaHoldControllerTele.enableContinuousInput(-Math.PI, Math.PI);
+        thetaHoldControllerAuto.enableContinuousInput(-Math.PI, Math.PI);
         field = new Field2d();
 
         getOdoPose = () -> getPose();
@@ -236,10 +238,14 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
     public Command getTrajectoryCommand(PathPlannerTrajectory trajectory, boolean resetPose) {
         //TODO: Remove trajectory drawing if we ever take this to comp
-        return new ParallelCommandGroup(
+        return new SequentialCommandGroup(
             new InstantCommand(() -> {
                 field.getObject("traj").setTrajectory(trajectory);
-                if(resetPose) resetOdometryPose(trajectory.getInitialPose());
+                PathPlannerState initialState = trajectory.getInitialState();
+                Pose2d initialPose = initialState.poseMeters;
+                Pose2d startPose = new Pose2d(initialPose.getX(), initialPose.getY(), initialState.holonomicRotation);
+                if(resetPose) resetOdometryPose(startPose);
+                field.getObject("startpose").setPose(startPose);
             }),
             new PPSwerveControllerCommand(
                 trajectory, this::getPose, kDriveKinematics, 
@@ -290,8 +296,8 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
     }
 
     public void resetOdometryPose(Pose2d newPose) {
-        odometry.resetPosition(newPose, getCurrentAngle());
         resetGyro(newPose.getRotation());
+        odometry.resetPosition(newPose, newPose.getRotation());
     }
 
     public enum SwerveState {
@@ -315,7 +321,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         Map<String, Sendable> sendables = new HashMap<>();
 
         for(Entry<String, SwerveModule> e : modules.entrySet()) {
-            sendables.put(e.getKey(), e.getValue());
+            // sendables.put(e.getKey(), e.getValue());
         }
 
         sendables.put("field", field);
