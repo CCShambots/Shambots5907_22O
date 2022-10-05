@@ -277,7 +277,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
     public void resetGyro(Rotation2d angle) {
         gyro.setYaw(angle.getDegrees());
         rotationOffset = 0;
-        holdAngle = getCurrentAngle();
+        holdAngle = angle;
     }
 
 

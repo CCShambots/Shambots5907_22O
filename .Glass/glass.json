@@ -9,10 +9,12 @@
       "drivetrain": {
         "Module 1": {
           "open": true
-        },
-        "open": true
+        }
       },
-      "open": true
+      "open": true,
+      "turret": {
+        "open": true
+      }
     },
     "types": {
       "/FMSInfo": "FMSInfo",
@@ -248,6 +250,24 @@
       "window": {
         "visible": false
       }
+    },
+    "Plot <4>": {
+      "plots": [
+        {
+          "height": 338,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/turret/flywheel velo"
+            }
+          ]
+        }
+      ]
     }
   }
 }

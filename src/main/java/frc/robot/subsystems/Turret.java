@@ -129,8 +129,10 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
         RPMLUT.add(1000, 2000);
         RPMLUT.createLUT();
 
-        hoodAngleLUT.add(0, 25);
-        hoodAngleLUT.add(1000, 25);
+        // hoodAngleLUT.add(0, 5); //68 in.
+        hoodAngleLUT.add(0, 20); //118.5 in.
+        hoodAngleLUT.add(1000, 5); 
+        // hoodAngleLUT.add(1000, 25);
         hoodAngleLUT.createLUT();
 
         ejectionRPMLUT.add(0, 0);
@@ -264,6 +266,10 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
         double flywheelFFOutput = flywheelFeedForward.calculate(flywheelPID.getSetpoint());
         double flywheelPIDOutput = flywheelPID.calculate(getFlywheelRPM());
 
+        if(getFlywheelTarget() == 0) {
+            flywheelPIDOutput = 0;
+            flywheelFFOutput = 0;
+        }
         flywheel1Motor.setVoltage(flywheelFFOutput + flywheelPIDOutput);
     }
 

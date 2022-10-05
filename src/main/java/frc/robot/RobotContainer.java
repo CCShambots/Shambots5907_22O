@@ -97,6 +97,7 @@ public class RobotContainer {
 
 
     new JoystickButton(operatorController, 5).whenPressed(new InstantCommand(() -> robotManager.requestTransition(RobotState.AttemptShooting)));
+    
     new JoystickButton(operatorController, 6).whenPressed(new InstantCommand(() -> robotManager.requestTransition(RobotState.EjectBottom)));
 
     new JoystickButton(driverController, 3).whenPressed(new InstantCommand(() -> drivetrain.requestTransition(SwerveState.XShape)))
@@ -106,8 +107,6 @@ public class RobotContainer {
       .whenPressed(new InstantCommand(() -> drivetrain.requestTransition(SwerveState.TeleopLimeLightTracking)))
       .whenReleased(new InstantCommand(() -> drivetrain.requestTransition(SwerveState.Teleop)));
 
-    new JoystickButton(driverController, 2)
-      .whenPressed(new InstantCommand(() -> drivetrain.resetOdometryPose(new Pose2d(5, 5, Rotation2d.fromDegrees(45)))));
   }
 
   public void runControlLoops() {

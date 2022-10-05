@@ -79,8 +79,7 @@ public final class Constants {
         public static final int RIGHT_PROX = 0;
         public static final int CENTER_PROX = 1;
 
-        //TODO: Raise both of these speeds
-        public static final double CONVEYOR_SPEED = 0.5;
+        public static final double CONVEYOR_SPEED = 0.65;
         public static final double COMPACTOR_SPEED = 0.5;
 
         public static IntSupplier numBallsSupplier;
@@ -88,14 +87,12 @@ public final class Constants {
 
 
     public static final class Climber {
-        //TODO: Get actual motor id's
         public static final int MOTOR_1_ID = 81;
         public static final int MOTOR_2_ID = 82;
 
         public static final int SOLENOID_1_PORT = 2;
         public static final int SOLENOID_2_PORT = 7;
 
-        //TODO: Maybe no load PID's (hopefully not though)
         public static final double KS = 0;
         public static final double KV = 0;
         public static final double KP = 0;
@@ -248,11 +245,11 @@ public final class Constants {
         public static final int CENTER_LIM_SWITCH_ID = 9;
 
         public static final double FLYWHEEL_KS = 1.05;
-        public static final double FLYWHEEL_KV = 0.0021;
+        public static final double FLYWHEEL_KV = 0.0020;
         public static final double FLYWHEEL_KP = 0.008; //0.14
         public static final double FLYWHEEL_KI = 0;
         public static final double FLYWHEEL_KD = 0.00008;
-        public static final double FLYWHEEL_TOLERANCE = 100;
+        public static final double FLYWHEEL_TOLERANCE = 30;
 
         public static final double SHOOT_DELAY = 1;
 
@@ -312,7 +309,7 @@ public final class Constants {
 
         public static final Range HOOD_RANGE = new Range(HOOD_MIN_ANGLE, HOOD_MAX_ANGLE);
 
-        public static final double HOOD_TOLERANCE = 10;
+        public static final double HOOD_TOLERANCE = 1;
 
         public static final double LIMELIGHT_HEIGHT = 0.81; //Meters
         public static final double LIMELIGHT_ANGLE = Math.toRadians(30); //Radians

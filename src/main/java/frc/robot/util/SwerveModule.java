@@ -160,7 +160,8 @@ public class SwerveModule implements Sendable{
 
     private double normalizeDegrees(double degrees) {
         double rads = Math.toRadians(degrees);
-        return new Rotation2d(Math.cos(rads), Math.sin(rads)).getDegrees();
+        //TODO: I might be broken, probably not but you never know
+        return Math.toDegrees(Math.atan2(Math.sin(rads), Math.cos(rads)));
     }
 
     public void setDesiredState(SwerveModuleState state) {

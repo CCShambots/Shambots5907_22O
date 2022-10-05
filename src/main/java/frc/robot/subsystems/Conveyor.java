@@ -63,7 +63,9 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
         Constants.defaultOptimizeMotor(rightConveyor);
 
         addDetermination(Undetermined, Idle, new InstantCommand(this::stopAll));
-        addTransition(Idle, StartIntakeLeft, new InstantCommand());
+        addTransition(Idle, StartIntakeLeft, new InstantCommand(() -> {
+            setShouldEndIntakeSequence(false);
+        }));
 
         setContinuousCommand(StartIntakeLeft, new InstantCommand(() -> {
             if(ballTracker.getNumberOfBalls() > 0 && ballTracker.findBall(PastRight) == null) {
@@ -141,7 +143,9 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
 
 
 
-        addTransition(Idle, StartIntakeRight, new InstantCommand());
+        addTransition(Idle, StartIntakeRight, new InstantCommand(() -> {
+            setShouldEndIntakeSequence(false);
+        }));
 
         setContinuousCommand(StartIntakeRight, new InstantCommand(() -> {
             if(ballTracker.getNumberOfBalls() > 0 && ballTracker.findBall(PastLeft) == null) {

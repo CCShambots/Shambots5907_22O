@@ -192,13 +192,10 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
                 }),
                 getLightControlCommand() //Run light control while intaking to indicate number of balls
         ));
-        Timer shootDelayTimer = new Timer();
 
-        addTransition(Idle, AttemptShooting, new InstantCommand(() -> {
-            shootDelayTimer.reset();
-            shootDelayTimer.stop();
-        }));
-        setContinuousCommand(AttemptShooting, new InstantCommand(() -> {
+        addTransition(Idle, AttemptShooting, new InstantCommand());
+
+        setContinuousCommand(AttemptShooting, new RunCommand(() -> {
             if(t.getCurrentState() == Turret.TurretState.LockedIn) {
                 requestTransition(Shoot);
             } else requestTransition(Idle);
@@ -217,13 +214,7 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
 
         setContinuousCommand(Shoot, new RunCommand(() -> {
             if(co.isInState(ConveyorState.Idle)) {
-                if(shootDelayTimer.get() > Constants.Turret.SHOOT_DELAY) {
-                    requestTransition(Idle);
-
-                } else if(shootDelayTimer.get() == 0) {
-                    shootDelayTimer.reset();
-                    shootDelayTimer.start();
-                }
+                requestTransition(Idle);
             }
         }));
 

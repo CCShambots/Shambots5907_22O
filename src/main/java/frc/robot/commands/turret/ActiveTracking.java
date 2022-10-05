@@ -10,6 +10,7 @@ import frc.robot.subsystems.Turret;
 import frc.robot.util.math.Geometry;
 import frc.robot.util.math.InterpLUT;
 
+import java.util.concurrent.DelayQueue;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
@@ -34,6 +35,8 @@ public class ActiveTracking extends CommandBase {
     private Direction searchDirection;
     private Direction prevSearchDirection;
 
+    private Timer delayTimer;
+
     public ActiveTracking(Turret turret, InterpLUT flywheelLUT, InterpLUT hoodLUT, BooleanConsumer indicateLockedIn) {
         this.turret = turret;
         this.flywheelLUT = flywheelLUT;
@@ -42,6 +45,8 @@ public class ActiveTracking extends CommandBase {
 
         this.odoPoseSupplier = Constants.SwerveDrivetrain.getOdoPose;
         this.ballCountSupplier = Constants.Conveyor.numBallsSupplier;
+
+        this.delayTimer = new Timer();
 
         this.timer = new Timer();
     }
@@ -73,16 +78,29 @@ public class ActiveTracking extends CommandBase {
         flywheelAndHoodControl();
     }
 
+
+    private boolean hadBalls = false;
+
     private void flywheelAndHoodControl() {
         //Flywheel and hood control
         double distance = odoPoseSupplier.get().getTranslation().getDistance(GOAL_POS);
 
-
         if(ballCountSupplier.getAsInt() > 0) {
+            hadBalls = true;
             turret.setHoodTargetAngle(hoodLUT.get(distance));
             turret.setFlywheelTargetRPM(flywheelLUT.get(distance));
         } else {
-            turret.setFlywheelTargetRPM(0);
+            if(delayTimer.get() < SHOOT_DELAY) {
+                if(delayTimer.get() == 0 && hadBalls) {
+                    delayTimer.reset();
+                    delayTimer.start();
+                }
+            } else {
+                delayTimer.stop();
+                delayTimer.reset();
+                turret.setFlywheelTargetRPM(0);
+                hadBalls = false;
+            }
         }
     }
 
