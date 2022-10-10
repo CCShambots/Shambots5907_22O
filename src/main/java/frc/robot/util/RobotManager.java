@@ -84,7 +84,10 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
         addSafeTransitionCondition(Idle, Test, () -> true);
 
         //Manual bottom eject logic
-        addTransition(Idle, EjectBottom, new InstantCommand(() -> {
+        addOmniTransition(
+                new RobotState[]{Idle, IntakeRight, IntakeLeft},
+                new RobotState[]{EjectBottom},
+                new InstantCommand(() -> {
             i.requestTransition(Intake.IntakeState.Ejecting);
             co.requestTransition(Conveyor.ConveyorState.EjectAll);
             l.requestTransition(Lights.LEDState.BottomEject);

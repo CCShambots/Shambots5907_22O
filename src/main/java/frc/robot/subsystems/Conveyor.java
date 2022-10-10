@@ -268,7 +268,7 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
         Logic for ejecting out the bottom
          */
 
-        addMultiTransition(
+        addOmniTransition(
                 new ConveyorState[]{Idle, IntakeLeft, EjectFromLeft, ShuffleToLeft, StartIntakeLeft,
                         WaitForBallFromLeft, IntakeRight, EjectFromRight, ShuffleToRight,
                         StartIntakeRight, WaitForBallFromRight},
