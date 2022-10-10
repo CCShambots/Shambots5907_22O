@@ -28,6 +28,7 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.commands.drivetrain.DriveCommand;
 import frc.robot.commands.drivetrain.LimeLightHoldAngleCommand;
@@ -138,6 +139,11 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
                     getCurrentAngle(), Geometry.getCurrentTargetPose(getDrivetrainAngle.get(), getRotaryAngle.get(), getLimelightXOffsetAngle.get()),
                     new Transform2d(new Translation2d(), new Rotation2d())
             );
+
+            //TODO: Remove
+            SmartDashboard.putNumber("vision-x", visionPoseEstimation.getX());
+            SmartDashboard.putNumber("vision-y", visionPoseEstimation.getY());
+            SmartDashboard.putNumber("vision-theta", visionPoseEstimation.getRotation().getRadians());
 
             field.getObject("limelight").setPose(visionPoseEstimation);
 

@@ -9,6 +9,7 @@ import frc.robot.util.hardware.ColorSensor;
 import frc.robot.util.hardware.ColorSensor.ColorSensorOutput;
 import frc.robot.util.hardware.ProximitySensor;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -113,6 +114,9 @@ public class BallTracker {
 
     private void safeSetBallPos(BallPosition targetPos, BallPosition searchPos) {
         Ball ball = findBall(searchPos);
+
+        if(ball == null) guessBall(targetPos, searchPos); //If no ball was found, try to guess one
+
         if(ball != null) {
             ball.setPosition(targetPos);
 
@@ -123,6 +127,58 @@ public class BallTracker {
 
     public Ball findBall(BallPosition pos) {
         return getActualBalls().stream().filter((e) -> e.getPosition() == pos).findFirst().orElse(null);
+    }
+
+    public Ball guessBall(BallPosition targetPos, BallPosition originalSearchPos) {
+        Direction searchDirection = evaluateDirection(targetPos, originalSearchPos);
+
+        //Find all balls to the correct direction of the ball
+        List<Ball> potentials = getActualBalls().stream().filter((e) -> evaluateDirection(targetPos, e.getPosition()) == searchDirection)
+                .collect(Collectors.toList());
+
+        if(potentials.size() > 0) {
+            Comparator<Ball> comparator =
+                    (e1, e2) -> evaluateDistance(targetPos, e1.getPosition()) - evaluateDistance(targetPos, e1.getPosition());
+            potentials.sort(comparator);
+
+            return potentials.get(0); //First element in the list will be the one with the least distance (the best solution)
+        }
+
+        return null;
+    }
+
+    private int evaluateDistance(BallPosition startingPos, BallPosition endPos) {
+        return Math.abs(endPos.ordinal() - startingPos.ordinal());
+    }
+
+
+    private Direction evaluateDirection(BallPosition startingPos, BallPosition endPos) {
+        //No need to account for starting and end pos being the same because that should never happen
+        switch (startingPos) {
+            case PastLeft: return Direction.Right;
+            case PastRight: return Direction.Left;
+            case Left: return endPos == PastLeft ? Direction.Left : Direction.Right;
+            case Right: return endPos == PastRight ? Direction.Right : Direction.Left;
+            case BetweenLeftAndCenter: return equalAnyPos(endPos, PastLeft, Left) ? Direction.Left : Direction.Right;
+            case BetweenRightAndCenter: return equalAnyPos(endPos, PastRight, Right) ? Direction.Right : Direction.Left;
+            case Center: return equalAnyPos(endPos, PastRight, Right, BetweenRightAndCenter) ? Direction.Right : Direction.Left;
+            case NotInBot: return null; //Never would be searching for a ball starting not in bot
+        }
+
+        //Null return should never get called because there's a switch for every possibility
+        return null;
+    }
+
+    private boolean equalAnyPos(BallPosition startingPos, BallPosition... otherPos) {
+        for(BallPosition other : otherPos) {
+            if (startingPos == other) return true;
+        }
+
+        return false;
+    }
+
+    private enum Direction {
+        Left, Right
     }
 
     /**
