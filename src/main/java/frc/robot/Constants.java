@@ -167,7 +167,7 @@ public final class Constants {
         public static final double WHEEL_BASE = 0.52705;
 
         // Maximum linear chassis speed in meters per second (MK4 standard modules capable of 4.1)
-        public static final double MAX_LINEAR_SPEED = 1.5;
+        public static final double MAX_LINEAR_SPEED = 2;
         public static final double MAX_LINEAR_ACCELERATION = 5;
         // Maximum chassis rotational speed in radians per second
         public static final double rotationRadius = Math.sqrt(Math.pow(TRACK_WIDTH / 2.0, 2) + Math.pow(WHEEL_BASE / 2.0, 2)) * 2 * Math.PI;
@@ -243,29 +243,51 @@ public final class Constants {
 
         public static final int OUTER_LIM_SWITCH_ID = 8;
         public static final int CENTER_LIM_SWITCH_ID = 9;
+        
+
+        public static final int flywheelkSlotIdx = 0;
+
+        /**
+         * Talon FX supports multiple (cascaded) PID loops. For
+         * now we just want the primary one.
+         */
+        public static final int flywheelkPIDLoopIdx = 0;
+
+        /**
+         * set to zero to skip waiting for confirmation, set to nonzero to wait and
+         * report to DS if action fails.
+         */
+        public static final int flywheelkTimeoutMs = 30;
+
+        /**
+         * Gains used in Motion Magic, to be adjusted accordingly
+         * Gains(kp, ki, kd, kf, izone, peak output);
+         */
+        public static final Gains flywheelGains = new Gains(0.5254, 0.0, 0.275, 0.0575, 0, 1.0);
+        public static final double FLYWHEEL_TOLERANCE = 30;
 
         public static final double FLYWHEEL_KS = 1.05;
         public static final double FLYWHEEL_KV = 0.0020;
         public static final double FLYWHEEL_KP = 0.008; //0.14
         public static final double FLYWHEEL_KI = 0;
         public static final double FLYWHEEL_KD = 0.00008;
-        public static final double FLYWHEEL_TOLERANCE = 30;
 
         public static final double SHOOT_DELAY = 1;
 
-	    public static final int kSlotIdx = 0;
+
+	    public static final int rotarykSlotIdx = 0;
 
         /**
          * Talon FX supports multiple (cascaded) PID loops. For
          * now we just want the primary one.
          */
-        public static final int kPIDLoopIdx = 0;
+        public static final int rotarykPIDLoopIdx = 0;
 
         /**
          * set to zero to skip waiting for confirmation, set to nonzero to wait and
          * report to DS if action fails.
          */
-        public static final int kTimeoutMs = 30;
+        public static final int rotarykTimeoutMs = 30;
 
         /**
          * Gains used in Motion Magic, to be adjusted accordingly
@@ -298,7 +320,7 @@ public final class Constants {
 
         public static final double HOOD_KS = 0.75;
         public static final double HOOD_KV = 0.0625;
-        public static final double HOOD_KP = 0.1;
+        public static final double HOOD_KP = 0.125;
         public static final double HOOD_KI = 0;
         public static final double HOOD_KD = 0;
         public static final double HOOD_MAX_VEL = 64; //Deg/sec
@@ -309,7 +331,7 @@ public final class Constants {
 
         public static final Range HOOD_RANGE = new Range(HOOD_MIN_ANGLE, HOOD_MAX_ANGLE);
 
-        public static final double HOOD_TOLERANCE = 1;
+        public static final double HOOD_TOLERANCE = 3;
 
         public static final double LIMELIGHT_HEIGHT = 0.81; //Meters
         public static final double LIMELIGHT_ANGLE = Math.toRadians(30); //Radians

@@ -311,9 +311,9 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
     @Override
     protected void additionalSendableData(SendableBuilder builder) {
-        builder.addDoubleProperty("Hold angle", () -> holdAngle.getDegrees(), null);
-        builder.addDoubleProperty("Measured Angle", () -> getCurrentAngle().getDegrees(), null);
-        builder.addBooleanProperty("field relative", this::isFieldRelative, null);
+        // builder.addDoubleProperty("Hold angle", () -> holdAngle.getDegrees(), null);
+        // builder.addDoubleProperty("Measured Angle", () -> getCurrentAngle().getDegrees(), null);
+        // builder.addBooleanProperty("field relative", this::isFieldRelative, null);
     }
 
     @Override
@@ -324,11 +324,11 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
             // sendables.put(e.getKey(), e.getValue());
         }
 
-        sendables.put("field", field);
-        sendables.put("thetaControllerTele", thetaHoldControllerTele);
-        sendables.put("thetaControllerAuto", thetaHoldControllerAuto);
-        sendables.put("xController", xHoldController);
-        sendables.put("yController", yHoldController);
+        // sendables.put("field", field);
+        // sendables.put("thetaControllerTele", thetaHoldControllerTele);
+        // sendables.put("thetaControllerAuto", thetaHoldControllerAuto);
+        // sendables.put("xController", xHoldController);
+        // sendables.put("yController", yHoldController);
 
         return sendables;
     }

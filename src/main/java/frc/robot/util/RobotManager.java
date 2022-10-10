@@ -198,8 +198,10 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
         setContinuousCommand(AttemptShooting, new RunCommand(() -> {
             if(t.getCurrentState() == Turret.TurretState.LockedIn) {
                 requestTransition(Shoot);
-            } else requestTransition(Idle);
+            }
         }));
+
+        addTransition(AttemptShooting, Idle, new InstantCommand());
 
 
         //Only start shooting if the conveyor and intakes are idle

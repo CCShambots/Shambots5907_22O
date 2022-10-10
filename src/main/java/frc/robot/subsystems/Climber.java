@@ -2,7 +2,6 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -135,23 +134,23 @@ public class Climber extends StatedSubsystem<ClimberState> {
 
     @Override
     protected void additionalSendableData(SendableBuilder builder) {
-        builder.addStringProperty("solenoid state", () -> getSolenoidState().name(), null);
-        builder.addBooleanProperty("motor control enabled", () -> isMotorControlEnabled(), null);
-        builder.addDoubleProperty("current velo (in/sec)", () -> getClimberVelo(), null);
-        builder.addDoubleProperty("goal velo (in/sec)", () -> pidController.getSetpoint().velocity, null);
-        builder.addDoubleProperty("goal pos", () -> getClimberTarget(), null);
-        builder.addDoubleProperty("current pos", () -> getClimberPos(), null);
+        // builder.addStringProperty("solenoid state", () -> getSolenoidState().name(), null);
+        // builder.addBooleanProperty("motor control enabled", () -> isMotorControlEnabled(), null);
+        // builder.addDoubleProperty("current velo (in/sec)", () -> getClimberVelo(), null);
+        // builder.addDoubleProperty("goal velo (in/sec)", () -> pidController.getSetpoint().velocity, null);
+        // builder.addDoubleProperty("goal pos", () -> getClimberTarget(), null);
+        // builder.addDoubleProperty("current pos", () -> getClimberPos(), null);
     }
 
     @Override
     public Map<String, Sendable> additionalSendables() {
         return Map.of(
-                "test/reset climber pos", new InstantCommand(() -> {if(getCurrentState() == Test) resetClimberPos();}),
-                "test/extend piston", new InstantCommand(() -> {if(getCurrentState() == Test) extendSolenoid();}),
-                "test/retract piston", new InstantCommand(() -> {if(getCurrentState() == Test) retractSolenoid();}),
-                "test/raise climber", new InstantCommand(() -> {if(getCurrentState() == Test) setManualPower(Direction.Up);}),
-                "test/lower climber", new InstantCommand(() -> {if(getCurrentState() == Test) setManualPower(Direction.Down);}),
-                "test/stop climber", new InstantCommand(() -> {if(getCurrentState() == Test) setManualPower(Direction.Stopped);})
+                // "test/reset climber pos", new InstantCommand(() -> {if(getCurrentState() == Test) resetClimberPos();}),
+                // "test/extend piston", new InstantCommand(() -> {if(getCurrentState() == Test) extendSolenoid();}),
+                // "test/retract piston", new InstantCommand(() -> {if(getCurrentState() == Test) retractSolenoid();}),
+                // "test/raise climber", new InstantCommand(() -> {if(getCurrentState() == Test) setManualPower(Direction.Up);}),
+                // "test/lower climber", new InstantCommand(() -> {if(getCurrentState() == Test) setManualPower(Direction.Down);}),
+                // "test/stop climber", new InstantCommand(() -> {if(getCurrentState() == Test) setManualPower(Direction.Stopped);})
         );
     }
 

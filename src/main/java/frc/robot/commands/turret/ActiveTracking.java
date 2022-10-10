@@ -198,7 +198,7 @@ public class ActiveTracking extends CommandBase {
 
         if(
             turret.doesLimelightHaveTarget() &&
-            !turret.isRotaryBusy() &&
+            // !turret.isRotaryBusy() &&
             !turret.isFlywheelBusy() &&
             !turret.isHoodBusy()
         ) indicateLockedInConsumer.accept(true);

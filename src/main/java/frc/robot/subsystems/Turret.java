@@ -1,6 +1,6 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.motorcontrol.DemandType;
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
@@ -10,6 +10,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants;
@@ -44,8 +45,10 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
     private final InterpLUT hoodAngleLUT = new InterpLUT();
     private final InterpLUT ejectionRPMLUT = new InterpLUT();
 
-    private final SimpleMotorFeedforward flywheelFeedForward = new SimpleMotorFeedforward(FLYWHEEL_KS, FLYWHEEL_KV);
-    private final PIDController flywheelPID = new PIDController(FLYWHEEL_KP, FLYWHEEL_KI, FLYWHEEL_KD);
+    // private final SimpleMotorFeedforward flywheelFeedForward = new SimpleMotorFeedforward(FLYWHEEL_KS, FLYWHEEL_KV);
+    // private final PIDController flywheelPID = new PIDController(FLYWHEEL_KP, FLYWHEEL_KI, FLYWHEEL_KD);
+
+    private double flywheelTarget = 0;
 
     // private final SimpleMotorFeedforward rotaryFeedForward = new SimpleMotorFeedforward(ROTARY_KS, ROTARY_KV);
     // private final ProfiledPIDController rotaryPID = new ProfiledPIDController(ROTARY_KP, ROTARY_KI, ROTARY_KD, NORMAL_ROTARY_CONSTRAINTS);
@@ -76,7 +79,7 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
 
         //Set the tolerance for the PID loop to say it is not busy
         // rotaryPID.setTolerance(ROTARY_TOLERANCE);
-        flywheelPID.setTolerance(FLYWHEEL_TOLERANCE);
+        // flywheelPID.setTolerance(FLYWHEEL_TOLERANCE);
         hoodPID.setTolerance(HOOD_TOLERANCE);
 
         
@@ -84,12 +87,12 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
 		rotaryMotor.configFactoryDefault();
 
 		/* Configure Sensor Source for Pirmary PID */
-		rotaryMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, Constants.Turret.kPIDLoopIdx,
-				Constants.Turret.kTimeoutMs);
+		rotaryMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, Constants.Turret.rotarykPIDLoopIdx,
+				Constants.Turret.rotarykTimeoutMs);
 
 		/* set deadband to super small 0.001 (0.1 %).
 			The default deadband is 0.04 (4 %) */
-        rotaryMotor.configNeutralDeadband(0.001, Constants.Turret.kTimeoutMs);
+        rotaryMotor.configNeutralDeadband(0.001, Constants.Turret.rotarykTimeoutMs);
 
 		/**
 		 * Configure Talon FX Output and Sensor direction accordingly Invert Motor to
@@ -101,37 +104,61 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
         rotaryMotor.configSupplyCurrentLimit(Constants.CURRENT_LIMIT);
 		
 		/* Set relevant frame periods to be at least as fast as periodic rate */
-		rotaryMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 10, Constants.Turret.kTimeoutMs);
-		rotaryMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 10, Constants.Turret.kTimeoutMs);
+		rotaryMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 10, Constants.Turret.rotarykTimeoutMs);
+		rotaryMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 10, Constants.Turret.rotarykTimeoutMs);
 
 		/* Set the peak and nominal outputs */
-		rotaryMotor.configNominalOutputForward(0, Constants.Turret.kTimeoutMs);
-		rotaryMotor.configNominalOutputReverse(0, Constants.Turret.kTimeoutMs);
-		rotaryMotor.configPeakOutputForward(1, Constants.Turret.kTimeoutMs);
-		rotaryMotor.configPeakOutputReverse(-1, Constants.Turret.kTimeoutMs);
+		rotaryMotor.configNominalOutputForward(0, Constants.Turret.rotarykTimeoutMs);
+		rotaryMotor.configNominalOutputReverse(0, Constants.Turret.rotarykTimeoutMs);
+		rotaryMotor.configPeakOutputForward(1, Constants.Turret.rotarykTimeoutMs);
+		rotaryMotor.configPeakOutputReverse(-1, Constants.Turret.rotarykTimeoutMs);
 
 		/* Set Motion Magic gains in slot0 - see documentation */
-		rotaryMotor.selectProfileSlot(Constants.Turret.kSlotIdx, Constants.Turret.kPIDLoopIdx);
-		rotaryMotor.config_kF(Constants.Turret.kSlotIdx, Constants.Turret.rotaryGains.kF, Constants.Turret.kTimeoutMs);
-		rotaryMotor.config_kP(Constants.Turret.kSlotIdx, Constants.Turret.rotaryGains.kP, Constants.Turret.kTimeoutMs);
-		rotaryMotor.config_kI(Constants.Turret.kSlotIdx, Constants.Turret.rotaryGains.kI, Constants.Turret.kTimeoutMs);
-		rotaryMotor.config_kD(Constants.Turret.kSlotIdx, Constants.Turret.rotaryGains.kD, Constants.Turret.kTimeoutMs);
+		rotaryMotor.selectProfileSlot(Constants.Turret.rotarykSlotIdx, Constants.Turret.rotarykPIDLoopIdx);
+		rotaryMotor.config_kF(Constants.Turret.rotarykSlotIdx, Constants.Turret.rotaryGains.kF, Constants.Turret.rotarykTimeoutMs);
+		rotaryMotor.config_kP(Constants.Turret.rotarykSlotIdx, Constants.Turret.rotaryGains.kP, Constants.Turret.rotarykTimeoutMs);
+		rotaryMotor.config_kI(Constants.Turret.rotarykSlotIdx, Constants.Turret.rotaryGains.kI, Constants.Turret.rotarykTimeoutMs);
+		rotaryMotor.config_kD(Constants.Turret.rotarykSlotIdx, Constants.Turret.rotaryGains.kD, Constants.Turret.rotarykTimeoutMs);
 
 		/* Set acceleration and vcruise velocity - see documentation */
-		rotaryMotor.configMotionCruiseVelocity(degreesToTicks(ROTARY_MAX_VEL) * 10, Constants.Turret.kTimeoutMs);
-		rotaryMotor.configMotionAcceleration(degreesToTicks(ROTARY_MAX_ACCEL) * 10, Constants.Turret.kTimeoutMs);
+		rotaryMotor.configMotionCruiseVelocity(degreesToTicks(ROTARY_MAX_VEL) * 10, Constants.Turret.rotarykTimeoutMs);
+		rotaryMotor.configMotionAcceleration(degreesToTicks(ROTARY_MAX_ACCEL) * 10, Constants.Turret.rotarykTimeoutMs);
+
+        //Drive motor set up
+
+        flywheel1Motor.setSensorPhase(false);
+        flywheel1Motor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, Constants.Turret.flywheelkTimeoutMs);
+        
+        flywheel1Motor.configSupplyCurrentLimit(Constants.CURRENT_LIMIT);
+        
+        flywheel1Motor.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 40, Constants.Turret.flywheelkTimeoutMs);
+
+        flywheel1Motor.configNominalOutputForward(0, Constants.Turret.flywheelkTimeoutMs);
+        flywheel1Motor.configNominalOutputReverse(0, Constants.Turret.flywheelkTimeoutMs);
+        flywheel1Motor.configPeakOutputForward(1, Constants.Turret.flywheelkTimeoutMs);
+        flywheel1Motor.configPeakOutputReverse(-1, Constants.Turret.flywheelkTimeoutMs);
+
+        flywheel1Motor.selectProfileSlot(Constants.Turret.flywheelkPIDLoopIdx, Constants.Turret.rotarykPIDLoopIdx);
+        flywheel1Motor.config_kF(Constants.Turret.flywheelkPIDLoopIdx, Constants.Turret.flywheelGains.kF, Constants.Turret.flywheelkTimeoutMs);
+        flywheel1Motor.config_kP(Constants.Turret.flywheelkPIDLoopIdx, Constants.Turret.flywheelGains.kP, Constants.Turret.flywheelkTimeoutMs);
+        flywheel1Motor.config_kI(Constants.Turret.flywheelkPIDLoopIdx, Constants.Turret.flywheelGains.kI, Constants.Turret.flywheelkTimeoutMs);
+        flywheel1Motor.config_kD(Constants.Turret.flywheelkPIDLoopIdx, Constants.Turret.flywheelGains.kD, Constants.Turret.flywheelkTimeoutMs);
+
 
 		/* Zero the sensor once on robot boot up */
 		// rotaryMotor.setSelectedSensorPosition(0, Constants.Turret.kPIDLoopIdx, Constants.Turret.kTimeoutMs);
 
         //Setup lookup tables for velocity and angle control
-        RPMLUT.add(0, 2000);
-        RPMLUT.add(1000, 2000);
+        RPMLUT.add(Units.inchesToMeters(68), 2000); //68 in.
+        RPMLUT.add(Units.inchesToMeters(126.5), 2000); //126.5 in
+        RPMLUT.add(Units.inchesToMeters(173), 2100); //173 in
+        RPMLUT.add(1000, 2100);
         RPMLUT.createLUT();
 
-        // hoodAngleLUT.add(0, 5); //68 in.
-        hoodAngleLUT.add(0, 20); //118.5 in.
-        hoodAngleLUT.add(1000, 5); 
+        hoodAngleLUT.add(Units.inchesToMeters(68), 5); //68 in.
+        hoodAngleLUT.add(Units.inchesToMeters(126.5), 18); //126.5 in.
+        hoodAngleLUT.add(Units.inchesToMeters(173), 23); //173 in.
+        hoodAngleLUT.add(1000, 23); 
         // hoodAngleLUT.add(1000, 25);
         hoodAngleLUT.createLUT();
 
@@ -143,11 +170,11 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
         getLimelightXOffsetAngle = () -> Rotation2d.fromDegrees(getLimelightXOffsetDegrees());
 
         addDetermination(Undetermined, Idle, new InstantCommand(() -> {
-            resetHoodPos(0);
+            // resetHoodPos(0);
+            resetHoodPID();
+            setHoodTargetAngle(2);
             resetRotaryPos(0);
             setRotarySpeed(Normal);
-            resetHoodPID();
-            resetFlywheelPID();
             turnOffLimelight();
             setFlywheelTargetRPM(0);
         }));
@@ -190,7 +217,12 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
     }
 
     public void setFlywheelTargetRPM(double rpm) {
-        flywheelPID.setSetpoint(rpm);
+        if(rpm != 0) {
+            flywheel1Motor.set(TalonFXControlMode.Velocity, RPMToFlywheelTicks(rpm));
+        } else {
+            flywheel1Motor.set(ControlMode.PercentOutput, 0);
+        }
+        flywheelTarget = rpm;
     }
 
     public void setRotaryTargetAngle(double degrees) {
@@ -221,6 +253,7 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
     @Override
     public void onEnable() {
         resetAllPIDs();
+        setHoodTargetAngle(2);
     }
 
     @Override
@@ -230,20 +263,15 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
                 () -> {
                     setHoodTargetAngle(getHoodAngle());
                     setFlywheelTargetRPM(0);
-                    setHoodTargetAngle(getHoodAngle());
+                    // setHoodTargetAngle(getHoodAngle());
                     turnOffLimelight();
                 }
         );
     }
 
     public void resetAllPIDs() {
-        resetFlywheelPID();
         resetHoodPID();
         resetHoodPID();
-    }
-
-    public void resetFlywheelPID() {
-        flywheelPID.reset();
     }
 
     public void resetHoodPID() {
@@ -254,7 +282,7 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
     public void update() {
 
         //Flywheel calculations
-        updateFlywheel();
+        // updateFlywheel();
 
         //Hood calculations
         updateHood();
@@ -262,16 +290,16 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
         prevRotaryAngle = getRotaryAngle();
     }
 
-    private void updateFlywheel() {
-        double flywheelFFOutput = flywheelFeedForward.calculate(flywheelPID.getSetpoint());
-        double flywheelPIDOutput = flywheelPID.calculate(getFlywheelRPM());
+    // private void updateFlywheel() {
+    //     double flywheelFFOutput = flywheelFeedForward.calculate(flywheelPID.getSetpoint());
+    //     double flywheelPIDOutput = flywheelPID.calculate(getFlywheelRPM());
 
-        if(getFlywheelTarget() == 0) {
-            flywheelPIDOutput = 0;
-            flywheelFFOutput = 0;
-        }
-        flywheel1Motor.setVoltage(flywheelFFOutput + flywheelPIDOutput);
-    }
+    //     if(getFlywheelTarget() == 0) {
+    //         flywheelPIDOutput = 0;
+    //         flywheelFFOutput = 0;
+    //     }
+    //     flywheel1Motor.setVoltage(flywheelFFOutput + flywheelPIDOutput);
+    // }
 
     private void updateHood() {
         if(hoodControlLoopEnabled) {
@@ -295,6 +323,17 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
             10 / // Ticks/sec
             2048 * // Rotations/sec
             60 //Rotations/min
+        ;
+    }
+
+    /**
+     * @return ticks / 100 ms
+     */
+    public double RPMToFlywheelTicks(double rpm) {
+        return rpm
+            / 60 //r/s
+            * 2048  // t/s
+            / 10  // t/100ms
         ;
     }
 
@@ -370,8 +409,8 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
 
         TrapezoidProfile.Constraints c = speed == Normal ? NORMAL_ROTARY_CONSTRAINTS : SEARCH_ROTARY_CONSTRAINTS;
         
-        rotaryMotor.configMotionCruiseVelocity(degreesToTicks(c.maxVelocity), Constants.Turret.kTimeoutMs);
-		rotaryMotor.configMotionAcceleration(degreesToTicks(c.maxAcceleration), Constants.Turret.kTimeoutMs);
+        rotaryMotor.configMotionCruiseVelocity(degreesToTicks(c.maxVelocity), Constants.Turret.rotarykTimeoutMs);
+		rotaryMotor.configMotionAcceleration(degreesToTicks(c.maxAcceleration), Constants.Turret.rotarykTimeoutMs);
     }
 
     public RotarySpeed getRotarySpeed() {return rotarySpeed;}
@@ -392,7 +431,7 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
     public void enableRotaryControlLoops() {hoodControlLoopEnabled = true;}
 
     //Diagnostic access methods
-    public double getFlywheelTarget() {return flywheelPID.getSetpoint();}
+    public double getFlywheelTarget() {return flywheelTarget;}
     public double getFlywheelError() {return abs(getFlywheelTarget()-getFlywheelRPM());}
     public double getHoodTarget() {return hoodPID.getSetpoint().position;}
     public double getHoodError() {return abs(getHoodTarget() - getHoodAngle());}
@@ -415,22 +454,22 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
         builder.addDoubleProperty("flywheel target", this::getFlywheelTarget, null);
         builder.addDoubleProperty("flywheel error", this::getFlywheelError, null);
         builder.addBooleanProperty("flywheel busy", this::isFlywheelBusy, null);
-        builder.addDoubleProperty("flywheel 1 voltage", flywheel1Motor::getMotorOutputVoltage, null);
-        builder.addDoubleProperty("flywheel 2 voltage", flywheel2Motor::getMotorOutputVoltage, null);
-        builder.addDoubleProperty("rotary degrees", this::getRotaryAngle, null);
-        builder.addDoubleProperty("rotary velo", this::getRotaryVelo, null);
-        builder.addDoubleProperty("rotary target", this::getRotaryTarget, null);
-        builder.addDoubleProperty("rotary error", this::getRotaryError, null);
-        builder.addBooleanProperty("rotary busy", this::isRotaryBusy, null);
-        builder.addDoubleProperty("rotary voltage", () -> rotaryMotor.getMotorOutputVoltage(), null);
+        // builder.addDoubleProperty("flywheel 1 voltage", flywheel1Motor::getMotorOutputVoltage, null);
+        // builder.addDoubleProperty("flywheel 2 voltage", flywheel2Motor::getMotorOutputVoltage, null);
+        // builder.addDoubleProperty("rotary degrees", this::getRotaryAngle, null);
+        // builder.addDoubleProperty("rotary velo", this::getRotaryVelo, null);
+        // builder.addDoubleProperty("rotary target", this::getRotaryTarget, null);
+        // builder.addDoubleProperty("rotary error", this::getRotaryError, null);
+        // builder.addBooleanProperty("rotary busy", this::isRotaryBusy, null);
+        // builder.addDoubleProperty("rotary voltage", () -> rotaryMotor.getMotorOutputVoltage(), null);
         builder.addDoubleProperty("hood degrees", this::getHoodAngle, null);
-        builder.addDoubleProperty("hood velo", this::getHoodVelo, null);
-        builder.addDoubleProperty("hood target velo", () -> hoodPID.getSetpoint().velocity, null);
+        // builder.addDoubleProperty("hood velo", this::getHoodVelo, null);
+        // builder.addDoubleProperty("hood target velo", () -> hoodPID.getSetpoint().velocity, null);
         builder.addDoubleProperty("hood target", this::getHoodTarget, null);
-        builder.addDoubleProperty("hood error", this::getHoodError, null);
+        // builder.addDoubleProperty("hood error", this::getHoodError, null);
         builder.addBooleanProperty("hood busy", this::isHoodBusy, null);
-        builder.addBooleanProperty("sensor 1 pressed", this::isOuterLimPressed, null);
-        builder.addBooleanProperty("sensor 2 pressed", this::isCenterLimPressed, null);
+        // builder.addBooleanProperty("sensor 1 pressed", this::isOuterLimPressed, null);
+        // builder.addBooleanProperty("sensor 2 pressed", this::isCenterLimPressed, null);
 
     }
 

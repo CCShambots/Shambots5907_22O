@@ -136,9 +136,9 @@ public class Intake extends StatedSubsystem<Intake.IntakeState> {
 
     @Override
     public void additionalSendableData(SendableBuilder builder) {
-        builder.addDoubleProperty("left-power", leftMotor::get, null);
-        builder.addDoubleProperty("right-power", rightMotor::get, null);
-        builder.addStringProperty("left-solenoid", () -> leftSolenoid.get().name(), null);
-        builder.addStringProperty("right-solenoid", () -> rightSolenoid.get().name(), null);
+        // builder.addDoubleProperty("left-power", leftMotor::get, null);
+        // builder.addDoubleProperty("right-power", rightMotor::get, null);
+        // builder.addStringProperty("left-solenoid", () -> leftSolenoid.get().name(), null);
+        // builder.addStringProperty("right-solenoid", () -> rightSolenoid.get().name(), null);
     }
 }
