@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -17,6 +18,7 @@ import frc.robot.util.hardware.ColorSensor;
 import frc.robot.util.hardware.ProximitySensor;
 
 import static frc.robot.Constants.Conveyor.*;
+import static frc.robot.Constants.Turret.*;
 import static frc.robot.subsystems.Conveyor.ConveyorState.*;
 import static frc.robot.subsystems.Conveyor.MotorState.*;
 import static frc.robot.util.ballTracker.Ball.BallColorType.*;
@@ -26,6 +28,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
     private final WPI_TalonFX leftCompactor = new WPI_TalonFX(LEFT_COMPACTOR_ID);
@@ -229,8 +232,9 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
         Logic for Shooting
          */
 
+        Timer shootTimer = new Timer();
 
-        addTransition(Idle, StartShooting, new InstantCommand(() -> {intakeLeftConveyor(); intakeRightConveyor();}));
+        addTransition(Idle, StartShooting, new InstantCommand(() -> {intakeLeftConveyor(); intakeRightConveyor(); shootTimer.reset(); shootTimer.start();}));
         setContinuousCommand(StartShooting, new InstantCommand(() -> {
             if(ballTracker.findBallsAtPositions(Left, BetweenLeftAndCenter, Center, BetweenRightAndCenter, Right).size() > 0) {
                 requestTransition(ShootFromCenter);
@@ -250,19 +254,25 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
         setContinuousCommand(ShootFromCenter, new FireBallFromConveyorCommand(
                 () -> {
                     List<Ball> balls = ballTracker.findBallsAtPositions(Left, BetweenLeftAndCenter, Center, BetweenRightAndCenter, Right);
-                    //TODO: Sort this by position later?
                     if(balls.size() > 0) return balls.get(0);
                     return null;
                 }, this));
 
-        setContinuousCommand(ShootFromLeft, new FireBallFromConveyorCommand(() -> ballTracker.findBall(PastLeft), this));
-        setContinuousCommand(ShootFromRight, new FireBallFromConveyorCommand(() -> ballTracker.findBall(PastRight), this));
+        setContinuousCommand(ShootFromLeft, new FireBallFromConveyorCommand(() -> ballTracker.findBall(PastLeft), this)
+                .deadlineWith(new FunctionalCommand(() -> {}, () -> {}, (interrupted) -> {}, () -> shootTimer.get() > MAX_SHOOT_TIME)));
+        setContinuousCommand(ShootFromRight, new FireBallFromConveyorCommand(() -> ballTracker.findBall(PastRight), this)
+                .deadlineWith(new FunctionalCommand(() -> {}, () -> {}, (interrupted) -> {}, () -> shootTimer.get() > MAX_SHOOT_TIME)));
 
         addTransition(ShootFromCenter, StartShooting, new InstantCommand());
         addTransition(ShootFromLeft, StartShooting, new InstantCommand(this::stopLeftCompactor));
         addTransition(ShootFromRight, StartShooting, new InstantCommand(this::stopRightCompactor));
 
-        addTransition(StartShooting, Idle, new InstantCommand(this::stopAll));
+        addTransition(StartShooting, Idle, new InstantCommand(() -> {
+            stopAll();
+            shootTimer.stop();
+        }));
+
+
 
         /*
         Logic for ejecting out the bottom

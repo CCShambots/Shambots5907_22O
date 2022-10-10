@@ -243,7 +243,8 @@ public final class Constants {
 
         public static final int OUTER_LIM_SWITCH_ID = 8;
         public static final int CENTER_LIM_SWITCH_ID = 9;
-        
+
+        public static final double MAX_SHOOT_TIME = 5; //seconds
 
         public static final int flywheelkSlotIdx = 0;
 
