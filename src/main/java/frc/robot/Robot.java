@@ -34,7 +34,7 @@ public class Robot extends TimedRobot {
     SubsystemManager.getInstance().disableAllSubsystems();
 
     CommandScheduler.getInstance().cancelAll();
-    DashboardInterface.getInstance().setTab(Auto);
+    // DashboardInterface.getInstance().setTab(Auto);
 
     Constants.botEnabledStatus = Constants.RobotEnabled.Disabled;
   }
@@ -46,7 +46,7 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     SubsystemManager.getInstance().prepSubsystems()
       .andThen(() -> m_robotContainer.getAutoCommand().schedule()).schedule();
-    DashboardInterface.getInstance().setTab(Auto);
+    // DashboardInterface.getInstance().setTab(Auto);
 
     Constants.botEnabledStatus = Constants.RobotEnabled.Auto;
 
@@ -61,7 +61,8 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     SubsystemManager.getInstance().prepSubsystems().schedule();
-    DashboardInterface.getInstance().setTab(Teleop);
+    //TODO: Uncomment all of these
+    // DashboardInterface.getInstance().setTab(Teleop);
 
     Constants.botEnabledStatus = Constants.RobotEnabled.Teleop;
 

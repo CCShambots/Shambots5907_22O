@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants;
 import frc.robot.util.Shambots5907_SMF.StatedSubsystem;
+import frc.robot.util.hardware.MotorConfiguration;
 
 import java.util.Map;
 
@@ -37,8 +38,8 @@ public class Climber extends StatedSubsystem<ClimberState> {
     public Climber() {
         super(ClimberState.class);
 
-        Constants.configureMotor(motor1);
-        Constants.configureMotor(motor2);
+        MotorConfiguration.configureBasicMotor(motor1);
+        MotorConfiguration.configureBasicMotor(motor2);
 
         motor2.follow(motor1);
         motor2.setInverted(InvertType.OpposeMaster);

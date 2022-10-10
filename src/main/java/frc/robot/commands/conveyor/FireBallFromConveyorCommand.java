@@ -42,5 +42,11 @@ public class FireBallFromConveyorCommand extends CommandBase {
     @Override
     public void end(boolean interrupted) {
         conveyor.goToStateCommandDelayed(StartShooting).schedule();
+
+        System.out.println("ENDING FIRE BALL FROM CONVEYOR COMMAND");
+        if(interrupted) {
+            conveyor.clearTracker();
+            System.out.println("INTERRUPTED");
+        }
     }
 }

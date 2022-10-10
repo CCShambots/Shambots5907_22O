@@ -115,7 +115,9 @@ public class BallTracker {
     private void safeSetBallPos(BallPosition targetPos, BallPosition searchPos) {
         Ball ball = findBall(searchPos);
 
-        if(ball == null) guessBall(targetPos, searchPos); //If no ball was found, try to guess one
+        if(ball == null) {
+            ball = guessBall(targetPos, searchPos); //If no ball was found, try to guess one
+        }
 
         if(ball != null) {
             ball.setPosition(targetPos);
@@ -127,6 +129,16 @@ public class BallTracker {
 
     public Ball findBall(BallPosition pos) {
         return getActualBalls().stream().filter((e) -> e.getPosition() == pos).findFirst().orElse(null);
+    }
+
+    public Ball findBall(BallPosition... pos) {
+        for(BallPosition specificPos : pos) {
+            Ball found = findBall(pos);
+
+            if(found != null) return found;
+        }
+
+        return null;
     }
 
     public Ball guessBall(BallPosition targetPos, BallPosition originalSearchPos) {
@@ -153,20 +165,22 @@ public class BallTracker {
 
 
     private Direction evaluateDirection(BallPosition startingPos, BallPosition endPos) {
-        //No need to account for starting and end pos being the same because that should never happen
-        switch (startingPos) {
-            case PastLeft: return Direction.Right;
-            case PastRight: return Direction.Left;
-            case Left: return endPos == PastLeft ? Direction.Left : Direction.Right;
-            case Right: return endPos == PastRight ? Direction.Right : Direction.Left;
-            case BetweenLeftAndCenter: return equalAnyPos(endPos, PastLeft, Left) ? Direction.Left : Direction.Right;
-            case BetweenRightAndCenter: return equalAnyPos(endPos, PastRight, Right) ? Direction.Right : Direction.Left;
-            case Center: return equalAnyPos(endPos, PastRight, Right, BetweenRightAndCenter) ? Direction.Right : Direction.Left;
-            case NotInBot: return null; //Never would be searching for a ball starting not in bot
-        }
+        return endPos.ordinal() > startingPos.ordinal() ? Direction.Right : Direction.Left;
 
-        //Null return should never get called because there's a switch for every possibility
-        return null;
+//        //No need to account for starting and end pos being the same because that should never happen
+//        switch (startingPos) {
+//            case PastLeft: return Direction.Right;
+//            case PastRight: return Direction.Left;
+//            case Left: return endPos == PastLeft ? Direction.Left : Direction.Right;
+//            case Right: return endPos == PastRight ? Direction.Right : Direction.Left;
+//            case BetweenLeftAndCenter: return equalAnyPos(endPos, PastLeft, Left) ? Direction.Left : Direction.Right;
+//            case BetweenRightAndCenter: return equalAnyPos(endPos, PastRight, Right) ? Direction.Right : Direction.Left;
+//            case Center: return equalAnyPos(endPos, PastRight, Right, BetweenRightAndCenter) ? Direction.Right : Direction.Left;
+//            case NotInBot: return null; //Never would be searching for a ball starting not in bot
+//        }
+//
+//        //Null return should never get called because there's a switch for every possibility
+//        return null;
     }
 
     private boolean equalAnyPos(BallPosition startingPos, BallPosition... otherPos) {

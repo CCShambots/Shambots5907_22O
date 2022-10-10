@@ -11,7 +11,6 @@ import com.ctre.phoenix.led.LarsonAnimation;
 import com.ctre.phoenix.led.StrobeAnimation;
 import com.ctre.phoenix.led.LarsonAnimation.BounceMode;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -79,8 +78,8 @@ public final class Constants {
         public static final int RIGHT_PROX = 0;
         public static final int CENTER_PROX = 1;
 
-        public static final double CONVEYOR_SPEED = 0.65;
-        public static final double COMPACTOR_SPEED = 0.5;
+        public static final double CONVEYOR_SPEED = 0.65; //0.65
+        public static final double COMPACTOR_SPEED = 0.5; //0.5
 
         public static IntSupplier numBallsSupplier;
     }
@@ -369,26 +368,7 @@ public final class Constants {
 
     }
 
-    public static void configureMotor(WPI_TalonFX motor, boolean braked, boolean reversed, boolean configFactoryDefault) {
-        if(configFactoryDefault) motor.configFactoryDefault();
-        motor.configSupplyCurrentLimit(CURRENT_LIMIT);
-        motor.setInverted(reversed);
-        motor.setNeutralMode(braked ? NeutralMode.Brake : NeutralMode.Coast);
-    }
 
-    /**
-     * Default configuration for a motor. Assumes that the motor should be braked, but not reversed
-     * @param motor Talon to configure
-     */
-    public static void configureMotor(WPI_TalonFX motor) {configureMotor(motor, true, false, true);}
-
-    /**
-     * Default configuration for a motor. Assumes that the motor should be braked, but not reversed
-     * @param motor Talon to configure
-     */
-    public static void configureMotor(WPI_TalonFX motor, boolean configFactoryDefault) {configureMotor(motor, true, false, configFactoryDefault);}
-
-    
     public static void defaultOptimizeMotor(WPI_TalonFX motor) {
         motor.setStatusFramePeriod(2, 1000);
         motor.setStatusFramePeriod(3, 1000);

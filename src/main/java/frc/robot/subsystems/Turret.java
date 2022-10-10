@@ -5,7 +5,6 @@ import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -20,6 +19,7 @@ import frc.robot.commands.turret.DetermineTurretState;
 import frc.robot.util.Shambots5907_SMF.StatedSubsystem;
 import frc.robot.util.hardware.Limelight;
 import frc.robot.util.hardware.MagneticLimitSwitch;
+import frc.robot.util.hardware.MotorConfiguration;
 import frc.robot.util.math.InterpLUT;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -70,9 +70,9 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
     public Turret() {
         super(TurretState.class);
 
-        Constants.configureMotor(hoodMotor, true);
-        Constants.configureMotor(flywheel1Motor, false, true, true);
-        Constants.configureMotor(flywheel2Motor, false, false, true);
+        MotorConfiguration.configureBasicMotor(hoodMotor, true);
+        MotorConfiguration.configureBasicMotor(flywheel1Motor, false, true, true);
+        MotorConfiguration.configureBasicMotor(flywheel2Motor, false, false, true);
 
         flywheel2Motor.follow(flywheel1Motor);
         flywheel2Motor.setInverted(OpposeMaster);

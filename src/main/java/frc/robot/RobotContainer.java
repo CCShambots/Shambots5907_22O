@@ -80,6 +80,16 @@ public class RobotContainer {
 
 
   private void configureButtonBindings() {
+    
+    //Drivetrain control
+    new JoystickButton(driverController, 3).whenPressed(new InstantCommand(() -> drivetrain.requestTransition(SwerveState.XShape)))
+      .whenReleased(new InstantCommand(() -> drivetrain.requestTransition(SwerveState.Teleop)));
+
+    new JoystickButton(driverController, 4)
+      .whenPressed(new InstantCommand(() -> drivetrain.requestTransition(SwerveState.TeleopLimeLightTracking)))
+      .whenReleased(new InstantCommand(() -> drivetrain.requestTransition(SwerveState.Teleop)));
+
+    new JoystickButton(driverController, 5).whenPressed(new InstantCommand(() -> drivetrain.resetGyro()));
 
     //Intake control
     new JoystickButton(operatorController, 1).whenPressed(new InstantCommand(() -> robotManager.requestTransition(RobotState.IntakeLeft)));
@@ -91,24 +101,18 @@ public class RobotContainer {
     }));
     new JoystickButton(operatorController, 3).whenPressed(new InstantCommand(() -> intake.requestTransition(intake.getPumpState())));
 
-    new JoystickButton(driverController, 6).whenPressed(new InstantCommand(() -> drivetrain.incrementModules()));
-
-    new JoystickButton(driverController, 5).whenPressed(new InstantCommand(() -> drivetrain.resetGyro()));
-
+    //Shoting controls
     new JoystickButton(operatorController, 5).whenPressed(new InstantCommand(() -> robotManager.requestTransition(RobotState.AttemptShooting)))
       .whenReleased(new InstantCommand(() -> {
         if(robotManager.isInState(RobotState.AttemptShooting)) robotManager.requestTransition(RobotState.Idle);
       }));
     
+
+      //Ejection control
     new JoystickButton(operatorController, 6).whenPressed(new InstantCommand(() -> robotManager.requestTransition(RobotState.EjectBottom)));
 
-    new JoystickButton(driverController, 3).whenPressed(new InstantCommand(() -> drivetrain.requestTransition(SwerveState.XShape)))
-      .whenReleased(new InstantCommand(() -> drivetrain.requestTransition(SwerveState.Teleop)));
-
-    new JoystickButton(driverController, 4)
-      .whenPressed(new InstantCommand(() -> drivetrain.requestTransition(SwerveState.TeleopLimeLightTracking)))
-      .whenReleased(new InstantCommand(() -> drivetrain.requestTransition(SwerveState.Teleop)));
-
+    //Climber control
+    new JoystickButton(operatorController, 7).whenPressed(new InstantCommand(() -> robotManager.advanceClimbState()));
   }
 
   public void runControlLoops() {

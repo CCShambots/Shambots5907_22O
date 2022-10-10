@@ -5,6 +5,7 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 import frc.robot.commands.conveyor.FireBallFromConveyorCommand;
@@ -15,6 +16,7 @@ import frc.robot.util.ballTracker.Ball;
 import frc.robot.util.ballTracker.BallTracker;
 import frc.robot.util.ballTracker.Ball.BallColorType;
 import frc.robot.util.hardware.ColorSensor;
+import frc.robot.util.hardware.MotorConfiguration;
 import frc.robot.util.hardware.ProximitySensor;
 
 import static frc.robot.Constants.Conveyor.*;
@@ -28,7 +30,6 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
     private final WPI_TalonFX leftCompactor = new WPI_TalonFX(LEFT_COMPACTOR_ID);
@@ -55,10 +56,10 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
 
         numBallsSupplier = () -> getNumBalls();
 
-        Constants.configureMotor(leftCompactor, true, true, true);
-        Constants.configureMotor(rightCompactor, true, true, true);
-        Constants.configureMotor(leftConveyor);
-        Constants.configureMotor(rightConveyor, true, true, true);
+        MotorConfiguration.configureBasicMotor(leftCompactor, true, true, true);
+        MotorConfiguration.configureBasicMotor(rightCompactor, true, true, true);
+        MotorConfiguration.configureBasicMotor(leftConveyor);
+        MotorConfiguration.configureBasicMotor(rightConveyor, true, true, true);
 
         Constants.defaultOptimizeMotor(leftCompactor);
         Constants.defaultOptimizeMotor(leftConveyor);
@@ -143,9 +144,6 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
         Logic for intaking on the right side
          */
 
-
-
-
         addTransition(Idle, StartIntakeRight, new InstantCommand(() -> {
             setShouldEndIntakeSequence(false);
         }));
@@ -226,8 +224,6 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
         addTransition(IntakeRight, StartIntakeLeft, new InstantCommand(this::stopAll));
         addTransition(ShuffleToLeft, StartIntakeLeft, new InstantCommand(this::stopAll));
 
-
-
         /*
         Logic for Shooting
          */
@@ -251,17 +247,25 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
         addTransition(StartShooting, ShootFromLeft, new InstantCommand(this::intakeLeftCompactor));
         addTransition(StartShooting, ShootFromRight, new InstantCommand(this::intakeRightCompactor));
 
-        setContinuousCommand(ShootFromCenter, new FireBallFromConveyorCommand(
+        setContinuousCommand(ShootFromCenter, new ParallelRaceGroup(
+                new FireBallFromConveyorCommand(
                 () -> {
                     List<Ball> balls = ballTracker.findBallsAtPositions(Left, BetweenLeftAndCenter, Center, BetweenRightAndCenter, Right);
                     if(balls.size() > 0) return balls.get(0);
                     return null;
-                }, this));
+                }, this),
+                new FunctionalCommand(() -> {}, () -> {System.out.println(shootTimer.get());}, (interrupted) -> {System.out.println("ending");}, () -> shootTimer.get() > MAX_SHOOT_TIME))
+                
+            );
 
-        setContinuousCommand(ShootFromLeft, new FireBallFromConveyorCommand(() -> ballTracker.findBall(PastLeft), this)
-                .deadlineWith(new FunctionalCommand(() -> {}, () -> {}, (interrupted) -> {}, () -> shootTimer.get() > MAX_SHOOT_TIME)));
-        setContinuousCommand(ShootFromRight, new FireBallFromConveyorCommand(() -> ballTracker.findBall(PastRight), this)
-                .deadlineWith(new FunctionalCommand(() -> {}, () -> {}, (interrupted) -> {}, () -> shootTimer.get() > MAX_SHOOT_TIME)));
+        setContinuousCommand(ShootFromLeft, new ParallelRaceGroup( 
+            new FireBallFromConveyorCommand(() -> ballTracker.findBall(PastLeft), this),
+                new FunctionalCommand(() -> {}, () -> {System.out.println(shootTimer.get());}, (interrupted) -> {}, () -> shootTimer.get() > MAX_SHOOT_TIME)
+            ));
+        setContinuousCommand(ShootFromRight, new ParallelRaceGroup(
+            new FireBallFromConveyorCommand(() -> ballTracker.findBall(PastRight), this),
+            new FunctionalCommand(() -> {}, () -> {System.out.println(shootTimer.get());}, (interrupted) -> {}, () -> shootTimer.get() > MAX_SHOOT_TIME)
+            ));
 
         addTransition(ShootFromCenter, StartShooting, new InstantCommand());
         addTransition(ShootFromLeft, StartShooting, new InstantCommand(this::stopLeftCompactor));

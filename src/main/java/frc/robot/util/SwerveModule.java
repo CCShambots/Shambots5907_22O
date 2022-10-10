@@ -107,9 +107,9 @@ public class SwerveModule implements Sendable{
     private void initDriveMotor() {
         driveMotor.setSensorPhase(false);
         driveMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 30);
-        
+
         driveMotor.configSupplyCurrentLimit(Constants.CURRENT_LIMIT);
-        
+
         driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 10, Constants.SwerveModule.kTimeoutMs);
 
         driveMotor.configNominalOutputForward(0, Constants.SwerveModule.kTimeoutMs);
@@ -123,24 +123,8 @@ public class SwerveModule implements Sendable{
         driveMotor.config_kI(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.driveGains.kI, Constants.SwerveModule.kTimeoutMs);
         driveMotor.config_kD(Constants.SwerveModule.kSlotIdx, Constants.SwerveModule.driveGains.kD, Constants.SwerveModule.kTimeoutMs);
 
-        driveMotor.configMotionCruiseVelocity(
-                //TODO: change coefficient and this to m/s
-                Math.toDegrees(Constants.SwerveModule.MAX_DRIVE_SPEED),
-                Constants.SwerveModule.kTimeoutMs
-        );
 
-        driveMotor.configMotionAcceleration(
-                //TODO: change coefficient and this to m/s
-                Math.toDegrees(Constants.SwerveModule.MAX_DRIVE_ACCEL),
-                Constants.SwerveModule.kTimeoutMs
-        );
 
-        // driveMotor.configSelectedFeedbackCoefficient(
-        //         //TODO: idk if this math is correct
-        //         (1 / 2048.0)
-        //         * (1 / Constants.SwerveModule.DRIVE_RATIO)
-        //         * (2 * Math.PI * Constants.SwerveModule.WHEEL_RADIUS)      
-        // );
     }
 
     private double driveTicksToMeters(double ticks) {

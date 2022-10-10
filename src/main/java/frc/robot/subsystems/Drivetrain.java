@@ -338,11 +338,5 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
         return sendables;
     }
-
-    double target = 0; 
-    public void incrementModules() {
-        setAllModules(new SwerveModuleState(0, Rotation2d.fromDegrees(target)));
-        target++;
-    }
     
 }
