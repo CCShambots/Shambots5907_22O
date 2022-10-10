@@ -268,7 +268,12 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
         Logic for ejecting out the bottom
          */
 
-        addTransition(Idle, EjectAll, new InstantCommand(this::exhaustAll));
+        addMultiTransition(
+                new ConveyorState[]{Idle, IntakeLeft, EjectFromLeft, ShuffleToLeft, StartIntakeLeft,
+                        WaitForBallFromLeft, IntakeRight, EjectFromRight, ShuffleToRight,
+                        StartIntakeRight, WaitForBallFromRight},
+                new ConveyorState[]{EjectAll},
+                new InstantCommand(this::exhaustAll));
         addTransition(EjectAll, Idle, new InstantCommand(() -> {
             stopAll();
             clearTracker();
@@ -282,6 +287,15 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
 
     public void setShouldEndIntakeSequence(boolean shouldEndIntakeSequence) {
         this.shouldEndIntakeSequence = shouldEndIntakeSequence;
+    }
+
+    @Override
+    public void onDisable() {
+        runInstantaneousTransition(Idle,
+                () -> {
+                    stopAll();
+                }
+        );
     }
 
     @Override
