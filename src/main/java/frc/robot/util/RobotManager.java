@@ -287,6 +287,21 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
         return dt.goToStateCommand(SwerveState.Trajectory, toRun);
     }
 
+    public Command sendDtToTracking() {
+        return dt.goToStateCommand(SwerveState.TeleopLimeLightTracking);
+    }
+
+    public Command autoTrackAndFire() {
+        return new ParallelCommandGroup(
+                sendDtToTracking(),
+                new SequentialCommandGroup(
+                        goToStateCommand(AttemptShooting),
+                        waitForState(Idle)
+                ).withTimeout(5) //5 second timeout in case things explode
+        );
+    }
+
+
     /**
      * Get a command to run on the drivetrain
      * @param name name of the trajectory

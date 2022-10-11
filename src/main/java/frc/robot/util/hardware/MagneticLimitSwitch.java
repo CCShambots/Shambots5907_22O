@@ -10,9 +10,7 @@ public class MagneticLimitSwitch {
         this.pin = new DigitalInput(pin);
     }
 
-    //TODO: This perhaps should not be inverted (we'll wait for having the actual bot to test)
     public boolean isTripped() {
         return !pin.get();
     }
-
 }

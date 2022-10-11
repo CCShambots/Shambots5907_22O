@@ -51,7 +51,6 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState>{
     public Conveyor() {
         super(ConveyorState.class);
 
-        //TODO: Remove
         disableColorDetection();
 
         numBallsSupplier = () -> getNumBalls();
