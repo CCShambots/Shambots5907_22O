@@ -26,7 +26,7 @@ public class FiveBall extends SequentialCommandGroup {
                         new SequentialCommandGroup(
                             new WaitCommand(2),
                             rm.goToStateCommand(IntakeLeft)
-                        )
+                        ),
                         rm.trajectoryOnDt("five-ball-3")
                 ),
                 rm.goToStateCommand(Idle),
