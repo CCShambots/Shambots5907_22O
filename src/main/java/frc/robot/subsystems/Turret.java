@@ -78,8 +78,6 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
         flywheel2Motor.setInverted(OpposeMaster);
 
         //Set the tolerance for the PID loop to say it is not busy
-        // rotaryPID.setTolerance(ROTARY_TOLERANCE);
-        // flywheelPID.setTolerance(FLYWHEEL_TOLERANCE);
         hoodPID.setTolerance(HOOD_TOLERANCE);
 
         
@@ -124,26 +122,11 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
 		rotaryMotor.configMotionCruiseVelocity(degreesToTicks(ROTARY_MAX_VEL) * 10, Constants.Turret.rotarykTimeoutMs);
 		rotaryMotor.configMotionAcceleration(degreesToTicks(ROTARY_MAX_ACCEL) * 10, Constants.Turret.rotarykTimeoutMs);
 
-        //Drive motor set up
+        //Flywheel motor set up
+        MotorConfiguration.configureVelocityMotor(flywheel1Motor, flywheelGains);
 
-        flywheel1Motor.setSensorPhase(false);
-        flywheel1Motor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, Constants.Turret.flywheelkTimeoutMs);
+        //Hood setup
         
-        flywheel1Motor.configSupplyCurrentLimit(Constants.CURRENT_LIMIT);
-        
-        flywheel1Motor.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 40, Constants.Turret.flywheelkTimeoutMs);
-
-        flywheel1Motor.configNominalOutputForward(0, Constants.Turret.flywheelkTimeoutMs);
-        flywheel1Motor.configNominalOutputReverse(0, Constants.Turret.flywheelkTimeoutMs);
-        flywheel1Motor.configPeakOutputForward(1, Constants.Turret.flywheelkTimeoutMs);
-        flywheel1Motor.configPeakOutputReverse(-1, Constants.Turret.flywheelkTimeoutMs);
-
-        flywheel1Motor.selectProfileSlot(Constants.Turret.flywheelkPIDLoopIdx, Constants.Turret.rotarykPIDLoopIdx);
-        flywheel1Motor.config_kF(Constants.Turret.flywheelkPIDLoopIdx, Constants.Turret.flywheelGains.kF, Constants.Turret.flywheelkTimeoutMs);
-        flywheel1Motor.config_kP(Constants.Turret.flywheelkPIDLoopIdx, Constants.Turret.flywheelGains.kP, Constants.Turret.flywheelkTimeoutMs);
-        flywheel1Motor.config_kI(Constants.Turret.flywheelkPIDLoopIdx, Constants.Turret.flywheelGains.kI, Constants.Turret.flywheelkTimeoutMs);
-        flywheel1Motor.config_kD(Constants.Turret.flywheelkPIDLoopIdx, Constants.Turret.flywheelGains.kD, Constants.Turret.flywheelkTimeoutMs);
-
 
 		/* Zero the sensor once on robot boot up */
 		// rotaryMotor.setSelectedSensorPosition(0, Constants.Turret.kPIDLoopIdx, Constants.Turret.kTimeoutMs);
@@ -263,7 +246,7 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
                 () -> {
                     setHoodTargetAngle(getHoodAngle());
                     setFlywheelTargetRPM(0);
-                    // setHoodTargetAngle(getHoodAngle());
+                    setRotaryTargetAngle(getRotaryAngle());
                     turnOffLimelight();
                 }
         );
@@ -280,26 +263,12 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
 
     @Override
     public void update() {
-
-        //Flywheel calculations
-        // updateFlywheel();
-
         //Hood calculations
         updateHood();
 
         prevRotaryAngle = getRotaryAngle();
     }
 
-    // private void updateFlywheel() {
-    //     double flywheelFFOutput = flywheelFeedForward.calculate(flywheelPID.getSetpoint());
-    //     double flywheelPIDOutput = flywheelPID.calculate(getFlywheelRPM());
-
-    //     if(getFlywheelTarget() == 0) {
-    //         flywheelPIDOutput = 0;
-    //         flywheelFFOutput = 0;
-    //     }
-    //     flywheel1Motor.setVoltage(flywheelFFOutput + flywheelPIDOutput);
-    // }
 
     private void updateHood() {
         if(hoodControlLoopEnabled) {

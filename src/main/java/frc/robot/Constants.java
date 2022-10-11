@@ -266,12 +266,6 @@ public final class Constants {
         public static final Gains flywheelGains = new Gains(0.5254, 0.0, 0.275, 0.0575, 0, 1.0);
         public static final double FLYWHEEL_TOLERANCE = 30;
 
-        public static final double FLYWHEEL_KS = 1.05;
-        public static final double FLYWHEEL_KV = 0.0020;
-        public static final double FLYWHEEL_KP = 0.008; //0.14
-        public static final double FLYWHEEL_KI = 0;
-        public static final double FLYWHEEL_KD = 0.00008;
-
         public static final double SHOOT_DELAY = 1;
 
 
@@ -295,11 +289,6 @@ public final class Constants {
          */
         public static final Gains rotaryGains = new Gains(0.15, 0.0, 0.0, 0.45, 0, 1.0);
 
-        public static final double ROTARY_KS = 1.45;
-        public static final double ROTARY_KV = 0.003;
-        public static final double ROTARY_KP = 0.08;
-        public static final double ROTARY_KI = 0.015;
-        public static final double ROTARY_KD = 0.0;
         public static final double ROTARY_MAX_VEL = 90; //Deg/sec
         public static final double ROTARY_MAX_ACCEL = 180; //Deg/(sec^2)
 
