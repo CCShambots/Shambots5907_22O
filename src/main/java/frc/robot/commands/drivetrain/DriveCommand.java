@@ -10,7 +10,7 @@ import frc.robot.subsystems.Drivetrain;
 
 import static frc.robot.Constants.SwerveDrivetrain.*;
 
-public class DriveCommand extends CommandBase{
+public class DriveCommand extends CommandBase {
     private Drivetrain drivetrain;
     private DoubleSupplier xSupplier;
     private DoubleSupplier ySupplier;
