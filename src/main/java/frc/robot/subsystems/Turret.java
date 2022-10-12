@@ -449,4 +449,16 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
     public enum RotarySpeed {
         Normal, Search
     }
+
+    public void setFlywheelPower(double power) {
+        flywheel1Motor.set(power);
+    }
+
+    public void setHoodPower(double power) {
+        hoodMotor.set(power);
+    }
+
+    public void setRotaryPower(double power) {
+        rotaryMotor.set(power);
+    }
 }
