@@ -12,8 +12,9 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import frc.robot.Constants;
+import frc.robot.util.currentRegulator.Regulatable;
 
-public class SwerveModule implements Sendable{
+public class SwerveModule implements Sendable, Regulatable {
 
     private final String moduleName;
 
@@ -28,6 +29,13 @@ public class SwerveModule implements Sendable{
     private double targetEncoderPos;
 
     private Translation2d moduleOffset;
+
+    //TODO: Change these to actual values
+    private final double driveMinCurrent = 15;
+    private final double turnMinCurrent = 10;
+
+    //TODO: Change this to actual priority (SUBSYSTEM RELATIVE)
+    private final int priority = 5;
 
     public SwerveModule(String name, int turnID, int driveID, int encoderID, double encoderOffset, boolean reverseDriveMotor, boolean reverseTurnMotor, Translation2d moduleOffset) {
         this.moduleOffset = moduleOffset;
@@ -212,5 +220,25 @@ public class SwerveModule implements Sendable{
         //builder.addDoubleProperty("Measuerd turn velo", () -> reverseTurnEncoder ? -1 : 1 * turnEncoder.getVelocity(), null);
         
     }
-    
+
+    @Override
+    public double getCurrentUsageTotal() {
+        return turnMotor.getStatorCurrent() + driveMotor.getStatorCurrent();
+    }
+
+    @Override
+    public double getMinCurrentTotal() {
+        return driveMinCurrent + turnMinCurrent;
+    }
+
+    @Override
+    public int getCurrentPriority() {
+        return priority;
+    }
+
+    @Override
+    public void setCurrent(double current) {
+        double multiplier = current / getMinCurrentTotal();
+        SupplyCurrentLimitConfiguration turn = new SupplyCurrentLimitConfiguration()
+    }
 }

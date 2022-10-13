@@ -44,6 +44,9 @@ import static frc.robot.subsystems.Drivetrain.*;
 import static frc.robot.subsystems.Drivetrain.SwerveState.*;
 
 public class Drivetrain extends RegulatedSubsystem<SwerveState> {
+    //TODO: change this to priority relative to whole bot
+    private final int priority = 0;
+    private final double minCurrent;
 
     private Map<String, SwerveModule> modules;
     private WPI_Pigeon2 gyro = new WPI_Pigeon2(PigeonID);
@@ -61,6 +64,7 @@ public class Drivetrain extends RegulatedSubsystem<SwerveState> {
 
     private Field2d field;
 
+
     public Drivetrain(Joystick driverController) {
         super(SwerveState.class);
 
@@ -69,6 +73,12 @@ public class Drivetrain extends RegulatedSubsystem<SwerveState> {
         modules.put("Module 2", new SwerveModule("Module-2", MODULE_2_TURN_ID, MODULE_2_DRIVE_ID, MODULE_2_ENCODER_ID, MODULE_2_OFFSET, false, true, moduleOffsets[1]));
         modules.put("Module 3", new SwerveModule("Module-3", MODULE_3_TURN_ID, MODULE_3_DRIVE_ID, MODULE_3_ENCODER_ID, MODULE_3_OFFSET, false, true, moduleOffsets[2]));
         modules.put("Module 4", new SwerveModule("Module-4", MODULE_4_TURN_ID, MODULE_4_DRIVE_ID, MODULE_4_ENCODER_ID, MODULE_4_OFFSET, false, true, moduleOffsets[3]));
+
+        double temp = 0;
+        for (SwerveModule sm : modules.values()) {
+            temp += sm.getMinCurrentTotal();
+        }
+        minCurrent = temp;
 
         gyro.configFactoryDefault();
 
@@ -309,22 +319,30 @@ public class Drivetrain extends RegulatedSubsystem<SwerveState> {
 
     @Override
     public double getCurrentUsageTotal() {
-        return 0;
+        double out = 0;
+
+        for (SwerveModule sm : modules.values()) {
+            out += sm.getCurrentUsageTotal();
+        }
+
+        return out;
     }
 
     @Override
     public double getMinCurrentTotal() {
-        return 0;
+        return minCurrent;
     }
 
     @Override
     public int getCurrentPriority() {
-        return 0;
+        return priority;
     }
 
     @Override
     public void setCurrent(double current) {
-
+        for (SwerveModule module : modules.values()) {
+            module.setCurrent(current / 4);
+        }
     }
 
     public enum SwerveState {
