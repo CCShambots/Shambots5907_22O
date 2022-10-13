@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 public class CurrentRegulator {
     private static CurrentRegulator instance = null;
-    private ArrayList<Regulatable> subsystems;
+    private ArrayList<RegulatedSubsystem<?>> subsystems;
 
     private double maxCurrent = Constants.MAX_CURRENT;
     private boolean enabled = true;
@@ -20,7 +20,7 @@ public class CurrentRegulator {
         return instance;
     }
 
-    public void registerSubsystem(Regulatable subsystem) {
+    public void registerSubsystem(RegulatedSubsystem<?> subsystem) {
         subsystems.add(subsystem);
         updateSubsystemCurrentLimits();
     }
@@ -30,14 +30,14 @@ public class CurrentRegulator {
 
         double increaseFactor = maxCurrent/getTotalCurrentMin();
 
-        for (Regulatable subsystem : subsystems) {
+        for (RegulatedSubsystem<?> subsystem : subsystems) {
             subsystem.setCurrent(subsystem.getMinCurrentTotal() * increaseFactor);
         }
     }
 
     private void limitTotalCurrent() {
         while (getTotalCurrentMin() > maxCurrent) {
-            Regulatable toCancel = getLeastImportantsubsystem();
+            RegulatedSubsystem<?> toCancel = getLeastImportantSubsystem();
             toCancel.suspend();
         }
     }
@@ -51,11 +51,11 @@ public class CurrentRegulator {
         return totalMin;
     }
 
-    private Regulatable getLeastImportantsubsystem() {
-        Regulatable out = subsystems.get(0);
+    private RegulatedSubsystem<?> getLeastImportantSubsystem() {
+        RegulatedSubsystem<?> out = subsystems.get(0);
 
-        for (Regulatable subsystem : subsystems) {
-            if (subsystem.getPriority() < out.getPriority()) {
+        for (RegulatedSubsystem<?> subsystem : subsystems) {
+            if (subsystem.getCurrentPriority() < out.getCurrentPriority()) {
                 out = subsystem;
             }
         }
