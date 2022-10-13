@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 
 import com.pathplanner.lib.PathPlannerTrajectory;
+import frc.robot.util.currentRegulator.CurrentRegulator;
 
 import static frc.robot.util.RobotManager.RobotState.*;
 
@@ -321,6 +322,8 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
         }
 
         prevBotEnabledStatus = botEnabledStatus;
+
+        CurrentRegulator.getInstance().update();
     }
 
     /**

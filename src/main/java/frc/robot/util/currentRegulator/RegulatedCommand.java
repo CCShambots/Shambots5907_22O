@@ -9,6 +9,17 @@ public abstract class RegulatedCommand extends CommandBase {
     public abstract double[] getMinCurrents();
     public abstract double getMinCurrentTotal();
 
-    public abstract void setCurrent(double[][] currents);
+    public abstract void setCurrent(double current);
     public abstract void requestBrownOutCancel();
+
+    public abstract int getPriority();
+
+    public abstract void init();
+
+    @Override
+    public void initialize() {
+        super.initialize();
+        CurrentRegulator.getInstance().registerCommand(this);
+        init();
+    }
 }
