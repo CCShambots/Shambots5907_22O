@@ -47,6 +47,9 @@ public final class Constants {
 
     public static final SupplyCurrentLimitConfiguration CURRENT_LIMIT = new SupplyCurrentLimitConfiguration(true, 20, 20, 0.1); //enable these limits, current limit, trigger threshold, trigger threshold time
     public static final Translation2d GOAL_POS = new Translation2d(8.23, 4.11); //in meters
+    //TODO: CHANGE THESE CURRENT VALUES
+    public static final double MAX_CURRENT = 100;
+    public static final double MAX_CURRENT_LOW_POWER = 70;
 
     public static class Lights {
         public static final int CANdleID = 0;

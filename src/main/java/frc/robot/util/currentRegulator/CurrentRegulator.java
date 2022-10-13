@@ -1,15 +1,18 @@
 package frc.robot.util.currentRegulator;
 
+import frc.robot.Constants;
+
 import java.util.ArrayList;
 
 public class CurrentRegulator {
     private static CurrentRegulator instance = null;
-    private ArrayList<RegulatedCommand> commands;
+    private ArrayList<Regulatable> subsystems;
 
-    private double maxCurrentDraw;
+    private double maxCurrent = Constants.MAX_CURRENT;
+    private boolean enabled = true;
 
     public CurrentRegulator() {
-        commands = new ArrayList<>();
+        subsystems = new ArrayList<>();
     }
 
     public static CurrentRegulator getInstance() {
@@ -17,61 +20,63 @@ public class CurrentRegulator {
         return instance;
     }
 
-    public void registerCommand(RegulatedCommand command) {
-        commands.add(command);
-        updateCommandCurrentLimits();
+    public void registerSubsystem(Regulatable subsystem) {
+        subsystems.add(subsystem);
+        updateSubsystemCurrentLimits();
     }
 
-    private void updateCommands() {
-        ArrayList<RegulatedCommand> newCommands = new ArrayList<>();
-
-        for (RegulatedCommand command : commands) {
-            if (!command.isFinished()) {
-                newCommands.add(command);
-            }
-        }
-
-        commands = newCommands;
-    }
-
-    public void updateCommandCurrentLimits() {
-        updateCommands();
+    public void updateSubsystemCurrentLimits() {
         limitTotalCurrent();
 
-        double increaseFactor = maxCurrentDraw/getTotalCurrentMin();
+        double increaseFactor = maxCurrent/getTotalCurrentMin();
 
-        for (RegulatedCommand command : commands) {
-            command.setCurrent(command.getMinCurrentTotal() * increaseFactor);
+        for (Regulatable subsystem : subsystems) {
+            subsystem.setCurrent(subsystem.getMinCurrentTotal() * increaseFactor);
         }
     }
 
     private void limitTotalCurrent() {
-        while (getTotalCurrentMin() > maxCurrentDraw) {
-            RegulatedCommand toCancel = getLeastImportantCommand();
-            toCancel.cancel();
-            commands.remove(toCancel);
+        while (getTotalCurrentMin() > maxCurrent) {
+            Regulatable toCancel = getLeastImportantsubsystem();
+            toCancel.suspend();
         }
     }
 
     private double getTotalCurrentMin() {
         double totalMin = 0;
-        for (RegulatedCommand command : commands) {
-            totalMin += command.getMinCurrentTotal();
+        for (Regulatable subsystem : subsystems) {
+            totalMin += subsystem.getMinCurrentTotal();
         }
 
         return totalMin;
     }
 
-    private RegulatedCommand getLeastImportantCommand() {
-        RegulatedCommand out = commands.get(0);
+    private Regulatable getLeastImportantsubsystem() {
+        Regulatable out = subsystems.get(0);
 
-        for (RegulatedCommand command : commands) {
-            if (command.getPriority() < out.getPriority()) {
-                out = command;
+        for (Regulatable subsystem : subsystems) {
+            if (subsystem.getPriority() < out.getPriority()) {
+                out = subsystem;
             }
         }
 
         return out;
+    }
+
+    public void setLowPowerMode(boolean on) {
+        maxCurrent = on ? Constants.MAX_CURRENT_LOW_POWER : Constants.MAX_CURRENT;
+    }
+
+    public boolean isLowPowerMode() {
+        return maxCurrent == Constants.MAX_CURRENT_LOW_POWER;
+    }
+
+    public void disable() {
+        enabled = false;
+    }
+
+    public void enable() {
+        enabled = true;
     }
 
     public void update() {

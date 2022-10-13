@@ -36,13 +36,14 @@ import frc.robot.util.Shambots5907_SMF.StatedSubsystem;
 import frc.robot.util.SwerveModule;
 import frc.robot.util.hardware.Limelight;
 import frc.robot.util.math.Geometry;
+import frc.robot.util.currentRegulator.RegulatedSubsystem;
 
 import static frc.robot.Constants.SwerveDrivetrain.*;
 import static frc.robot.Constants.Turret.*;
 import static frc.robot.subsystems.Drivetrain.*;
 import static frc.robot.subsystems.Drivetrain.SwerveState.*;
 
-public class Drivetrain extends StatedSubsystem<SwerveState> {
+public class Drivetrain extends RegulatedSubsystem<SwerveState> {
 
     private Map<String, SwerveModule> modules;
     private WPI_Pigeon2 gyro = new WPI_Pigeon2(PigeonID);
@@ -304,6 +305,26 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
     public void resetOdometryPose(Pose2d newPose) {
         resetGyro(newPose.getRotation());
         odometry.resetPosition(newPose, newPose.getRotation());
+    }
+
+    @Override
+    public double getCurrentUsageTotal() {
+        return 0;
+    }
+
+    @Override
+    public double getMinCurrentTotal() {
+        return 0;
+    }
+
+    @Override
+    public int getCurrentPriority() {
+        return 0;
+    }
+
+    @Override
+    public void setCurrent(double current) {
+
     }
 
     public enum SwerveState {
