@@ -1,0 +1,243 @@
+{
+  "NetworkTables": {
+    "SmartDashboard": {
+      "climber": {
+        "current velo (in": {
+          "open": true
+        }
+      },
+      "drivetrain": {
+        "Module 1": {
+          "open": true
+        },
+        "open": true
+      },
+      "open": true
+    },
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/LiveWindow/Lights": "Subsystem",
+      "/LiveWindow/RobotManager": "Subsystem",
+      "/LiveWindow/Turret": "Subsystem",
+      "/LiveWindow/Ungrouped/DigitalInput[0]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[1]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[2]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[4]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[5]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[6]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[7]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[8]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[9]": "Digital Input",
+      "/LiveWindow/Ungrouped/PIDController[10]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[11]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[12]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[13]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[14]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[15]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[1]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[2]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[3]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[4]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[5]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[6]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[7]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[8]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[9]": "PIDController",
+      "/LiveWindow/Ungrouped/Pigeon 2 [1]": "Gyro",
+      "/LiveWindow/Ungrouped/Pigeon 2 [6]": "Gyro",
+      "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
+      "/LiveWindow/Ungrouped/Talon FX [11]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [12]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [13]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [14]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [15]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [16]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [17]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [18]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [21]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [22]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [31]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [32]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [33]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [34]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [41]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [42]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [43]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [44]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [51]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [52]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [81]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [82]": "Motor Controller",
+      "/SmartDashboard/Choose Auto Route": "String Chooser",
+      "/SmartDashboard/Intake": "Subsystem",
+      "/SmartDashboard/PPSwerveControllerCommand_field": "Field2d",
+      "/SmartDashboard/Robot Manager": "Subsystem",
+      "/SmartDashboard/climber": "Subsystem",
+      "/SmartDashboard/climber/test/brake": "Command",
+      "/SmartDashboard/climber/test/extend piston": "Command",
+      "/SmartDashboard/climber/test/lower climber": "Command",
+      "/SmartDashboard/climber/test/raise climber": "Command",
+      "/SmartDashboard/climber/test/reset climber pos": "Command",
+      "/SmartDashboard/climber/test/retract piston": "Command",
+      "/SmartDashboard/climber/test/stop climber": "Command",
+      "/SmartDashboard/climber/test/unbrake": "Command",
+      "/SmartDashboard/drivetrain": "Subsystem",
+      "/SmartDashboard/drivetrain/field": "Field2d",
+      "/SmartDashboard/drivetrain/thetaControllerTele": "PIDController",
+      "/SmartDashboard/drivetrain/xController": "PIDController",
+      "/SmartDashboard/drivetrain/yController": "PIDController",
+      "/SmartDashboard/turret": "Subsystem"
+    },
+    "windows": {
+      "/SmartDashboard/drivetrain/field": {
+        "Module 1": {
+          "image": "C:\\Users\\barta\\Documents\\GitHub\\Shambots5907_22O\\Glass Configuration\\circle.png",
+          "length": 0.25,
+          "style": "Box/Image",
+          "width": 0.25
+        },
+        "Module 2": {
+          "image": "C:\\Users\\barta\\Documents\\GitHub\\Shambots5907_22O\\Glass Configuration\\circle.png",
+          "length": 0.25,
+          "width": 0.25
+        },
+        "Module 3": {
+          "image": "C:\\Users\\barta\\Documents\\GitHub\\Shambots5907_22O\\Glass Configuration\\circle.png",
+          "length": 0.25,
+          "width": 0.25
+        },
+        "Module 4": {
+          "image": "C:\\Users\\barta\\Documents\\GitHub\\Shambots5907_22O\\Glass Configuration\\circle.png",
+          "length": 0.25,
+          "width": 0.25
+        },
+        "traj": {
+          "arrows": false,
+          "style": "Line"
+        },
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables Settings": {
+    "mode": "Client"
+  },
+  "Plots": {
+    "Plot <0>": {
+      "plots": [
+        {
+          "height": 449,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/drivetrain/auto hold error"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/drivetrain/auto hold target"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/drivetrain/Measured Angle"
+            }
+          ]
+        }
+      ]
+    },
+    "Plot <6>": {
+      "plots": [
+        {
+          "height": 338,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/turret/hood velo"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/turret/hood degrees"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/turret/hood target"
+            },
+            {
+              "color": [
+                0.7686275243759155,
+                0.30588236451148987,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/turret/hood error"
+            }
+          ]
+        }
+      ],
+      "window": {
+        "visible": false
+      }
+    },
+    "Plot <8>": {
+      "plots": [
+        {
+          "height": 338,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/turret/flywheel velo"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/turret/flywheel target"
+            }
+          ]
+        }
+      ],
+      "window": {
+        "visible": false
+      }
+    }
+  }
+}

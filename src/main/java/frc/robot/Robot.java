@@ -15,20 +15,30 @@ public class Robot extends TimedRobot {
 
     m_robotContainer = new RobotContainer();
     m_robotContainer.determineRobotManagerState();
+
+    Constants.pullAllianceFromFMS();
+    m_robotContainer.enableLights();
+    addPeriodic(m_robotContainer::runControlLoops, 0.05, 0.001);
   }
+
 
   @Override
   public void robotPeriodic() {
 
     CommandScheduler.getInstance().run();
+
   }
 
   @Override
   public void disabledInit() {
-    CommandScheduler.getInstance().cancelAll();
-    
     SubsystemManager.getInstance().disableAllSubsystems();
+
+    CommandScheduler.getInstance().cancelAll();
     DashboardInterface.getInstance().setTab(Auto);
+
+    m_robotContainer.clearClimbTest();
+
+    Constants.botEnabledStatus = Constants.RobotEnabled.Disabled;
   }
 
   @Override
@@ -36,8 +46,15 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    SubsystemManager.getInstance().prepSubsystems().schedule();
+    SubsystemManager.getInstance().prepSubsystems()
+      .andThen(() -> m_robotContainer.getAutoCommand().schedule()).schedule();
     DashboardInterface.getInstance().setTab(Auto);
+
+    Constants.botEnabledStatus = Constants.RobotEnabled.Auto;
+
+    m_robotContainer.rescheduleRobotManagerState();
+
+    Constants.pullAllianceFromFMS();
   }
 
   @Override
@@ -46,7 +63,14 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     SubsystemManager.getInstance().prepSubsystems().schedule();
+    //TODO: Uncomment all of these
     DashboardInterface.getInstance().setTab(Teleop);
+
+    Constants.botEnabledStatus = Constants.RobotEnabled.Teleop;
+
+    Constants.pullAllianceFromFMS();
+
+    m_robotContainer.rescheduleRobotManagerState();
   }
 
   /** This function is called periodically during operator control. */
@@ -57,6 +81,9 @@ public class Robot extends TimedRobot {
   public void testInit() {
     CommandScheduler.getInstance().cancelAll();
     DashboardInterface.getInstance().setTab(Test);
+
+    Constants.botEnabledStatus = Constants.RobotEnabled.Test;
+    m_robotContainer.climberTest();
   }
 
   @Override
