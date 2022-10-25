@@ -2,7 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.util.Shambots5907_SMF.SubsystemManager;
+import frc.robot.ShamLib.SMF.SubsystemManager;
 import frc.robot.util.dashboard.DashboardInterface;
 import static frc.robot.util.dashboard.DashboardInterface.Tab.*;
 
