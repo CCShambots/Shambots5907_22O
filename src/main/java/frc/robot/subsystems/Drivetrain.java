@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -9,35 +10,29 @@ import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 
-import edu.wpi.first.math.ComputerVisionUtil;
 import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.*;
-import frc.robot.Constants;
 import frc.robot.ShamLib.SMF.StatedSubsystem;
 import frc.robot.commands.drivetrain.DriveCommand;
 import frc.robot.commands.drivetrain.LimeLightHoldAngleCommand;
-import frc.robot.subsystems.Conveyor.ConveyorState;
 import frc.robot.util.SwerveModule;
-import frc.robot.util.hardware.Limelight;
-import frc.robot.util.math.Geometry;
+import org.photonvision.PhotonCamera;
+import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 import static frc.robot.Constants.SwerveDrivetrain.*;
-import static frc.robot.Constants.Turret.*;
 import static frc.robot.subsystems.Drivetrain.*;
 import static frc.robot.subsystems.Drivetrain.SwerveState.*;
 
@@ -59,19 +54,12 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
     private Field2d field;
 
-    // private DoubleLogEntry limelightX, limelightY, limelightTheta, odometryX, odometryY, odometryTheta;
+    private PhotonCamera camera;
 
     public Drivetrain(Joystick driverController) {
         super(SwerveState.class);
 
-        // DataLogManager.start();
-        // DataLog log = DataLogManager.getLog();
-        // limelightX = new DoubleLogEntry(log, "/limelight/x");
-        // limelightY = new DoubleLogEntry(log, "/limielight/y");
-        // limelightTheta = new DoubleLogEntry(log, "/limelight/theta");
-        // odometryX = new DoubleLogEntry(log, "/dt/x");
-        // odometryY = new DoubleLogEntry(log, "/dt/y");
-        // odometryTheta = new DoubleLogEntry(log, "/dt/theta");
+        camera = new PhotonCamera("tag-cam");
 
         modules = new HashMap<>();
         modules.put("Module 1", new SwerveModule("Module-1", MODULE_1_TURN_ID, MODULE_1_DRIVE_ID, MODULE_1_ENCODER_ID, MODULE_1_OFFSET, false, true, moduleOffsets[0]));
@@ -145,24 +133,48 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
         updateField2dObject();
 
-        if(Limelight.getInstance().hasTarget() && !Constants.Conveyor.conveyorSupplier.get().isInState(ConveyorState.ShootFromCenter, ConveyorState.ShootFromLeft, ConveyorState.ShootFromRight)) {
-            visionPoseEstimation = ComputerVisionUtil.estimateFieldToRobot(
-                    LIMELIGHT_HEIGHT, GOAL_HEIGHT, LIMELIGHT_ANGLE, Limelight.getInstance().getYOffset().getRadians(), Limelight.getInstance().getXOffset().plus(getRotaryAngle.get()),
-                    getCurrentAngle(), Geometry.getCurrentTargetPose(getDrivetrainAngle.get(), getRotaryAngle.get(), getLimelightXOffsetAngle.get()),
-                    new Transform2d(new Translation2d(), new Rotation2d())
+//        if(Limelight.getInstance().hasTarget() && !Constants.Conveyor.conveyorSupplier.get().isInState(ConveyorState.ShootFromCenter, ConveyorState.ShootFromLeft, ConveyorState.ShootFromRight)) {
+//            visionPoseEstimation = ComputerVisionUtil.estimateFieldToRobot(
+//                    LIMELIGHT_HEIGHT, GOAL_HEIGHT, LIMELIGHT_ANGLE, Limelight.getInstance().getYOffset().getRadians(), Limelight.getInstance().getXOffset().plus(getRotaryAngle.get()),
+//                    getCurrentAngle(), Geometry.getCurrentTargetPose(getDrivetrainAngle.get(), getRotaryAngle.get(), getLimelightXOffsetAngle.get()),
+//                    new Transform2d(new Translation2d(), new Rotation2d())
+//            );
+//
+//            field.getObject("limelight").setPose(visionPoseEstimation);
+//
+//            odometry.addVisionMeasurement(visionPoseEstimation, Timer.getFPGATimestamp());
+//        }
+
+        PhotonPipelineResult result = camera.getLatestResult();
+
+        if(result.hasTargets()) {
+            PhotonTrackedTarget target = result.getBestTarget();
+
+            double latencySeconds = result.getLatencyMillis() / 1000.0;
+
+            final double kFieldLength = Units.feetToMeters(54);
+            final double kFieldWidth = Units.feetToMeters(27);
+
+            Field2d field = new Field2d();
+
+            final Pose3d targetFieldPose = new Pose3d(
+                    kFieldLength/2.0, kFieldWidth/2.0, 0,
+                    new Rotation3d(0, 0, Math.PI)
             );
-            
-            // limelightX.append(visionPoseEstimation.getX());
-            // limelightY.append(visionPoseEstimation.getY());
-            // limelightTheta.append(visionPoseEstimation.getRotation().getRadians());
 
-            // odometryX.append(odometry.getEstimatedPosition().getX());
-            // odometryY.append(odometry.getEstimatedPosition().getY());
-            // odometryTheta.append(odometry.getEstimatedPosition().getRotation().getRadians());
-        
-            field.getObject("limelight").setPose(visionPoseEstimation);
+            Transform3d camToTarget = target.getBestCameraToTarget();
 
-            odometry.addVisionMeasurement(visionPoseEstimation, Timer.getFPGATimestamp());
+            Pose3d camPose3d = targetFieldPose.transformBy(camToTarget.inverse());
+            Pose2d camPose2d = camPose3d.toPose2d();
+
+            Transform3d cameraToRobotPose = new Transform3d(
+                    new Pose3d(), new Pose3d()
+            );
+
+            Pose3d robotPose3d = camPose3d.transformBy(cameraToRobotPose);
+
+            Pose2d robotPose2d = robotPose3d.toPose2d();
+
         }
     }
 
