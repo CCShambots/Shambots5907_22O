@@ -2,11 +2,31 @@
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/LiveWindow/Conveyor": "Subsystem",
       "/LiveWindow/Lights": "Subsystem",
       "/LiveWindow/RobotManager": "Subsystem",
+      "/LiveWindow/Ungrouped/DigitalInput[7]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[9]": "Digital Input",
+      "/LiveWindow/Ungrouped/PIDController[2]": "PIDController",
       "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
+      "/LiveWindow/Ungrouped/Talon FX [17]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [18]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [21]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [31]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [41]": "Motor Controller",
+      "/LiveWindow/Ungrouped/Talon FX [51]": "Motor Controller",
+      "/SmartDashboard/Choose Auto Route": "String Chooser",
+      "/SmartDashboard/Intake": "Subsystem",
       "/SmartDashboard/LEDs": "Subsystem",
-      "/SmartDashboard/Lights": "Subsystem"
+      "/SmartDashboard/Lights": "Subsystem",
+      "/SmartDashboard/Robot Manager": "Subsystem",
+      "/SmartDashboard/climber": "Subsystem",
+      "/SmartDashboard/climber/test/brake": "Command",
+      "/SmartDashboard/climber/test/unbrake": "Command",
+      "/SmartDashboard/conveyor": "Subsystem",
+      "/SmartDashboard/drivetrain": "Subsystem",
+      "/SmartDashboard/drivetrain/field": "Field2d",
+      "/SmartDashboard/turret": "Subsystem"
     }
   },
   "NetworkTables": {

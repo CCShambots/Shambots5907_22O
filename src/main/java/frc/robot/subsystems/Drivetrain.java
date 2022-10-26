@@ -22,9 +22,12 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.*;
+import frc.robot.Constants;
 import frc.robot.ShamLib.SMF.StatedSubsystem;
+import frc.robot.ShamLib.vision.PhotonVisionUtil;
 import frc.robot.commands.drivetrain.DriveCommand;
 import frc.robot.commands.drivetrain.LimeLightHoldAngleCommand;
 import frc.robot.util.SwerveModule;
@@ -55,6 +58,8 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
     private Field2d field;
 
     private PhotonCamera camera;
+
+    private PhotonVisionUtil visionUtil = new PhotonVisionUtil(Constants.SwerveDrivetrain.cameraPose);
 
     public Drivetrain(Joystick driverController) {
         super(SwerveState.class);
@@ -133,48 +138,11 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
         updateField2dObject();
 
-//        if(Limelight.getInstance().hasTarget() && !Constants.Conveyor.conveyorSupplier.get().isInState(ConveyorState.ShootFromCenter, ConveyorState.ShootFromLeft, ConveyorState.ShootFromRight)) {
-//            visionPoseEstimation = ComputerVisionUtil.estimateFieldToRobot(
-//                    LIMELIGHT_HEIGHT, GOAL_HEIGHT, LIMELIGHT_ANGLE, Limelight.getInstance().getYOffset().getRadians(), Limelight.getInstance().getXOffset().plus(getRotaryAngle.get()),
-//                    getCurrentAngle(), Geometry.getCurrentTargetPose(getDrivetrainAngle.get(), getRotaryAngle.get(), getLimelightXOffsetAngle.get()),
-//                    new Transform2d(new Translation2d(), new Rotation2d())
-//            );
-//
-//            field.getObject("limelight").setPose(visionPoseEstimation);
-//
-//            odometry.addVisionMeasurement(visionPoseEstimation, Timer.getFPGATimestamp());
-//        }
-
         PhotonPipelineResult result = camera.getLatestResult();
 
         if(result.hasTargets()) {
-            PhotonTrackedTarget target = result.getBestTarget();
-
             double latencySeconds = result.getLatencyMillis() / 1000.0;
-
-            final double kFieldLength = Units.feetToMeters(54);
-            final double kFieldWidth = Units.feetToMeters(27);
-
-            Field2d field = new Field2d();
-
-            final Pose3d targetFieldPose = new Pose3d(
-                    kFieldLength/2.0, kFieldWidth/2.0, 0,
-                    new Rotation3d(0, 0, Math.PI)
-            );
-
-            Transform3d camToTarget = target.getBestCameraToTarget();
-
-            Pose3d camPose3d = targetFieldPose.transformBy(camToTarget.inverse());
-            Pose2d camPose2d = camPose3d.toPose2d();
-
-            Transform3d cameraToRobotPose = new Transform3d(
-                    new Pose3d(), new Pose3d()
-            );
-
-            Pose3d robotPose3d = camPose3d.transformBy(cameraToRobotPose);
-
-            Pose2d robotPose2d = robotPose3d.toPose2d();
-
+            odometry.addVisionMeasurement(visionUtil.getRobotPoseFromTarget(result.getBestTarget()), Timer.getFPGATimestamp()-latencySeconds);
         }
     }
 

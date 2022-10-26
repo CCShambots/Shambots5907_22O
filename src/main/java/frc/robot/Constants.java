@@ -16,6 +16,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.robot.util.math.BoundingRegion;
@@ -227,6 +228,8 @@ public final class Constants {
         public static final int MODULE_4_TURN_ID = 18;
         public static final int MODULE_4_ENCODER_ID = 17;
         public static final double MODULE_4_OFFSET = -153.1;
+
+        public static final Pose3d cameraPose = new Pose3d();
 
         public static Supplier<Pose2d> getOdoPose;
         public static Supplier<Rotation2d> getDrivetrainAngle;
