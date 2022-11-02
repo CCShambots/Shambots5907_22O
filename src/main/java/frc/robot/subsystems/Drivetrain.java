@@ -9,7 +9,7 @@ import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 
-import edu.wpi.first.math.ComputerVisionUtil;
+// import edu.wpi.first.math.ComputerVisionUtil;
 import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.controller.PIDController;
@@ -28,7 +28,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Constants;
-import frc.robot.ShamLib.SMF.StatedSubsystem;
+import frc.robot.ShamLib.SMF.StateMachine;
 import frc.robot.commands.drivetrain.DriveCommand;
 import frc.robot.commands.drivetrain.LimeLightHoldAngleCommand;
 import frc.robot.subsystems.Conveyor.ConveyorState;
@@ -41,7 +41,7 @@ import static frc.robot.Constants.Turret.*;
 import static frc.robot.subsystems.Drivetrain.*;
 import static frc.robot.subsystems.Drivetrain.SwerveState.*;
 
-public class Drivetrain extends StatedSubsystem<SwerveState> {
+public class Drivetrain extends StateMachine<SwerveState> {
 
     private Map<String, SwerveModule> modules;
     private WPI_Pigeon2 gyro = new WPI_Pigeon2(PigeonID);
@@ -145,25 +145,25 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
         updateField2dObject();
 
-        if(Limelight.getInstance().hasTarget() && !Constants.Conveyor.conveyorSupplier.get().isInState(ConveyorState.ShootFromCenter, ConveyorState.ShootFromLeft, ConveyorState.ShootFromRight)) {
-            visionPoseEstimation = ComputerVisionUtil.estimateFieldToRobot(
-                    LIMELIGHT_HEIGHT, GOAL_HEIGHT, LIMELIGHT_ANGLE, Limelight.getInstance().getYOffset().getRadians(), Limelight.getInstance().getXOffset().plus(getRotaryAngle.get()),
-                    getCurrentAngle(), Geometry.getCurrentTargetPose(getDrivetrainAngle.get(), getRotaryAngle.get(), getLimelightXOffsetAngle.get()),
-                    new Transform2d(new Translation2d(), new Rotation2d())
-            );
+        // if(Limelight.getInstance().hasTarget() && !Constants.Conveyor.conveyorSupplier.get().isInState(ConveyorState.ShootFromCenter, ConveyorState.ShootFromLeft, ConveyorState.ShootFromRight)) {
+        //     visionPoseEstimation = ComputerVisionUtil.estimateFieldToRobot(
+        //             LIMELIGHT_HEIGHT, GOAL_HEIGHT, LIMELIGHT_ANGLE, Limelight.getInstance().getYOffset().getRadians(), Limelight.getInstance().getXOffset().plus(getRotaryAngle.get()),
+        //             getCurrentAngle(), Geometry.getCurrentTargetPose(getDrivetrainAngle.get(), getRotaryAngle.get(), getLimelightXOffsetAngle.get()),
+        //             new Transform2d(new Translation2d(), new Rotation2d())
+        //     );
             
-            // limelightX.append(visionPoseEstimation.getX());
-            // limelightY.append(visionPoseEstimation.getY());
-            // limelightTheta.append(visionPoseEstimation.getRotation().getRadians());
+        //     // limelightX.append(visionPoseEstimation.getX());
+        //     // limelightY.append(visionPoseEstimation.getY());
+        //     // limelightTheta.append(visionPoseEstimation.getRotation().getRadians());
 
-            // odometryX.append(odometry.getEstimatedPosition().getX());
-            // odometryY.append(odometry.getEstimatedPosition().getY());
-            // odometryTheta.append(odometry.getEstimatedPosition().getRotation().getRadians());
+        //     // odometryX.append(odometry.getEstimatedPosition().getX());
+        //     // odometryY.append(odometry.getEstimatedPosition().getY());
+        //     // odometryTheta.append(odometry.getEstimatedPosition().getRotation().getRadians());
         
-            field.getObject("limelight").setPose(visionPoseEstimation);
+        //     field.getObject("limelight").setPose(visionPoseEstimation);
 
-            odometry.addVisionMeasurement(visionPoseEstimation, Timer.getFPGATimestamp());
-        }
+        //     odometry.addVisionMeasurement(visionPoseEstimation, Timer.getFPGATimestamp());
+        // }
     }
 
     public void updateOdometry() {
@@ -201,7 +201,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
     @Override
     protected void onDisable() {
-        runInstantaneousTransition(Idle, () -> {
+        forceState(Idle, () -> {
             setAllModules(STOPPED_STATE);
         });
     }

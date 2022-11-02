@@ -3,7 +3,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.ShamLib.SMF.StatedSubsystem;
+import frc.robot.ShamLib.SMF.StateMachine;
 
 import static frc.robot.subsystems.Lights.*;
 
@@ -13,7 +13,7 @@ import com.ctre.phoenix.led.CANdle.LEDStripType;
 import static frc.robot.subsystems.Lights.LEDState.*;
 import static frc.robot.Constants.Lights.*;
 
-public class Lights extends StatedSubsystem<LEDState> {
+public class Lights extends StateMachine<LEDState> {
     // private final CANdle candle = new CANdle(CANdleID, "rio");
 
     private Animation currentAnimation = lightsOff;

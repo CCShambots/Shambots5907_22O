@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Constants;
 import frc.robot.ShamLib.SMF.SimpleTransition;
-import frc.robot.ShamLib.SMF.StatedSubsystem;
+import frc.robot.ShamLib.SMF.StateMachine;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.Conveyor.ConveyorState;
 import frc.robot.subsystems.Drivetrain.SwerveState;
@@ -23,7 +23,7 @@ import com.pathplanner.lib.PathPlannerTrajectory;
 
 import static frc.robot.util.RobotManager.RobotState.*;
 
-public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
+public class RobotManager extends StateMachine<RobotManager.RobotState> {
     private Drivetrain dt;
     private Intake i;
     private Conveyor co;
@@ -378,7 +378,7 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
         Constants.RobotEnabled botEnabledStatus = Constants.botEnabledStatus;
 
         if(botEnabledStatus == Constants.RobotEnabled.Disabled && botEnabledStatus != prevBotEnabledStatus) {
-            runInstantaneousTransition(Idle, () -> {}); // All the subsystems will transition themselves to idle
+            forceState(Idle, () -> {}); // All the subsystems will transition themselves to idle
         }
 
         prevBotEnabledStatus = botEnabledStatus;

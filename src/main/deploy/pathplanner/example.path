@@ -14,7 +14,8 @@
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
-      "isStopPoint": false
+      "isStopPoint": false,
+      "waitTime": 0
     },
     {
       "anchorPoint": {
@@ -33,7 +34,8 @@
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
-      "isStopPoint": false
+      "isStopPoint": false,
+      "waitTime": 0
     },
     {
       "anchorPoint": {
@@ -52,7 +54,8 @@
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
-      "isStopPoint": false
+      "isStopPoint": false,
+      "waitTime": 0
     },
     {
       "anchorPoint": {
@@ -71,7 +74,8 @@
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
-      "isStopPoint": false
+      "isStopPoint": false,
+      "waitTime": 0
     },
     {
       "anchorPoint": {
@@ -90,7 +94,8 @@
       "isReversal": true,
       "velOverride": null,
       "isLocked": false,
-      "isStopPoint": false
+      "isStopPoint": false,
+      "waitTime": 0
     },
     {
       "anchorPoint": {
@@ -109,7 +114,8 @@
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
-      "isStopPoint": false
+      "isStopPoint": false,
+      "waitTime": 0
     },
     {
       "anchorPoint": {
@@ -128,7 +134,8 @@
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
-      "isStopPoint": false
+      "isStopPoint": false,
+      "waitTime": 0
     },
     {
       "anchorPoint": {
@@ -147,7 +154,8 @@
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
-      "isStopPoint": false
+      "isStopPoint": false,
+      "waitTime": 3.0
     },
     {
       "anchorPoint": {
@@ -163,11 +171,17 @@
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
-      "isStopPoint": false
+      "isStopPoint": false,
+      "waitTime": 0
     }
   ],
   "maxVelocity": 2.0,
   "maxAcceleration": null,
   "isReversed": null,
-  "markers": []
+  "markers": [
+    {
+      "position": 2.4727272727272718,
+      "name": "marker"
+    }
+  ]
 }

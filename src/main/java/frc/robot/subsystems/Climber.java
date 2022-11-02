@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import frc.robot.ShamLib.SMF.StatedSubsystem;
+import frc.robot.ShamLib.SMF.StateMachine;
 import frc.robot.ShamLib.motors.MotionMagicTalonFX;
 
 import java.util.Map;
@@ -21,7 +21,7 @@ import static frc.robot.Constants.Climber.*;
 import static frc.robot.subsystems.Climber.*;
 import static frc.robot.subsystems.Climber.ClimberState.*;
 
-public class Climber extends StatedSubsystem<ClimberState> {
+public class Climber extends StateMachine<ClimberState> {
 
     private final MotionMagicTalonFX motor1 = new MotionMagicTalonFX(MOTOR_1_ID, climberGains, climberRatio, MAX_VEL, MAX_ACCEL);
     private final WPI_TalonFX motor2 = new WPI_TalonFX(MOTOR_2_ID);
@@ -88,14 +88,14 @@ public class Climber extends StatedSubsystem<ClimberState> {
     @Override
     protected void onDisable() {
         if(getCurrentState() == Test) {
-            runInstantaneousTransition(Idle, () -> {
+            forceState(Idle, () -> {
                 enableMotorBraking();
             });
         }
     }
 
     public void climbTest() {
-        runInstantaneousTransition(Test, () -> {
+        forceState(Test, () -> {
             disableMotorBraking();
             unBrake();
             setManualPower(0);

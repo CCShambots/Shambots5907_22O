@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
-import frc.robot.ShamLib.SMF.StatedSubsystem;
+import frc.robot.ShamLib.SMF.StateMachine;
 import frc.robot.commands.conveyor.FireBallFromConveyorCommand;
 import frc.robot.commands.conveyor.RejectOpponentBallsFromLeftCommand;
 import frc.robot.commands.conveyor.RejectOpponentBallsFromRightCommand;
@@ -32,7 +32,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import java.util.List;
 import java.util.Map;
 
-public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState> {
+public class Conveyor extends StateMachine<Conveyor.ConveyorState> {
     private final WPI_TalonFX leftCompactor = new WPI_TalonFX(LEFT_COMPACTOR_ID);
     private final WPI_TalonFX rightCompactor = new WPI_TalonFX(RIGHT_COMPACTOR_ID);
     private final WPI_TalonFX leftConveyor = new WPI_TalonFX(LEFT_CONVEYOR_ID);
@@ -308,7 +308,7 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState> {
 
     @Override
     public void onDisable() {
-        runInstantaneousTransition(Idle,
+        forceState(Idle,
                 () -> {
                     stopAll();
                 }
@@ -372,7 +372,7 @@ public class Conveyor extends StatedSubsystem<Conveyor.ConveyorState> {
         return (
             new InstantCommand(
                 () -> {
-                    runInstantaneousTransition(StartShooting, () -> {intakeLeftConveyor(); intakeRightConveyor(); intakeLeftCompactor(); intakeRightCompactor(); shootTimer.reset(); shootTimer.start();});
+                    forceState(StartShooting, () -> {intakeLeftConveyor(); intakeRightConveyor(); intakeLeftCompactor(); intakeRightCompactor(); shootTimer.reset(); shootTimer.start();});
                     System.out.println("ran force transition");
                 }
             ).andThen(evaluateShootCommand())

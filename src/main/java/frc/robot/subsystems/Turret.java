@@ -11,7 +11,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants;
-import frc.robot.ShamLib.SMF.StatedSubsystem;
+import frc.robot.ShamLib.SMF.StateMachine;
 import frc.robot.commands.turret.ActiveTracking;
 import frc.robot.commands.turret.AutoEjecting;
 import frc.robot.commands.turret.DetermineTurretState;
@@ -28,7 +28,7 @@ import static frc.robot.subsystems.Turret.RotarySpeed.*;
 import static frc.robot.subsystems.Turret.TurretState.*;
 import static java.lang.Math.abs;
 
-public class Turret extends StatedSubsystem<Turret.TurretState> {
+public class Turret extends StateMachine<Turret.TurretState> {
     private final WPI_TalonFX rotaryMotor = new WPI_TalonFX(ROTARY_MOTOR_ID, "Drivetrian");
     private final WPI_TalonFX hoodMotor = new WPI_TalonFX(HOOD_MOTOR_ID);
     private final WPI_TalonFX flywheel1Motor = new WPI_TalonFX(FLYWHEEL_MOTOR1_ID);
@@ -241,7 +241,7 @@ public class Turret extends StatedSubsystem<Turret.TurretState> {
 
     @Override
     public void onDisable() {
-        runInstantaneousTransition(
+        forceState(
                 Idle,
                 () -> {
                     setHoodTargetAngle(getHoodAngle());

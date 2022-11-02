@@ -7,14 +7,14 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import frc.robot.ShamLib.SMF.StatedSubsystem;
+import frc.robot.ShamLib.SMF.StateMachine;
 import frc.robot.util.hardware.MotorConfiguration;
 
 import static frc.robot.subsystems.Intake.IntakeState.*;
 import static frc.robot.Constants.Intake.*;
 import static frc.robot.Constants.*;
 
-public class Intake extends StatedSubsystem<Intake.IntakeState> {
+public class Intake extends StateMachine<Intake.IntakeState> {
 
     private final DoubleSolenoid leftSolenoid = new DoubleSolenoid(COMPRESSOR_ID, PneumaticsModuleType.CTREPCM, LEFT_SOLENOID_FORWARD, LEFT_SOLENOID_REVERSE);
     private final DoubleSolenoid rightSolenoid = new DoubleSolenoid(COMPRESSOR_ID, PneumaticsModuleType.CTREPCM, RIGHT_SOLENOID_FORWARD, RIGHT_SOLENOID_REVERSE);
