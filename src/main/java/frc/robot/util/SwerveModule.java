@@ -8,6 +8,7 @@ import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
@@ -176,7 +177,11 @@ public class SwerveModule implements Sendable{
 
     public double getDriveMotorRate(){
         return driveTicksToMeters(driveMotor.getSelectedSensorVelocity()) * 10.0;
-    } 
+    }
+    
+    public double getDistanceDriven() {
+        return driveTicksToMeters(driveMotor.getSelectedSensorPosition());
+    }
 
     public SwerveModuleState getCurrentState() {
         return new SwerveModuleState(getDriveMotorRate(), getTurnAngle());
@@ -193,6 +198,10 @@ public class SwerveModule implements Sendable{
 
     public String getModuleName() {
         return moduleName;
+    }
+
+    public SwerveModulePosition getPosition() {
+        return(new SwerveModulePosition(getDistanceDriven(), getTurnAngle()));
     }
 
     @Override

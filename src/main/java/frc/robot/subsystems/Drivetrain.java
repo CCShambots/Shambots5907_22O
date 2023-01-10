@@ -20,6 +20,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
@@ -85,11 +86,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         holdAngle = new Rotation2d(rotationOffset);
         thetaHoldControllerTele.setTolerance(Math.toRadians(1.5));
         
-        odometry = new SwerveDrivePoseEstimator(getCurrentAngle(), new Pose2d(), kDriveKinematics,
-                new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.02, 0.02, 0.01),
-                new MatBuilder<>(Nat.N1(), Nat.N1()).fill(0),
-                new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.02, 0.02, 0.01)
-        );
+        odometry = new SwerveDrivePoseEstimator(kDriveKinematics, getCurrentAngle(), getModulePositions(), new Pose2d());
 
         thetaHoldControllerTele.enableContinuousInput(-Math.PI, Math.PI);
         thetaHoldControllerAuto.enableContinuousInput(-Math.PI, Math.PI);
@@ -145,33 +142,32 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
         updateField2dObject();
 
-        if(Limelight.getInstance().hasTarget() && !Constants.Conveyor.conveyorSupplier.get().isInState(ConveyorState.ShootFromCenter, ConveyorState.ShootFromLeft, ConveyorState.ShootFromRight)) {
-            visionPoseEstimation = ComputerVisionUtil.estimateFieldToRobot(
-                    LIMELIGHT_HEIGHT, GOAL_HEIGHT, LIMELIGHT_ANGLE, Limelight.getInstance().getYOffset().getRadians(), Limelight.getInstance().getXOffset().plus(getRotaryAngle.get()),
-                    getCurrentAngle(), Geometry.getCurrentTargetPose(getDrivetrainAngle.get(), getRotaryAngle.get(), getLimelightXOffsetAngle.get()),
-                    new Transform2d(new Translation2d(), new Rotation2d())
-            );
+
+        //TODO: use photon vision here instead
+        // if(Limelight.getInstance().hasTarget() && !Constants.Conveyor.conveyorSupplier.get().isInState(ConveyorState.ShootFromCenter, ConveyorState.ShootFromLeft, ConveyorState.ShootFromRight)) {
+        //     visionPoseEstimation = ComputerVisionUtil.estimateFieldToRobot(
+        //             LIMELIGHT_HEIGHT, GOAL_HEIGHT, LIMELIGHT_ANGLE, Limelight.getInstance().getYOffset().getRadians(), Limelight.getInstance().getXOffset().plus(getRotaryAngle.get()),
+        //             getCurrentAngle(), Geometry.getCurrentTargetPose(getDrivetrainAngle.get(), getRotaryAngle.get(), getLimelightXOffsetAngle.get()),
+        //             new Transform2d(new Translation2d(), new Rotation2d())
+        //     );
             
-            // limelightX.append(visionPoseEstimation.getX());
-            // limelightY.append(visionPoseEstimation.getY());
-            // limelightTheta.append(visionPoseEstimation.getRotation().getRadians());
+        //     // limelightX.append(visionPoseEstimation.getX());
+        //     // limelightY.append(visionPoseEstimation.getY());
+        //     // limelightTheta.append(visionPoseEstimation.getRotation().getRadians());
 
-            // odometryX.append(odometry.getEstimatedPosition().getX());
-            // odometryY.append(odometry.getEstimatedPosition().getY());
-            // odometryTheta.append(odometry.getEstimatedPosition().getRotation().getRadians());
+        //     // odometryX.append(odometry.getEstimatedPosition().getX());
+        //     // odometryY.append(odometry.getEstimatedPosition().getY());
+        //     // odometryTheta.append(odometry.getEstimatedPosition().getRotation().getRadians());
         
-            field.getObject("limelight").setPose(visionPoseEstimation);
+        //     field.getObject("limelight").setPose(visionPoseEstimation);
 
-            odometry.addVisionMeasurement(visionPoseEstimation, Timer.getFPGATimestamp());
-        }
+        //     odometry.addVisionMeasurement(visionPoseEstimation, Timer.getFPGATimestamp());
+        // }
     }
 
     public void updateOdometry() {
         odometry.update(getCurrentAngle(),
-                modules.get("Module 1").getCurrentState(),
-                modules.get("Module 2").getCurrentState(),
-                modules.get("Module 3").getCurrentState(),
-                modules.get("Module 4").getCurrentState()
+                getModulePositions()
         );
     }
 
@@ -288,6 +284,17 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         return gyro.getYaw();
     }
 
+    public SwerveModulePosition[] getModulePositions() {
+        SwerveModulePosition[] positions = {
+            modules.get(0).getPosition(),
+            modules.get(1).getPosition(),
+            modules.get(2).getPosition(),
+            modules.get(3).getPosition()
+        };
+
+        return positions;
+    }
+
     public boolean isFieldRelative() {return fieldRelative;}
     public void setFieldRelative(boolean value) {fieldRelative = value;}
 
@@ -317,7 +324,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
     public void resetOdometryPose(Pose2d newPose) {
         resetGyro(newPose.getRotation());
-        odometry.resetPosition(newPose, newPose.getRotation());
+        odometry.resetPosition(newPose.getRotation(), getModulePositions(), newPose);
     }
 
     public enum SwerveState {
