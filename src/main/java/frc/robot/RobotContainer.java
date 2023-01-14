@@ -4,6 +4,7 @@ import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.ShamLib.SMF.SubsystemManager;
 import frc.robot.commands.auto.FiveBall;
 import frc.robot.commands.auto.OneBall;
@@ -12,6 +13,7 @@ import frc.robot.subsystems.*;
 import frc.robot.ShamLib.AutonomousLoader;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.util.RobotManager;
@@ -26,8 +28,9 @@ import java.util.*;
 public class RobotContainer {
   private final Joystick driverController = new Joystick(0);
   private final Joystick operatorController = new Joystick(1);
+  private final CommandXboxController driveXboxController = new CommandXboxController(2);
 
-  private final Drivetrain drivetrain = new Drivetrain(driverController);
+  private final Drivetrain drivetrain = new Drivetrain(driveXboxController);
   private final Intake intake = new Intake();
   private final Conveyor conveyor = new Conveyor();
   private final Turret turret = new Turret(); //Instantiated in the constructor because I need Robot.java
@@ -124,11 +127,10 @@ public class RobotContainer {
     //Climber control
     new JoystickButton(operatorController, 7).whenPressed(new InstantCommand(() -> robotManager.advanceClimbState()));
 
+    driveXboxController.a().toggleOnTrue(drivetrain.calculateTurnKF(() -> driveXboxController.getLeftX() > 0));
+  
   }
 
-  public void runControlLoops() {
-    drivetrain.runModuleControlLoops();
-  }
 
   public Command getAutoCommand() {
     return autoLoader.getCurrentSelection();

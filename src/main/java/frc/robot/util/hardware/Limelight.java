@@ -1,6 +1,8 @@
 package frc.robot.util.hardware;
 
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -9,7 +11,7 @@ public class Limelight{
 
     private static Limelight instance;
 
-    /**Limelight subsystem that returns all the information we use for targetting */
+    /**Limelight subsystem that returns all the information we use for targeting */
     private Limelight() {}
 
     public static Limelight getInstance() {
@@ -59,5 +61,24 @@ public class Limelight{
      */
     public double getLatency() {
         return getLimeLightTable().getEntry("tl").getDouble(0);
+    }
+
+
+    //Apriltag stuff
+    public Pose3dSendable getPose() {
+        return new Pose3dSendable(
+                getEntry("botpose/x"),
+                getEntry("botpose/y"),
+                getEntry("botpose/z"),
+                new Rotation3d(
+                    getEntry("botpose/roll"),
+                    getEntry("botpose/pitch"),
+                    getEntry("botpose/yaw")
+                )
+        );
+    }
+
+    public double getEntry(String key) {
+        return getLimeLightTable().getEntry(key).getDouble(0);
     }
 }

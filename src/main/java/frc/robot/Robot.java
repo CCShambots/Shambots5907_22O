@@ -18,7 +18,6 @@ public class Robot extends TimedRobot {
 
     Constants.pullAllianceFromFMS();
     m_robotContainer.enableLights();
-    addPeriodic(m_robotContainer::runControlLoops, 0.05, 0.001);
   }
 
 
