@@ -1,8 +1,11 @@
 package frc.robot;
 
+import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.ShamLib.SMF.SubsystemManager;
@@ -24,6 +27,8 @@ import frc.robot.subsystems.Drivetrain.SwerveState;
 import frc.robot.subsystems.Lights;
 
 import java.util.*;
+
+import static edu.wpi.first.math.geometry.Rotation2d.fromDegrees;
 
 public class RobotContainer {
   private final Joystick driverController = new Joystick(0);
@@ -127,8 +132,23 @@ public class RobotContainer {
     //Climber control
     new JoystickButton(operatorController, 7).whenPressed(new InstantCommand(() -> robotManager.advanceClimbState()));
 
-    driveXboxController.a().toggleOnTrue(drivetrain.calculateTurnKF(() -> driveXboxController.getLeftX() > 0));
+    // driveXboxController.a().toggleOnTrue(drivetrain.calculateTurnKF(() -> driveXboxController.getLeftX() > 0));
   
+    driveXboxController.leftBumper().onTrue(new InstantCommand(() -> drivetrain.resetGyro()));
+
+    driveXboxController.a().onTrue(
+      new InstantCommand(() -> {
+        drivetrain.runTrajectoryWithEndTracking(
+                drivetrain.buildTrajectory(new PathConstraints(1.5, 1))
+                        .splineToHeading(new Pose2d(14.5, 2.75, new Rotation2d(0)), fromDegrees(0))
+                        .build()
+                , false
+        ).schedule();
+      })
+    );
+    driveXboxController.b().onTrue(drivetrain.goToStateCommand(SwerveState.Teleop));
+
+    driveXboxController.x().onTrue(new InstantCommand(() -> drivetrain.requestTransition(SwerveState.XShape)));
   }
 
 

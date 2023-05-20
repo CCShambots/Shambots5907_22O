@@ -2,30 +2,27 @@ package frc.robot.subsystems;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.function.BooleanSupplier;
 
+import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlannerTrajectory;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
 import frc.robot.ShamLib.PIDGains;
 import frc.robot.ShamLib.SMF.StatedSubsystem;
-import frc.robot.ShamLib.swerve.ModuleInfo;
-import frc.robot.ShamLib.swerve.SwerveDrive;
-import frc.robot.ShamLib.swerve.SwerveModule;
-import frc.robot.commands.drivetrain.DriveCommand;
+import frc.robot.ShamLib.swerve.*;
+import frc.robot.ShamLib.vision.PhotonVisionInstance;
 import frc.robot.commands.drivetrain.LimeLightHoldAngleCommand;
-import frc.robot.util.hardware.Limelight;
-import frc.robot.util.hardware.Pose3dSendable;
 
 import static frc.robot.Constants.SwerveDrivetrain.*;
 import static frc.robot.Constants.SwerveModule.*;
@@ -36,6 +33,16 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
     private SwerveDrive drive;
 
+    private Pose3d cameraPose = 
+    new Pose3d(
+        -0.12, 0, 0.81,
+        new Rotation3d(
+            0, -(4/180) * Math.PI, 0
+        )
+    );
+
+    private PhotonVisionInstance photonInstance;
+
     public Drivetrain(CommandXboxController driverController) {
         super(SwerveState.class);
 
@@ -44,6 +51,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
                 driveGains,
                 turnGains,
                 MAX_LINEAR_SPEED,
+                MAX_LINEAR_ACCELERATION,
                 MAX_TURN_SPEED,
                 MAX_TURN_ACCEL,
                 new PIDGains(P_HOLDANGLETELE, I_HOLDANGLETELE, D_HOLDANGLETELE),
@@ -58,6 +66,12 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
                 ModuleInfo.getL1Module(MODULE_3_DRIVE_ID, MODULE_3_TURN_ID, MODULE_3_ENCODER_ID, MODULE_3_OFFSET, moduleOffsets[2]),
                 ModuleInfo.getL1Module(MODULE_4_DRIVE_ID, MODULE_4_TURN_ID, MODULE_4_ENCODER_ID, MODULE_4_OFFSET, moduleOffsets[3])
         );
+
+        try {
+            photonInstance = new PhotonVisionInstance(cameraPose, "Cam");
+        } catch (Exception e){
+            e.printStackTrace();
+        }
 
 
         getOdoPose = () -> getPose();
@@ -75,7 +89,19 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
         addCommutativeTransition(Idle, Teleop, new InstantCommand(), new InstantCommand(() -> setAllModules(STOPPED_STATE)));
 
-        setContinuousCommand(Teleop, new DriveCommand(this, () -> -driverController.getLeftY(), () -> -driverController.getLeftX(), () -> -driverController.getRightX(), true));
+        setContinuousCommand(Teleop, new DriveCommand(
+            drive, 
+            () -> -driverController.getLeftY(), 
+            () -> -driverController.getLeftX(), 
+            () -> -driverController.getRightX(), 
+            MAX_LINEAR_SPEED,
+            MAX_LINEAR_ACCELERATION, 
+            MAX_ROTATION,
+            MAX_ROT_ACCEL,
+            Constants.ControllerConversions.DEADBAND, 
+            Constants.ControllerConversions.conversionFunction, 
+            true, 
+            this));
 
         addCommutativeTransition(Idle, XShape, new InstantCommand(() -> setModuleStates(X_SHAPE_ARRAY)), new InstantCommand(() -> setAllModules(STOPPED_STATE)));
         addCommutativeTransition(Teleop, XShape, new InstantCommand(() -> setModuleStates(X_SHAPE_ARRAY)), new InstantCommand(() -> setAllModules(STOPPED_STATE)));
@@ -83,7 +109,7 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         setContinuousCommand(
                 TeleopLimeLightTracking,
                 new ParallelCommandGroup(
-                        new DriveCommand(
+                        new frc.robot.commands.drivetrain.DriveCommand(
                                 this,
                                 () -> -driverController.getLeftY(),
                                 () -> -driverController.getLeftX(),
@@ -101,17 +127,36 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         addCommutativeTransition(TeleopLimeLightTracking, Trajectory, new InstantCommand(), new InstantCommand());
         addCommutativeTransition(TeleopLimeLightTracking, Idle, new InstantCommand(), new InstantCommand());
 
+        addCommutativeTransition(Teleop, Trajectory, new InstantCommand(), new InstantCommand());
+
         driverController.x().onTrue(new InstantCommand(() -> drive.setAllModules(new SwerveModuleState(1, Rotation2d.fromDegrees(90)))));
         driverController.b().onTrue(new InstantCommand(() -> drive.setAllModules(new SwerveModuleState(2, Rotation2d.fromDegrees(-90)))));
         driverController.y().onTrue(new InstantCommand(() -> drive.setAllModules(new SwerveModuleState(0, Rotation2d.fromDegrees(0)))));
     }
 
-    Pose2d visionPoseEstimation = new Pose2d();
+    public Command runTrajectoryWithEndTracking(PathPlannerTrajectory traj, boolean resetPose) {
+        return drive.runTrajectoryWithEndTracking(traj, resetPose, this).andThen(new InstantCommand(() -> requestTransition(Teleop)));
+    }
 
     @Override
     public void update() {
         updateOdometry();
+        
+        // if(Limelight.getInstance().hasTarget()) {
+        //     Pose3d botPose = Limelight.getInstance().getPose(botToLimelight); 
 
+        //     drive.getField().getObject("vision").setPose(botPose.toPose2d());
+        //     // drive.addVisionMeasurement(botPose.toPose2d());
+        // }
+
+        if(photonInstance.hasTarget()) {
+            Pose3d botPose = photonInstance.getPose3d(new Pose3d(getPose()));
+            
+            if(botPose != null) {
+                drive.addVisionMeasurement(botPose.toPose2d());
+                drive.getField().getObject("vision").setPose(botPose.toPose2d());
+            }
+        }
 
     }
 
@@ -168,6 +213,14 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
         return getTrajectoryCommand(trajectory, false);
     }
 
+    public TrajectoryBuilder buildTrajectory() {
+        return drive.buildTrajectory();
+    }
+
+    public TrajectoryBuilder buildTrajectory(PathConstraints constraints) {
+        return drive.buildTrajectory(constraints);
+    }
+
     public Pose2d getPose() {
         return drive.getPose();
     }
@@ -213,12 +266,16 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
 
     @Override
     protected void additionalSendableData(SendableBuilder builder) {
-        // builder.addDoubleProperty("Hold angle", () -> holdAngle.getDegrees(), null);
         builder.addDoubleProperty("Measured Angle", () -> getCurrentAngle().getDegrees(), null);
-        // builder.addBooleanProperty("field relative", this::isFieldRelative, null);
-//        builder.addDoubleProperty("auto hold target", () -> Math.toDegrees(thetaHoldControllerAuto.getSetpoint()), null);
-//        builder.addDoubleProperty("auto hold error", () -> Math.toDegrees(thetaHoldControllerAuto.getPositionError()), null);
-        // builder.addDoubleProperty("current angle", () -> thetaHoldControllerAuto.getSetpoint(), null);
+
+        builder.addDoubleProperty("thetaControllerAuto error", 
+            () -> Math.toDegrees(drive.getThetaHoldControllerAuto().getSetpoint() - getCurrentAngle().getRadians()), null);
+            
+        builder.addDoubleProperty("thetaControllerTele error", 
+        () -> Math.toDegrees(drive.getThetaHoldControllerTele().getSetpoint() - getCurrentAngle().getRadians()), null);
+
+        builder.addDoubleProperty("xController error", () -> Math.abs(drive.getxHoldController().getSetpoint() - getPose().getX()), null);
+        builder.addDoubleProperty("yController error", () -> Math.abs(drive.getyHoldController().getSetpoint() - getPose().getY()), null);
     }
 
     @Override
@@ -230,13 +287,10 @@ public class Drivetrain extends StatedSubsystem<SwerveState> {
        }
 
         sendables.put("field", drive.getField());
-        // sendables.put("thetaControllerTele", thetaHoldControllerTele);
-        // sendables.put("thetaControllerAuto", thetaHoldControllerAuto);
-        // sendables.put("xController", xHoldController);
-        // sendables.put("yController", yHoldController);
-
-        sendables.put("pose-from-limelight", Limelight.getInstance().getPose());
-
+        sendables.put("thetaControllerTele", drive.getThetaHoldControllerTele());
+        sendables.put("thetaControllerAuto", drive.getThetaHoldControllerAuto());
+        sendables.put("xController", drive.getxHoldController());
+        sendables.put("yController", drive.getyHoldController());
 
         return sendables;
     }

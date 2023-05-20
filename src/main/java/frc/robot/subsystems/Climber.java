@@ -35,7 +35,7 @@ public class Climber extends StatedSubsystem<ClimberState> {
         motor2.follow(motor1);
         motor2.setInverted(InvertType.FollowMaster);
 
-        enableMotorBraking();
+        // enableMotorBraking();
 
         addDetermination(Undetermined, Idle, new InstantCommand(() -> {
             brake();

@@ -128,7 +128,7 @@ public final class Constants {
 
         // Turn motor PID controller coefficients
         // public static final double P_TURN = 9;
-        public static final double P_TURN = 0.6;
+        public static final double P_TURN = 0.5;
         public static final double I_TURN = 0;
         public static final double D_TURN = 0; //0.1
         public static final double KF_TURN = 0.06464446306847016; //0.15
@@ -182,15 +182,15 @@ public final class Constants {
 
         public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(moduleOffsets);
 
-        public static final double P_HOLDANGLETELE = 3.5; //.5
+        public static final double P_HOLDANGLETELE = 3.5; 
         public static final double I_HOLDANGLETELE = 0.25; 
         public static final double D_HOLDANGLETELE = 0;
 
-        public static final double P_HOLDANGLEAUTO = 5; //4
-        public static final double I_HOLDANGLEAUTO = .25; //.25
+        public static final double P_HOLDANGLEAUTO = 5; 
+        public static final double I_HOLDANGLEAUTO = .25; 
         public static final double D_HOLDANGLEAUTO = 0;
 
-        public static final double P_HOLDTRANSLATION = 1; //1
+        public static final double P_HOLDTRANSLATION = 1;
         public static final double I_HOLDTRANSLATION = 0;
         public static final double D_HOLDTRANSLATION = 0;
 

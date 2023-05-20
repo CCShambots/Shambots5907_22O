@@ -71,7 +71,7 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
                     if(!t.isInState(Turret.TurretState.ActiveTracking) && !t.isTransitioning()) {
                         t.requestTransition(Turret.TurretState.ActiveTracking);
                     }
-                    if(!dt.isInState(SwerveState.Teleop, SwerveState.XShape, SwerveState.TeleopLimeLightTracking
+                    if(!dt.isInState(SwerveState.Teleop, SwerveState.XShape, SwerveState.TeleopLimeLightTracking, SwerveState.Trajectory
                     ) && !dt.isTransitioning()  && Constants.botEnabledStatus == Constants.RobotEnabled.Teleop) {
                         dt.requestTransition(SwerveState.Teleop);
                     }
@@ -286,9 +286,8 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
         safeConditions.put(new SimpleTransition<RobotState>(startState, endState), List.of(conditions));
     }
 
-    public Command trajectoryOnDt(String name, boolean resetPose) {
-        // System.out.println(trajectories);
-        Command toRun = dt.getTrajectoryCommand(trajectories.get(name), resetPose)
+    public Command trajectoryOnDt(PathPlannerTrajectory traj, boolean resetPose) {
+        Command toRun = dt.getTrajectoryCommand(traj, resetPose)
                 .andThen(() -> dt.requestTransition(SwerveState.Idle));
         Timer trajRunningTime = new Timer();
         return dt.goToStateCommand(SwerveState.Trajectory, toRun)
@@ -297,6 +296,10 @@ public class RobotManager extends StatedSubsystem<RobotManager.RobotState> {
                 () -> {}, 
                 (interrupted) -> {trajRunningTime.stop();}, 
                 () -> {return !toRun.isScheduled() && trajRunningTime.get() > 0.25;}));
+    }
+
+    public Command trajectoryOnDt(String name, boolean resetPose) {
+        return trajectoryOnDt(trajectories.get(name), resetPose);
     }
 
     public Command waitForDtIdle() {

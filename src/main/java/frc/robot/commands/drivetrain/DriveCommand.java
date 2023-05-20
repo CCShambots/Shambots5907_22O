@@ -58,7 +58,7 @@ public class DriveCommand extends CommandBase{
       speeds.vyMetersPerSecond = yLimiter.calculate(speeds.vyMetersPerSecond);
       speeds.omegaRadiansPerSecond = thetaLimiter.calculate(speeds.omegaRadiansPerSecond);
       
-      // drivetrain.drive(speeds, useTurning);
+      drivetrain.drive(speeds, useTurning);
     }
 
     @Override

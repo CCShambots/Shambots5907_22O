@@ -25,6 +25,13 @@ public class Pose3dSendable extends Pose3d implements Sendable {
         super(pose);
     }
 
+    public static Pose3dSendable fromPose3d(Pose3d pose) {
+        return new Pose3dSendable(
+            pose.getTranslation(),
+            pose.getRotation()
+        );
+    }
+
     @Override
     public void initSendable(SendableBuilder builder) {
         builder.addDoubleProperty("translation/x", this::getX, null);

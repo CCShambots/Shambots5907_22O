@@ -3,7 +3,7 @@ package frc.robot.util.hardware;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
@@ -65,17 +65,31 @@ public class Limelight{
 
 
     //Apriltag stuff
-    public Pose3dSendable getPose() {
-        return new Pose3dSendable(
-                getEntry("botpose/x"),
-                getEntry("botpose/y"),
-                getEntry("botpose/z"),
-                new Rotation3d(
-                    getEntry("botpose/roll"),
-                    getEntry("botpose/pitch"),
-                    getEntry("botpose/yaw")
-                )
-        );
+    public Pose3dSendable getPose(Transform3d robotToCam) {
+        
+        double[] pose = getLimeLightTable().getEntry("botpose").getDoubleArray(new double[6]);
+
+        Pose3d camPose;
+
+        if(pose.length == 6) {
+            camPose =  new Pose3d(
+                    pose[0],
+                    pose[1],
+                    pose[2],
+                    new Rotation3d(
+                        pose[3],
+                        pose[4],
+                        pose[5]
+                    )
+            );
+
+        } else {
+            camPose = new Pose3d();
+        }
+
+        Pose3d botPose = camPose.transformBy(robotToCam.inverse());
+
+        return Pose3dSendable.fromPose3d(botPose);
     }
 
     public double getEntry(String key) {

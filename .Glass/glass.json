@@ -14,6 +14,17 @@
       },
       "open": true
     },
+    "transitory": {
+      "SmartDashboard": {
+        "drivetrain": {
+          "open": true
+        },
+        "open": true
+      },
+      "limelight": {
+        "open": true
+      }
+    },
     "types": {
       "/FMSInfo": "FMSInfo",
       "/LiveWindow/Lights": "Subsystem",
@@ -69,6 +80,7 @@
       "/LiveWindow/Ungrouped/Talon FX [81]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon FX [82]": "Motor Controller",
       "/SmartDashboard/Choose Auto Route": "String Chooser",
+      "/SmartDashboard/Drivetrain": "Subsystem",
       "/SmartDashboard/Intake": "Subsystem",
       "/SmartDashboard/PPSwerveControllerCommand_field": "Field2d",
       "/SmartDashboard/Robot Manager": "Subsystem",
@@ -83,6 +95,7 @@
       "/SmartDashboard/climber/test/unbrake": "Command",
       "/SmartDashboard/drivetrain": "Subsystem",
       "/SmartDashboard/drivetrain/field": "Field2d",
+      "/SmartDashboard/drivetrain/thetaControllerAuto": "PIDController",
       "/SmartDashboard/drivetrain/thetaControllerTele": "PIDController",
       "/SmartDashboard/drivetrain/xController": "PIDController",
       "/SmartDashboard/drivetrain/yController": "PIDController",
@@ -122,13 +135,13 @@
     }
   },
   "NetworkTables Settings": {
-    "mode": "Client"
+    "mode": "Client (NT3)"
   },
   "Plots": {
     "Plot <0>": {
       "plots": [
         {
-          "height": 449,
+          "height": 0,
           "series": [
             {
               "color": [
